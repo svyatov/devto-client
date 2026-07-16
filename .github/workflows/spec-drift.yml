@@ -1,0 +1,38 @@
+name: spec-drift
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare upstream spec against the pinned snapshot
+        run: |
+          curl -sf https://raw.githubusercontent.com/forem/forem/main/swagger/v1/api_v1.json -o /tmp/upstream.json
+          if ! cmp -s /tmp/upstream.json spec/api_v1.json; then
+            echo "drifted=true" >> "$GITHUB_OUTPUT"
+            diff <(jq -S . spec/api_v1.json) <(jq -S . /tmp/upstream.json) | head -200 > /tmp/drift.diff || true
+            echo "Upstream spec has drifted from the pinned snapshot."
+            exit 1
+          fi
+          echo "Snapshot matches upstream."
+      - name: Open or refresh the drift issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BODY="Upstream \`swagger/v1/api_v1.json\` no longer matches \`spec/api_v1.json\`. Re-sync: update the snapshot (recording the new upstream SHA in \`spec/upstream.json\`), review the overlay, run \`npm run generate\`, and commit the diff."
+          EXISTING=$(gh issue list --state open --search "in:title upstream spec drift" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "Still drifting as of $(date -u +%F)."
+          else
+            gh issue create --title "Upstream spec drift detected" --body "$BODY"
+          fi

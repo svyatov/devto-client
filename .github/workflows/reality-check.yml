@@ -1,0 +1,38 @@
+name: reality-check
+
+on:
+  schedule:
+    - cron: "43 5 * * 1" # weekly
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  reality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Re-record the public keyless tier over tests/fixtures/recorded in this
+      # ephemeral checkout (nothing is committed), then run the same reality
+      # checks against the fresh payloads. The spec can stay unchanged while
+      # server behavior drifts — this is the only alarm for that surface.
+      - run: node --experimental-strip-types scripts/record-fixtures.ts
+      - run: npx vitest run tests/reality.test.ts
+      - name: Open or refresh the reality-drift issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          EXISTING=$(gh issue list --state open --search "in:title server reality drift" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "Still failing as of $(date -u +%F)."
+          else
+            gh issue create --title "Server reality drift detected" --body "Freshly re-recorded public responses no longer satisfy the reality checks (tests/reality.test.ts). The server has drifted from the composed spec — review the overlay and regenerate."
+          fi
