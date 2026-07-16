@@ -23,7 +23,13 @@ jobs:
       # ephemeral checkout (nothing is committed), then run the same reality
       # checks against the fresh payloads. The spec can stay unchanged while
       # server behavior drifts — this is the only alarm for that surface.
+      # DEVTO_API_KEY must belong to a dedicated low-privilege account (see the
+      # recorder's docstring): the run re-verifies the user-scope and write-cycle
+      # tiers, and each keyed run leaves one unpublished draft on that account.
+      # Unset secret → empty env var → the recorder degrades to the public tier.
       - run: node --experimental-strip-types scripts/record-fixtures.ts
+        env:
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
       - id: check
         run: npx vitest run tests/reality.test.ts
       # gate on the reality tests specifically — a failed recording run (rate

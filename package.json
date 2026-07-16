@@ -33,7 +33,7 @@
   "packageManager": "npm@12.0.1",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "check": "biome check .",
+    "check": "biome check . && tsc",
     "test": "vitest run --coverage",
     "compose": "node --experimental-strip-types scripts/compose-spec.ts",
     "generate": "npm run compose && npx -y openapi-typescript@7.13.0 spec/composed.json -o src/generated/types.ts && biome check --write src/generated/types.ts",

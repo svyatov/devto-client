@@ -211,7 +211,12 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
 
   // discover concrete ids from the public articles list
   const articles = await rf<
-    { id: number; user: { username: string }; path: string; organization?: { username: string } }[]
+    {
+      id: number;
+      user: { username: string; user_id: number };
+      path: string;
+      organization?: { username: string };
+    }[]
   >("GET", "/api/articles", { query: { per_page: 10 } });
   // prefer a user-owned article so path-derived {username} is a user, not an org
   const first = articles.find((a) => !a.organization) ?? articles[0];
@@ -230,7 +235,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     { template: "/api/pages", path: "/api/pages", trim: 3 },
     { template: "/api/podcast_episodes", path: "/api/podcast_episodes" },
     { template: "/api/videos", path: "/api/videos" },
-    { template: "/api/users/{id}", path: "/api/users/by_username", query: { url: username } },
+    { template: "/api/users/{id}", path: `/api/users/${first.user.user_id}` },
     ...(org
       ? [
           { template: "/api/organizations/{username}", path: `/api/organizations/${org}` },

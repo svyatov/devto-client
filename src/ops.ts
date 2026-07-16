@@ -54,27 +54,39 @@ type BodyOf<O> = O extends { requestBody: { content: { "application/json": infer
     ? B | undefined
     : never;
 
+// the generator marks `query` itself required when any query param is required
+type QueryRequired<O> = O extends { parameters: { query: Record<string, unknown> } } ? true : false;
+
 type ArgsOf<O> = ([PathParamsOf<O>] extends [never] ? unknown : { path: PathParamsOf<O> }) &
-  ([QueryOf<O>] extends [never] ? unknown : { query?: QueryOf<O> }) &
+  ([QueryOf<O>] extends [never]
+    ? unknown
+    : QueryRequired<O> extends true
+      ? { query: QueryOf<O> }
+      : { query?: QueryOf<O> }) &
   ([BodyOf<O>] extends [never]
     ? unknown
     : undefined extends BodyOf<O>
       ? { body?: BodyOf<O> }
       : { body: BodyOf<O> }) & { signal?: AbortSignal };
 
-/** No required keys → args object itself is optional. */
-type Call<O> = [PathParamsOf<O>] extends [never]
-  ? undefined extends BodyOf<O>
-    ? (args?: ArgsOf<O>) => Promise<SuccessOf<O>>
-    : [BodyOf<O>] extends [never]
-      ? (args?: ArgsOf<O>) => Promise<SuccessOf<O>>
-      : (args: ArgsOf<O>) => Promise<SuccessOf<O>>
+type RequiredKeysOf<T> = {
+  [K in keyof T]-?: Partial<Pick<T, K>> extends Pick<T, K> ? never : K;
+}[keyof T];
+
+/** No required keys (path, required query, required body) → args object itself is optional. */
+type Call<O> = [RequiredKeysOf<ArgsOf<O>>] extends [never]
+  ? (args?: ArgsOf<O>) => Promise<SuccessOf<O>>
   : (args: ArgsOf<O>) => Promise<SuccessOf<O>>;
 
 type ItemOf<O> = SuccessOf<O> extends readonly (infer T)[] ? T : never;
-type IterCall<O> = (
-  args?: Omit<ArgsOf<O>, "query"> & { query?: Omit<QueryOf<O>, "page"> },
-) => AsyncGenerator<ItemOf<O>, void, undefined>;
+type IterQueryOf<O> = [QueryOf<O>] extends [never] ? never : Omit<QueryOf<O>, "page">;
+type IterArgsOf<O> = Omit<ArgsOf<O>, "query"> &
+  ([RequiredKeysOf<IterQueryOf<O>>] extends [never]
+    ? { query?: IterQueryOf<O> }
+    : { query: IterQueryOf<O> });
+type IterCall<O> = [RequiredKeysOf<IterArgsOf<O>>] extends [never]
+  ? (args?: IterArgsOf<O>) => AsyncGenerator<ItemOf<O>, void, undefined>
+  : (args: IterArgsOf<O>) => AsyncGenerator<ItemOf<O>, void, undefined>;
 
 export type BoundOps<T extends OpTable> = { [K in keyof T]: Call<OpOf<T[K]>> } & {
   [K in keyof T as T[K]["paginated"] extends true ? `${K & string}All` : never]: IterCall<
