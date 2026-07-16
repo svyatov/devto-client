@@ -52,7 +52,7 @@ export function compose(
   snapshot: unknown,
   overlay: OverlayEntry[],
 ): { spec: unknown; deletable: string[] } {
-  const spec = JSON.parse(JSON.stringify(snapshot)) as Node;
+  const spec = structuredClone(snapshot) as Node;
   const deletable: string[] = [];
 
   for (const entry of overlay) {
