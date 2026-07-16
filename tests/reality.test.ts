@@ -44,7 +44,7 @@ function deref(schema: Schema): Schema {
 }
 
 /** Property names the composed spec declares for a schema (allOf merged). */
-export function declaredKeys(schema: Schema): string[] {
+function declaredKeys(schema: Schema): string[] {
   const resolved = deref(schema);
   if (resolved.allOf) return resolved.allOf.flatMap((s) => declaredKeys(s));
   return Object.keys(resolved.properties ?? {});
@@ -61,7 +61,7 @@ function successSchema(template: string, method: string): Schema | null {
   return null;
 }
 
-export function isVacuous(payload: unknown): boolean {
+function isVacuous(payload: unknown): boolean {
   if (Array.isArray(payload)) return payload.length === 0;
   if (payload !== null && typeof payload === "object") {
     return Object.keys(payload).length === 0;
@@ -75,7 +75,7 @@ export function isVacuous(payload: unknown): boolean {
  * `organization` only when the article has one), so any element carrying the
  * key proves the server still sends it.
  */
-export function missingKeys(payload: unknown, schema: Schema): string[] {
+function missingKeys(payload: unknown, schema: Schema): string[] {
   const resolved = deref(schema);
   if (resolved.type === "array" && resolved.items) {
     if (!Array.isArray(payload)) return ["<payload is not an array>"];
