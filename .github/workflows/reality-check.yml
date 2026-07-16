@@ -24,9 +24,12 @@ jobs:
       # checks against the fresh payloads. The spec can stay unchanged while
       # server behavior drifts — this is the only alarm for that surface.
       - run: node --experimental-strip-types scripts/record-fixtures.ts
-      - run: npx vitest run tests/reality.test.ts
+      - id: check
+        run: npx vitest run tests/reality.test.ts
+      # gate on the reality tests specifically — a failed recording run (rate
+      # limit, network) is not server drift
       - name: Open or refresh the reality-drift issue
-        if: failure()
+        if: failure() && steps.check.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

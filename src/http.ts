@@ -131,6 +131,9 @@ export async function request<T>(
   if (config.apiKey !== undefined) headers.set("api-key", config.apiKey);
 
   const init: RequestInit = { method, headers };
+  // fetch strips Authorization on cross-origin redirects but forwards custom
+  // headers like api-key — refuse redirects outright rather than leak the key
+  if (config.apiKey !== undefined) init.redirect = "error";
   if (opts.signal) init.signal = opts.signal;
   if (opts.body !== undefined) {
     init.body = JSON.stringify(opts.body);

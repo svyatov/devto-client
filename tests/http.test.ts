@@ -67,6 +67,16 @@ describe("request building", () => {
     );
   });
 
+  it("refuses redirects when an api-key is configured, follows them keyless", async () => {
+    const a = client({ apiKey: "secret" }, json([]));
+    await a.client.request("GET", "/api/articles/me");
+    expect(a.calls[0]?.init.redirect).toBe("error");
+
+    const b = client({}, json([]));
+    await b.client.request("GET", "/api/articles");
+    expect(b.calls[0]?.init.redirect).toBeUndefined();
+  });
+
   it("attaches api-key when configured, omits it otherwise", async () => {
     const a = client({ apiKey: "secret" }, json([]));
     await a.client.request("GET", "/api/articles/me");

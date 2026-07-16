@@ -80,6 +80,41 @@ describe("recordWriteCycle", () => {
     expect(recorded.map((r) => r.template)).not.toContain("/api/articles/{id}/unpublish");
   });
 
+  it("skips the reaction toggle when the key lacks the privilege (401)", async () => {
+    const rf = vi.fn(async (method: string, path: string) => {
+      if (path === "/api/reactions/toggle")
+        throw new DevToApiError(401, { error: "unauthorized" }, "");
+      if (method === "POST" && path === "/api/articles") return { id: 42 };
+      return {};
+    }) as unknown as Rf;
+    const recorded = await recordWriteCycle(rf, 7);
+    expect(recorded.map((r) => r.template)).not.toContain("/api/reactions/toggle");
+  });
+
+  it("propagates a non-privilege error from the reaction toggle", async () => {
+    const rf = vi.fn(async (method: string, path: string) => {
+      if (path === "/api/reactions/toggle") throw new DevToApiError(500, undefined, "boom");
+      if (method === "POST" && path === "/api/articles") return { id: 42 };
+      return {};
+    }) as unknown as Rf;
+    await expect(recordWriteCycle(rf, 7)).rejects.toThrow(/boom/);
+  });
+
+  it("warns instead of throwing when only the reversal toggle fails", async () => {
+    let toggles = 0;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const rf = vi.fn(async (method: string, path: string) => {
+      if (path === "/api/reactions/toggle" && ++toggles === 2)
+        throw new DevToApiError(500, undefined, "boom");
+      if (method === "POST" && path === "/api/articles") return { id: 42 };
+      return {};
+    }) as unknown as Rf;
+    const recorded = await recordWriteCycle(rf, 7);
+    expect(recorded.map((r) => r.template)).toContain("/api/reactions/toggle");
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("REVERSAL FAILED"));
+    warn.mockRestore();
+  });
+
   it("creates a draft, updates, unpublishes, and toggles the reaction back off", async () => {
     const calls: [string, string, unknown][] = [];
     const rf = vi.fn(

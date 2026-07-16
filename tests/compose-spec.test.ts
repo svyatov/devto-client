@@ -67,6 +67,14 @@ describe("compose", () => {
     ).toThrow(/dangling target/);
   });
 
+  it("fails when the final key is missing from a valid parent", () => {
+    expect(() =>
+      compose(base(), [
+        entry({ target: "/paths/~1api~1things/get/missing", expect: { anything: true } }),
+      ]),
+    ).toThrow(/dangling target \(missing "missing"\)/);
+  });
+
   it("fails when expect no longer matches the target node", () => {
     // simulated upstream reorder: index 0 is now per_page, not page
     expect(() =>

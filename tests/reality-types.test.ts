@@ -48,11 +48,12 @@ import updatedArticle from "./fixtures/recorded/put_api-articles-id.json" with {
  * incompatible values.
  */
 
-type Get200<P extends keyof paths> = paths[P] extends {
-  get: { responses: { 200: { content: { "application/json": infer B } } } };
-}
-  ? Widen<B>
-  : never;
+type ResponseAt<P extends keyof paths, V extends string, S extends number> =
+  paths[P] extends Record<V, { responses: Record<S, { content: { "application/json": infer B } }> }>
+    ? Widen<B>
+    : never;
+
+type Get200<P extends keyof paths> = ResponseAt<P, "get", 200>;
 
 /**
  * JSON imports widen literal values to string/number, so a recorded
@@ -72,17 +73,8 @@ type Widen<T> = T extends string
           ? { [K in keyof T]: Widen<T[K]> }
           : T;
 
-type Post201<P extends keyof paths> = paths[P] extends {
-  post: { responses: { 201: { content: { "application/json": infer B } } } };
-}
-  ? Widen<B>
-  : never;
-
-type Put200<P extends keyof paths> = paths[P] extends {
-  put: { responses: { 200: { content: { "application/json": infer B } } } };
-}
-  ? Widen<B>
-  : never;
+type Post201<P extends keyof paths> = ResponseAt<P, "post", 201>;
+type Put200<P extends keyof paths> = ResponseAt<P, "put", 200>;
 
 it("recorded payloads satisfy the generated response types", () => {
   const checks: [string, unknown][] = [

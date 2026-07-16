@@ -6,6 +6,8 @@
  * create (published: false) → update → unpublish, and a reaction toggle pair.
  * POST /api/follows is NOT recorded: v1 has no unfollow endpoint, so the write
  * cannot be reversed in the same run (KTD9); its fixture stays type-derived.
+ * Each run leaves its unpublished draft behind — v1 has no article-delete
+ * endpoint; the run logs the draft id for manual cleanup.
  *
  * Run: DEVTO_API_KEY=... node --experimental-strip-types scripts/record-fixtures.ts
  */
@@ -127,6 +129,7 @@ export async function recordWriteCycle(rf: Rf, reactableArticleId: number): Prom
     recordedAt: stamp(),
     payload: scrub(draft, true),
   });
+  console.log(`created draft article ${draft.id} — v1 has no delete endpoint, remove it manually`);
 
   const updated = await rf<unknown>("PUT", `/api/articles/${draft.id}`, {
     body: { article: { body_markdown: "Synthetic fixture content, updated. Safe to delete." } },
@@ -165,10 +168,17 @@ export async function recordWriteCycle(rf: Rf, reactableArticleId: number): Prom
       recordedAt: stamp(),
       payload: scrub(toggleOn),
     });
-    // reverse: toggle back off
-    await rf<unknown>("POST", "/api/reactions/toggle", {
-      query: { category: "like", reactable_id: reactableArticleId, reactable_type: "Article" },
-    });
+    // reverse: toggle back off — never rethrow (toggle isn't idempotent, and the
+    // like is live on someone else's article), but tell the operator loudly
+    try {
+      await rf<unknown>("POST", "/api/reactions/toggle", {
+        query: { category: "like", reactable_id: reactableArticleId, reactable_type: "Article" },
+      });
+    } catch (err) {
+      console.warn(
+        `REVERSAL FAILED: like on article ${reactableArticleId} is still applied — toggle it off manually (${String(err)})`,
+      );
+    }
   } catch (err) {
     if (!(err instanceof DevToApiError && [401, 403].includes(err.status))) throw err;
     console.warn(`skipped: POST /api/reactions/toggle (${err.status}, admin-gated)`);
@@ -266,8 +276,10 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     : [];
 
   const reads = await recordReads(rf, [...publicReads, ...userReads]);
+  // persist the paced multi-minute crawl immediately — a write-cycle failure must not discard it
+  const readFiles = writeFixtures(outDir, reads.recorded);
   const writes = apiKey ? await recordWriteCycle(rf, first.id) : [];
-  const files = writeFixtures(outDir, [...reads.recorded, ...writes]);
+  const files = [...readFiles, ...writeFixtures(outDir, writes)];
 
   // KTD13: do public endpoints answer cross-origin? Probe with an Origin header.
   const corsRes = await config.fetch(`${config.baseUrl}/api/articles?per_page=1`, {

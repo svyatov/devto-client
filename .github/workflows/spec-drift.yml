@@ -14,18 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch the upstream spec
+        run: curl -sf https://raw.githubusercontent.com/forem/forem/main/swagger/v1/api_v1.json -o /tmp/upstream.json
       - name: Compare upstream spec against the pinned snapshot
+        id: compare
         run: |
-          curl -sf https://raw.githubusercontent.com/forem/forem/main/swagger/v1/api_v1.json -o /tmp/upstream.json
           if ! cmp -s /tmp/upstream.json spec/api_v1.json; then
-            echo "drifted=true" >> "$GITHUB_OUTPUT"
-            diff <(jq -S . spec/api_v1.json) <(jq -S . /tmp/upstream.json) | head -200 > /tmp/drift.diff || true
             echo "Upstream spec has drifted from the pinned snapshot."
             exit 1
           fi
           echo "Snapshot matches upstream."
+      # gate on the compare step specifically — a curl network failure is not drift
       - name: Open or refresh the drift issue
-        if: failure()
+        if: failure() && steps.compare.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
