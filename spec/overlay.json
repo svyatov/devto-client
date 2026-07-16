@@ -1,0 +1,41 @@
+[
+  {
+    "target": "/components/schemas/ErrorEnvelope",
+    "expect": null,
+    "reason": "missing schema: upstream spec declares no error response types; Api::V1::ApiController renders { error, status } (hand-rolled 400s omit status)",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "error": { "type": "string" },
+        "status": { "type": "integer" }
+      },
+      "required": ["error"]
+    }
+  },
+  {
+    "target": "/paths/~1api~1comments/get/parameters/4",
+    "expect": { "name": "page", "in": "query" },
+    "reason": "reality correction: GET /api/comments declares page twice (pageParam $ref at index 0 plus this inline copy); openapi-typescript rejects duplicate params",
+    "patch": null
+  },
+  {
+    "target": "/paths/~1api~1articles/post/responses/201/content",
+    "expect": null,
+    "reason": "missing schema: create renders the same show template as GET /api/articles/{id}, i.e. Article (verified in app/controllers/concerns/api/articles_controller.rb)",
+    "patch": {
+      "application/json": {
+        "schema": { "$ref": "#/components/schemas/Article" }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1articles~1{id}/put/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: update renders the same show template as GET /api/articles/{id}, i.e. Article (verified in app/controllers/concerns/api/articles_controller.rb)",
+    "patch": {
+      "application/json": {
+        "schema": { "$ref": "#/components/schemas/Article" }
+      }
+    }
+  }
+]
