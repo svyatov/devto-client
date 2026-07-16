@@ -6,15 +6,22 @@
     "patch": {
       "type": "object",
       "properties": {
-        "error": { "type": "string" },
-        "status": { "type": "integer" }
+        "error": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer"
+        }
       },
       "required": ["error"]
     }
   },
   {
     "target": "/paths/~1api~1comments/get/parameters/4",
-    "expect": { "name": "page", "in": "query" },
+    "expect": {
+      "name": "page",
+      "in": "query"
+    },
     "reason": "reality correction: GET /api/comments declares page twice (pageParam $ref at index 0 plus this inline copy); openapi-typescript rejects duplicate params",
     "patch": null
   },
@@ -24,7 +31,9 @@
     "reason": "missing schema: create renders the same show template as GET /api/articles/{id}, i.e. Article (verified in app/controllers/concerns/api/articles_controller.rb)",
     "patch": {
       "application/json": {
-        "schema": { "$ref": "#/components/schemas/Article" }
+        "schema": {
+          "$ref": "#/components/schemas/Article"
+        }
       }
     }
   },
@@ -34,7 +43,910 @@
     "reason": "missing schema: update renders the same show template as GET /api/articles/{id}, i.e. Article (verified in app/controllers/concerns/api/articles_controller.rb)",
     "patch": {
       "application/json": {
-        "schema": { "$ref": "#/components/schemas/Article" }
+        "schema": {
+          "$ref": "#/components/schemas/Article"
+        }
+      }
+    }
+  },
+  {
+    "target": "/components/schemas/ReactionResult",
+    "expect": null,
+    "reason": "missing schema: reactions create/toggle render { result, category, id, reactable_id, reactable_type } (verified in app/controllers/api/v1/reactions_controller.rb)",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "reactable_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "reactable_type": {
+          "type": "string"
+        }
+      },
+      "required": ["result", "category", "id", "reactable_id", "reactable_type"]
+    }
+  },
+  {
+    "target": "/paths/~1api~1reactions/post/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see ReactionResult; 200 returned for non-create outcomes",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/ReactionResult"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1reactions/post/responses/201",
+    "expect": null,
+    "reason": "reality correction: controller renders 201 when the reaction is newly created; upstream spec declares only 200",
+    "patch": {
+      "description": "reaction created",
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/ReactionResult"
+          }
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1reactions~1toggle/post/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see ReactionResult",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/ReactionResult"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1agent_sessions~1presign",
+    "expect": null,
+    "reason": "code-only endpoint, verified in forem routes (agent_sessions#presign renders { s3_key, presigned_url })",
+    "patch": {
+      "post": {
+        "summary": "Generate a presigned S3 upload URL for a raw session file (undocumented)",
+        "tags": ["agent_sessions"],
+        "operationId": "presignAgentSession",
+        "responses": {
+          "200": {
+            "description": "presigned URL generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "s3_key": {
+                      "type": "string"
+                    },
+                    "presigned_url": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["s3_key", "presigned_url"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "503": {
+            "description": "S3 storage not configured"
+          }
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1agent_sessions~1{id}~1raw_url",
+    "expect": null,
+    "reason": "code-only endpoint, verified in forem routes (agent_sessions#raw_url renders { raw_url })",
+    "patch": {
+      "get": {
+        "summary": "Presigned URL of the raw session file (undocumented)",
+        "tags": ["agent_sessions"],
+        "operationId": "getAgentSessionRawUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Agent session id or slug"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "raw file URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "raw_url": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["raw_url"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "no raw file available"
+          }
+        }
+      }
+    }
+  },
+  {
+    "target": "/components/schemas/HealthCheckMessage",
+    "expect": null,
+    "reason": "missing schema: health checks render { message } (verified in concerns/api/health_checks_controller.rb)",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": ["message"]
+    }
+  },
+  {
+    "target": "/components/schemas/OrganizationSummary",
+    "expect": null,
+    "reason": "missing schema: organizations create/update render this reduced shape, not the full Organization (verified in api/v1/organizations_controller.rb)",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "profile_image": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string",
+          "nullable": true
+        },
+        "tag_line": {
+          "type": "string",
+          "nullable": true
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "name", "slug"]
+    }
+  },
+  {
+    "target": "/components/schemas/SegmentBulkResult",
+    "expect": null,
+    "reason": "missing schema: SegmentedUsers::BulkUpsert/BulkDelete return { succeeded, failed } id arrays (verified in app/services/segmented_users)",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "succeeded": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "failed": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "required": ["succeeded", "failed"]
+    }
+  },
+  {
+    "target": "/components/schemas/AdminUserIdentity",
+    "expect": null,
+    "reason": "missing schema: verified in app/views/api/v1/admin/user_identities/_identity.json.jbuilder",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "provider", "uid", "created_at"]
+    }
+  },
+  {
+    "target": "/components/schemas/AdminUserNote",
+    "expect": null,
+    "reason": "missing schema: verified in app/views/api/v1/admin/user_notes/_note.json.jbuilder",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "content": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "author_id": {
+          "type": "integer",
+          "format": "int64",
+          "nullable": true
+        },
+        "created_at": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "content", "created_at"]
+    }
+  },
+  {
+    "target": "/components/schemas/AdminUser",
+    "expect": null,
+    "reason": "missing schema: verified in app/views/api/v1/admin/users/_user.json.jbuilder",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "nullable": true
+        },
+        "registered_at": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "summary": {
+              "type": "string",
+              "nullable": true
+            },
+            "location": {
+              "type": "string",
+              "nullable": true
+            },
+            "website_url": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        },
+        "identities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AdminUserIdentity"
+          }
+        },
+        "counts": {
+          "type": "object",
+          "properties": {
+            "articles": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "comments": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "reactions": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "required": ["id", "username", "status"]
+    }
+  },
+  {
+    "target": "/paths/~1api~1comments~1{id}/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: show renders the same comment tree as the index (verified in api/v1/comments_controller.rb views)",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/Comment"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1billboards~1{id}/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: show renders a Billboard like the index",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/Billboard"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1pages/post/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: create renders the Page model (verified in api/v1/pages_controller.rb; note upstream declares 200, and the controller indeed renders :ok, not :created)",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/Page"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1segments/post/responses/201/content",
+    "expect": null,
+    "reason": "missing schema: create renders the Segment (verified in api/v1/audience_segments_controller.rb)",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/Segment"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1segments~1{id}/delete/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: destroy renders the deleted Segment (verified in api/v1/audience_segments_controller.rb)",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/Segment"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1instance/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: verified in concerns/api/instances_controller.rb",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "context": {
+              "type": "string"
+            },
+            "cover_image_url": {
+              "type": "string",
+              "nullable": true
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "display_in_directory": {
+              "type": "boolean"
+            },
+            "domain": {
+              "type": "string"
+            },
+            "logo_image_url": {
+              "type": "string",
+              "nullable": true
+            },
+            "name": {
+              "type": "string"
+            },
+            "tagline": {
+              "type": "string",
+              "nullable": true
+            },
+            "version": {
+              "type": "string"
+            },
+            "visibility": {
+              "type": "string",
+              "enum": ["public", "private", "pending"]
+            }
+          },
+          "required": ["context", "domain", "name", "version", "visibility"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1health_checks~1app/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see HealthCheckMessage",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/HealthCheckMessage"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1health_checks~1cache/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see HealthCheckMessage",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/HealthCheckMessage"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1health_checks~1database/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see HealthCheckMessage",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/HealthCheckMessage"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1organizations/post/responses/201/content",
+    "expect": null,
+    "reason": "missing schema: see OrganizationSummary",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/OrganizationSummary"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1organizations~1{id}/put/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see OrganizationSummary",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/OrganizationSummary"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1organizations~1{id}/delete/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: destroy renders { message, status } (verified in api/v1/organizations_controller.rb)",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            },
+            "status": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "required": ["message", "status"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1segments~1{id}~1add_users/put/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see SegmentBulkResult",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/SegmentBulkResult"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1segments~1{id}~1remove_users/put/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see SegmentBulkResult",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/SegmentBulkResult"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: verified in app/views/api/v1/admin/users/index.json.jbuilder",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "users": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AdminUser"
+              }
+            },
+            "page": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "per_page": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "total": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "required": ["users", "page", "per_page", "total"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{id}/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see AdminUser",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/AdminUser"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{id}/patch/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: see AdminUser",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/AdminUser"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{id}~1merge/post/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: merge renders the kept user (verified in app/views/api/v1/admin/users/merge.json.jbuilder)",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/AdminUser"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{id}~1email/put/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: verified in concerns/api/admin/users_controller.rb#update_email",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "email": {
+              "type": "string"
+            }
+          },
+          "required": ["id", "email"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{id}~1status/put/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: verified in concerns/api/admin/users_controller.rb#update_status",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "status": {
+              "type": "string"
+            }
+          },
+          "required": ["id", "status"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{id}~1notification_settings/put/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: verified in concerns/api/admin/users_controller.rb#update_notification_settings",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "notification_setting": {
+              "type": "object",
+              "properties": {
+                "email_newsletter": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["email_newsletter"]
+            }
+          },
+          "required": ["id", "notification_setting"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{user_id}~1identities/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: verified in app/views/api/v1/admin/user_identities/index.json.jbuilder",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "identities": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AdminUserIdentity"
+              }
+            }
+          },
+          "required": ["identities"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{user_id}~1identities/post/responses/201/content",
+    "expect": null,
+    "reason": "missing schema: verified in app/views/api/v1/admin/user_identities/create.json.jbuilder",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/AdminUserIdentity"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1identities~1bulk/post/responses/200/content",
+    "expect": null,
+    "reason": "partially unknown: bulk_create renders { results } but per-item shape is service-internal; items deliberately typed unknown — honest typing beats guessed typing",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "results": {
+              "type": "array",
+              "items": {}
+            }
+          },
+          "required": ["results"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{user_id}~1notes/get/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: verified in app/views/api/v1/admin/user_notes/index.json.jbuilder",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "notes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AdminUserNote"
+              }
+            }
+          },
+          "required": ["notes"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1users~1{user_id}~1notes/post/responses/201/content",
+    "expect": null,
+    "reason": "missing schema: verified in app/views/api/v1/admin/user_notes/create.json.jbuilder",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/AdminUserNote"
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1admin~1concepts~1{id}~1trigger_lookback/post/responses/200/content",
+    "expect": null,
+    "reason": "missing schema: renders { message } (verified in api/v1/admin/concepts_controller.rb)",
+    "patch": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": ["message"]
+        }
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1feedback_messages~1{id}/patch/responses/200/content",
+    "expect": null,
+    "reason": "unknown shape: renders the raw FeedbackMessage model as_json; admin-tier, unverifiable without privileges — typed unknown deliberately",
+    "patch": {
+      "application/json": {
+        "schema": {}
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1analytics~1dashboard/get/responses/200/content",
+    "expect": null,
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "patch": {
+      "application/json": {
+        "schema": {}
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1analytics~1follower_engagement/get/responses/200/content",
+    "expect": null,
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "patch": {
+      "application/json": {
+        "schema": {}
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1analytics~1heatmap/get/responses/200/content",
+    "expect": null,
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "patch": {
+      "application/json": {
+        "schema": {}
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1analytics~1historical/get/responses/200/content",
+    "expect": null,
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "patch": {
+      "application/json": {
+        "schema": {}
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1analytics~1past_day/get/responses/200/content",
+    "expect": null,
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "patch": {
+      "application/json": {
+        "schema": {}
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1analytics~1referrers/get/responses/200/content",
+    "expect": null,
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "patch": {
+      "application/json": {
+        "schema": {}
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1analytics~1top_contributors/get/responses/200/content",
+    "expect": null,
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "patch": {
+      "application/json": {
+        "schema": {}
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1analytics~1totals/get/responses/200/content",
+    "expect": null,
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "patch": {
+      "application/json": {
+        "schema": {}
       }
     }
   }

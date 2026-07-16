@@ -1,0 +1,5 @@
+{
+  "probedAt": "2026-07-16T17:19:56.755Z",
+  "endpoint": "/api/articles",
+  "accessControlAllowOrigin": "*"
+}

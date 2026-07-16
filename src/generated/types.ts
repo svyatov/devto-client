@@ -95,7 +95,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": unknown;
+          };
         };
       };
     };
@@ -151,7 +153,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": unknown;
+          };
         };
       };
     };
@@ -191,7 +195,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": unknown;
+          };
         };
       };
     };
@@ -235,7 +241,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": unknown;
+          };
         };
       };
     };
@@ -279,7 +287,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": unknown;
+          };
         };
       };
     };
@@ -321,7 +331,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": unknown;
+          };
         };
       };
     };
@@ -365,7 +377,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": unknown;
+          };
         };
       };
     };
@@ -405,7 +419,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": unknown;
+          };
         };
       };
     };
@@ -1397,7 +1413,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["Billboard"];
+          };
         };
         /** @description unauthorized */
         401: {
@@ -2006,7 +2024,11 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              message: string;
+            };
+          };
         };
       };
     };
@@ -2136,7 +2158,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": unknown;
+          };
         };
       };
     };
@@ -2279,7 +2303,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["HealthCheckMessage"];
+          };
         };
       };
     };
@@ -2323,7 +2349,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["HealthCheckMessage"];
+          };
         };
       };
     };
@@ -2367,7 +2395,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["HealthCheckMessage"];
+          };
         };
       };
     };
@@ -2408,7 +2438,21 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              context: string;
+              cover_image_url?: string | null;
+              description?: string | null;
+              display_in_directory?: boolean;
+              domain: string;
+              logo_image_url?: string | null;
+              name: string;
+              tagline?: string | null;
+              version: string;
+              /** @enum {string} */
+              visibility: "public" | "private" | "pending";
+            };
+          };
         };
       };
     };
@@ -2561,7 +2605,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["OrganizationSummary"];
+          };
         };
         /** @description Unauthorized */
         401: {
@@ -2611,7 +2657,13 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              message: string;
+              /** Format: int64 */
+              status: number;
+            };
+          };
         };
         /** @description unauthorized */
         401: {
@@ -2720,7 +2772,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["Page"];
+          };
         };
         /** @description unauthorized */
         401: {
@@ -2971,7 +3025,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["ReactionResult"];
+          };
         };
         /** @description unauthorized */
         401: {
@@ -3025,7 +3081,18 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["ReactionResult"];
+          };
+        };
+        /** @description reaction created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ReactionResult"];
+          };
         };
         /** @description unauthorized */
         401: {
@@ -3926,7 +3993,17 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              users: components["schemas"]["AdminUser"][];
+              /** Format: int64 */
+              page: number;
+              /** Format: int64 */
+              per_page: number;
+              /** Format: int64 */
+              total: number;
+            };
+          };
         };
       };
     };
@@ -3979,7 +4056,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["AdminUser"];
+          };
         };
       };
     };
@@ -4020,7 +4099,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["AdminUser"];
+          };
         };
       };
     };
@@ -4062,7 +4143,13 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              /** Format: int64 */
+              id: number;
+              email: string;
+            };
+          };
         };
       };
     };
@@ -4115,7 +4202,13 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              /** Format: int64 */
+              id: number;
+              status: string;
+            };
+          };
         };
       };
     };
@@ -4164,7 +4257,15 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              /** Format: int64 */
+              id: number;
+              notification_setting: {
+                email_newsletter: boolean;
+              };
+            };
+          };
         };
       };
     };
@@ -4218,7 +4319,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["AdminUser"];
+          };
         };
       };
     };
@@ -4256,7 +4359,11 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              notes: components["schemas"]["AdminUserNote"][];
+            };
+          };
         };
       };
     };
@@ -4295,7 +4402,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["AdminUserNote"];
+          };
         };
       };
     };
@@ -4333,7 +4442,11 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              identities: components["schemas"]["AdminUserIdentity"][];
+            };
+          };
         };
       };
     };
@@ -4373,7 +4486,9 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": components["schemas"]["AdminUserIdentity"];
+          };
         };
       };
     };
@@ -4463,7 +4578,11 @@ export interface paths {
           headers: {
             [name: string]: unknown;
           };
-          content?: never;
+          content: {
+            "application/json": {
+              results: unknown[];
+            };
+          };
         };
       };
     };
@@ -4491,6 +4610,40 @@ export interface paths {
      *     - By default, returns 24 video articles per page.
      */
     get: operations["videos"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/agent_sessions/presign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Generate a presigned S3 upload URL for a raw session file (undocumented) */
+    post: operations["presignAgentSession"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/agent_sessions/{id}/raw_url": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Presigned URL of the raw session file (undocumented) */
+    get: operations["getAgentSessionRawUrl"];
     put?: never;
     post?: never;
     delete?: never;
@@ -5231,6 +5384,71 @@ export interface components {
       error: string;
       status?: number;
     };
+    ReactionResult: {
+      result: string;
+      category: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      reactable_id: number;
+      reactable_type: string;
+    };
+    HealthCheckMessage: {
+      message: string;
+    };
+    OrganizationSummary: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      profile_image?: string;
+      slug: string;
+      summary?: string | null;
+      tag_line?: string | null;
+      url?: string;
+    };
+    SegmentBulkResult: {
+      succeeded: number[];
+      failed: number[];
+    };
+    AdminUserIdentity: {
+      /** Format: int64 */
+      id: number;
+      provider: string;
+      uid: string;
+      created_at: string;
+    };
+    AdminUserNote: {
+      /** Format: int64 */
+      id: number;
+      content: string;
+      reason?: string;
+      /** Format: int64 */
+      author_id?: number | null;
+      created_at: string;
+    };
+    AdminUser: {
+      /** Format: int64 */
+      id: number;
+      username: string;
+      name?: string;
+      email?: string | null;
+      registered_at?: string;
+      status: string;
+      profile?: {
+        summary?: string | null;
+        location?: string | null;
+        website_url?: string | null;
+      };
+      identities?: components["schemas"]["AdminUserIdentity"][];
+      counts?: {
+        /** Format: int64 */
+        articles?: number;
+        /** Format: int64 */
+        comments?: number;
+        /** Format: int64 */
+        reactions?: number;
+      };
+    };
   };
   responses: never;
   parameters: {
@@ -5873,7 +6091,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["Segment"];
+        };
       };
       /** @description Unauthorized */
       401: {
@@ -5938,7 +6158,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["Segment"];
+        };
       };
       /** @description Unauthorized */
       401: {
@@ -6025,7 +6247,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["SegmentBulkResult"];
+        };
       };
       /** @description Unauthorized */
       401: {
@@ -6072,7 +6296,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["SegmentBulkResult"];
+        };
       };
       /** @description Unauthorized */
       401: {
@@ -6159,7 +6385,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["Comment"];
+        };
       };
       /** @description Comment Not Found */
       404: {
@@ -6394,7 +6622,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["OrganizationSummary"];
+        };
       };
       /** @description Unauthorized */
       401: {
@@ -7236,6 +7466,82 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["VideoArticle"][];
         };
+      };
+    };
+  };
+  presignAgentSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description presigned URL generated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            s3_key: string;
+            presigned_url: string;
+          };
+        };
+      };
+      /** @description unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description S3 storage not configured */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getAgentSessionRawUrl: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent session id or slug */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description raw file URL */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            raw_url: string;
+          };
+        };
+      };
+      /** @description unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description no raw file available */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
