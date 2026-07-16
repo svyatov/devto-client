@@ -1,8 +1,8 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import { DevToClient } from "../src/client.ts";
 import { DevToApiError } from "../src/errors.ts";
-import { bindOps } from "../src/ops.ts";
 import type { components } from "../src/generated/types.ts";
+import { bindOps } from "../src/ops.ts";
 
 type Call = { method: string; url: string; body: string | null };
 

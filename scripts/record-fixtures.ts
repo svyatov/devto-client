@@ -71,7 +71,7 @@ export function scrub(value: unknown, scrubContent = false): unknown {
 export async function recordReads(
   rf: Rf,
   specs: ReadSpec[],
-  pauseMs = 1000, // Rack::Attack allows 3 GET/s per key; keyless throttling is stricter
+  pauseMs = 3000, // keyless per-IP throttling on dev.to is far stricter than the per-key 3 GET/s
 ): Promise<{ recorded: Recorded[]; skipped: string[] }> {
   const recorded: Recorded[] = [];
   const skipped: string[] = [];
