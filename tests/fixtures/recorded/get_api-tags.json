@@ -1,0 +1,77 @@
+{
+  "template": "/api/tags",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:43:19.129Z",
+  "payload": [
+    {
+      "id": 8,
+      "name": "webdev",
+      "bg_color_hex": "#562765",
+      "text_color_hex": "#ffffff",
+      "short_summary": "Because the internet..."
+    },
+    {
+      "id": 307,
+      "name": "ai",
+      "bg_color_hex": "#17fd1a",
+      "text_color_hex": "#ffffff",
+      "short_summary": "Artificial intelligence leverages computers and machines to mimic the problem-solving and decision-making capabilities found in humans and in nature."
+    },
+    {
+      "id": 33,
+      "name": "programming",
+      "bg_color_hex": "#890606",
+      "text_color_hex": "#ffffff",
+      "short_summary": "The magic behind computers. 💻  🪄"
+    },
+    {
+      "id": 6,
+      "name": "javascript",
+      "bg_color_hex": "#f7df1e",
+      "text_color_hex": "#000000",
+      "short_summary": "Once relegated to the browser as one of the 3 core technologies of the web, JavaScript can now be found almost anywhere you find code. \n\nJavaScript developers move fast and push software development forward; they can be as opinionated as the frameworks they use, so let's keep it clean here and make it a place to learn from each other!"
+    },
+    {
+      "id": 555,
+      "name": "beginners",
+      "bg_color_hex": "#008335",
+      "text_color_hex": "#FFFFFF",
+      "short_summary": "\"A journey of a thousand miles begins with a single step.\" -Chinese Proverb"
+    },
+    {
+      "id": 112,
+      "name": "productivity",
+      "bg_color_hex": "#2A0798",
+      "text_color_hex": "#C8F7C5",
+      "short_summary": "Productivity includes tips on how to use tools and software, process optimization, useful references, experience, and mindstate optimization."
+    },
+    {
+      "id": 297,
+      "name": "tutorial",
+      "bg_color_hex": "#FEFFA5",
+      "text_color_hex": "#b30047",
+      "short_summary": "Tutorial is a general purpose tag. We welcome all types of tutorial - code related or not! \n\nIt's all about learning, and using tutorials to teach others!"
+    },
+    {
+      "id": 25,
+      "name": "python",
+      "bg_color_hex": "#1E38BB",
+      "text_color_hex": "#FFDF5B",
+      "short_summary": "import antigravity"
+    },
+    {
+      "id": 168,
+      "name": "devops",
+      "bg_color_hex": "#06B500",
+      "text_color_hex": "#FFFFFF",
+      "short_summary": "Content centering around the shifting left of responsibility, deconstruction of responsibility silos, and the automation of repetitive work tasks."
+    },
+    {
+      "id": 125,
+      "name": "react",
+      "bg_color_hex": "#222222",
+      "text_color_hex": "#61DAF6",
+      "short_summary": "Official tag for Facebook's React JavaScript library for building user interfaces"
+    }
+  ]
+}

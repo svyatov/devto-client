@@ -25,6 +25,8 @@ export interface ReadSpec {
   query?: Record<string, string | number>;
   /** Replace title/body/description content in the payload (draft listings). */
   scrubContent?: boolean;
+  /** Cap array payloads at this many elements (pages ships megabytes of body_html). */
+  trim?: number;
 }
 
 export interface Recorded {
@@ -80,7 +82,8 @@ export async function recordReads(
     try {
       const opts: RequestOptions = {};
       if (spec.query) opts.query = spec.query;
-      const payload = await rf<unknown>(method, spec.path, opts);
+      let payload = await rf<unknown>(method, spec.path, opts);
+      if (spec.trim !== undefined && Array.isArray(payload)) payload = payload.slice(0, spec.trim);
       recorded.push({
         template: spec.template,
         method,
@@ -111,7 +114,8 @@ export async function recordWriteCycle(rf: Rf, reactableArticleId: number): Prom
   const draft = await rf<{ id: number }>("POST", "/api/articles", {
     body: {
       article: {
-        title: "devto-client fixture draft",
+        // unique per run: dev.to rejects duplicate titles within five minutes
+        title: `devto-client fixture draft ${Date.now()}`,
         body_markdown: "Synthetic fixture content. Safe to delete.",
         published: false,
       },
@@ -134,28 +138,41 @@ export async function recordWriteCycle(rf: Rf, reactableArticleId: number): Prom
     payload: scrub(updated, true),
   });
 
-  await rf<undefined>("PUT", `/api/articles/${draft.id}/unpublish`);
-  out.push({
-    template: "/api/articles/{id}/unpublish",
-    method: "PUT",
-    recordedAt: stamp(),
-    payload: null,
-  });
+  // moderator-gated on dev.to (regular keys get 401); the draft was never
+  // published, so skipping it leaves no residue either way
+  try {
+    await rf<undefined>("PUT", `/api/articles/${draft.id}/unpublish`);
+    out.push({
+      template: "/api/articles/{id}/unpublish",
+      method: "PUT",
+      recordedAt: stamp(),
+      payload: null,
+    });
+  } catch (err) {
+    if (!(err instanceof DevToApiError && [401, 403].includes(err.status))) throw err;
+    console.warn(`skipped: PUT /api/articles/{id}/unpublish (${err.status}, privilege-gated)`);
+  }
 
-  const toggleOn = await rf<unknown>("POST", "/api/reactions/toggle", {
-    query: { category: "like", reactable_id: reactableArticleId, reactable_type: "Article" },
-  });
-  out.push({
-    template: "/api/reactions/toggle",
-    method: "POST",
-    recordedAt: stamp(),
-    payload: scrub(toggleOn),
-  });
-
-  // reverse: toggle back off
-  await rf<unknown>("POST", "/api/reactions/toggle", {
-    query: { category: "like", reactable_id: reactableArticleId, reactable_type: "Article" },
-  });
+  // the reactions API is admin-gated upstream (ReactionPolicy#api?); regular
+  // keys get 401 — skip, leaving reactions in the type-derived tier
+  try {
+    const toggleOn = await rf<unknown>("POST", "/api/reactions/toggle", {
+      query: { category: "like", reactable_id: reactableArticleId, reactable_type: "Article" },
+    });
+    out.push({
+      template: "/api/reactions/toggle",
+      method: "POST",
+      recordedAt: stamp(),
+      payload: scrub(toggleOn),
+    });
+    // reverse: toggle back off
+    await rf<unknown>("POST", "/api/reactions/toggle", {
+      query: { category: "like", reactable_id: reactableArticleId, reactable_type: "Article" },
+    });
+  } catch (err) {
+    if (!(err instanceof DevToApiError && [401, 403].includes(err.status))) throw err;
+    console.warn(`skipped: POST /api/reactions/toggle (${err.status}, admin-gated)`);
+  }
 
   return out;
 }
@@ -200,7 +217,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     { template: "/api/articles/{username}/{slug}", path: `/api/articles/${username}/${slug}` },
     { template: "/api/comments", path: "/api/comments", query: { a_id: first.id } },
     { template: "/api/tags", path: "/api/tags" },
-    { template: "/api/pages", path: "/api/pages" },
+    { template: "/api/pages", path: "/api/pages", trim: 3 },
     { template: "/api/podcast_episodes", path: "/api/podcast_episodes" },
     { template: "/api/videos", path: "/api/videos" },
     { template: "/api/users/{id}", path: "/api/users/by_username", query: { url: username } },

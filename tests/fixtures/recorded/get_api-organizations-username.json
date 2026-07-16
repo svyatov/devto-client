@@ -1,0 +1,21 @@
+{
+  "template": "/api/organizations/{username}",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:43:37.452Z",
+  "payload": {
+    "type_of": "organization",
+    "id": 11939,
+    "username": "gde",
+    "name": "Google Developer Experts",
+    "summary": "The official place for discovering GDE-created content and exploring how experts leverage Google technologies.",
+    "twitter_username": "",
+    "github_username": "",
+    "url": "",
+    "location": "",
+    "tech_stack": "",
+    "tag_line": "",
+    "story": "",
+    "joined_at": "2025-11-19T16:18:45Z",
+    "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Forganization%2Fprofile_image%2F11939%2Fe3080d5b-ecde-42a8-b089-bafecc31fa97.png"
+  }
+}

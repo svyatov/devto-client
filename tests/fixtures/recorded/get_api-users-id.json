@@ -1,0 +1,30 @@
+{
+  "template": "/api/users/{id}",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:43:34.103Z",
+  "payload": {
+    "type_of": "user",
+    "id": 31877,
+    "username": "sidhantpanda",
+    "name": "Sidhant Panda",
+    "twitter_username": null,
+    "github_username": "sidhantpanda",
+    "email": "scrubbed@example.com",
+    "summary": "A small developer fish in the developer ocean",
+    "location": "Amsterdam, Netherlands",
+    "website_url": "https://panda.fyi",
+    "joined_at": "Aug 31, 2017",
+    "profile_image": "https://media2.dev.to/dynamic/image/width=320,height=320,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F31877%2Ff90a107a-e6d7-4594-a472-00fe30399e9b.png",
+    "badge_ids": [
+      2,
+      9,
+      10,
+      75,
+      91,
+      213,
+      214,
+      215,
+      280
+    ]
+  }
+}

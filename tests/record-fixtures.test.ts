@@ -67,6 +67,19 @@ describe("recordReads", () => {
 });
 
 describe("recordWriteCycle", () => {
+  it("skips the privilege-gated unpublish on 401 and still toggles the reaction back", async () => {
+    const calls: string[] = [];
+    const rf = vi.fn(async (method: string, path: string) => {
+      calls.push(`${method} ${path}`);
+      if (path.endsWith("/unpublish")) throw new DevToApiError(401, { error: "unauthorized" }, "");
+      if (method === "POST" && path === "/api/articles") return { id: 42 };
+      return {};
+    }) as unknown as Rf;
+    const recorded = await recordWriteCycle(rf, 7);
+    expect(calls.filter((c) => c.includes("toggle"))).toHaveLength(2);
+    expect(recorded.map((r) => r.template)).not.toContain("/api/articles/{id}/unpublish");
+  });
+
   it("creates a draft, updates, unpublishes, and toggles the reaction back off", async () => {
     const calls: [string, string, unknown][] = [];
     const rf = vi.fn(

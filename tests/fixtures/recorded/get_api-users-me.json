@@ -1,0 +1,30 @@
+{
+  "template": "/api/users/me",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:44:12.162Z",
+  "payload": {
+    "type_of": "user",
+    "id": 122709,
+    "username": "svyatov",
+    "name": "Leonid Svyatov",
+    "twitter_username": null,
+    "github_username": "svyatov",
+    "email": null,
+    "summary": "Design, build, and ship end-to-end features - backend, frontend, infra - with agentic AI in the loop. Open-source maintainer and contributor.",
+    "location": "Yerevan, Armenia",
+    "website_url": "https://www.svyatov.com",
+    "joined_at": "Dec 19, 2018",
+    "profile_image": "https://media2.dev.to/dynamic/image/width=320,height=320,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F122709%2F4d89b6fb-d4ad-4af4-9c12-8cb53789179c.jpeg",
+    "badge_ids": [
+      2,
+      9,
+      10,
+      75,
+      91,
+      213,
+      214,
+      280
+    ],
+    "followers_count": 219
+  }
+}

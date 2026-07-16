@@ -1,0 +1,397 @@
+{
+  "template": "/api/podcast_episodes",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:43:27.773Z",
+  "payload": [
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82680,
+      "path": "/codenewbie/s27e8-learning-ai-matt-eland",
+      "title": "S27:E8 - Learning AI (Matt Eland)",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/2/2e7a90b5-76bd-4b0f-ae36-11d0f7f4b054.jpg",
+      "podcast": {
+        "title": "CodeNewbie",
+        "slug": "codenewbie",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/2/2e7a90b5-76bd-4b0f-ae36-11d0f7f4b054.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82687,
+      "path": "/icdpl/icd-weekend-25-facebook-podsluchuje-snapchata-nowe-sposoby-na-oszukiwanie-ai",
+      "title": "ICD Weekend #25 – Facebook podsłuchuje Snapchata • nowe sposoby na oszukiwanie AI",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png",
+      "podcast": {
+        "title": "Internet! Czas działać (polish)",
+        "slug": "icdpl",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82681,
+      "path": "/codenewbie/s27e7-tech-and-art-chris-immel",
+      "title": "S27:E7 - Tech and Art (Chris Immel)",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/2/2e7a90b5-76bd-4b0f-ae36-11d0f7f4b054.jpg",
+      "podcast": {
+        "title": "CodeNewbie",
+        "slug": "codenewbie",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/2/2e7a90b5-76bd-4b0f-ae36-11d0f7f4b054.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82685,
+      "path": "/icdpl/icd-weekend-24-pay-or-ok-wytyczne-erod",
+      "title": "ICD Weekend #24 - Pay Or OK? Wytyczne EROD",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png",
+      "podcast": {
+        "title": "Internet! Czas działać (polish)",
+        "slug": "icdpl",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82682,
+      "path": "/codenewbie/s27e6-the-crossover-of-health-technology-and-art-daniel-bourke",
+      "title": "S27:E6 - The Crossover of Health, Technology and Art (Daniel Bourke)",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/2/2e7a90b5-76bd-4b0f-ae36-11d0f7f4b054.jpg",
+      "podcast": {
+        "title": "CodeNewbie",
+        "slug": "codenewbie",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/2/2e7a90b5-76bd-4b0f-ae36-11d0f7f4b054.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82684,
+      "path": "/icdpl/icd-weekend-23-prawie-znaleziono-algorytm-lamiacy-kryptograficzne-problemy-kratowe",
+      "title": "ICD Weekend #23 – Prawie znaleziono algorytm łamiący kryptograficzne problemy kratowe",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png",
+      "podcast": {
+        "title": "Internet! Czas działać (polish)",
+        "slug": "icdpl",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82683,
+      "path": "/codenewbie/s27e5-navigating-the-ai-evolution-chelsea-kaufman",
+      "title": "S27:E5 - Navigating the AI Evolution (Chelsea Kaufman)",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/2/2e7a90b5-76bd-4b0f-ae36-11d0f7f4b054.jpg",
+      "podcast": {
+        "title": "CodeNewbie",
+        "slug": "codenewbie",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/2/2e7a90b5-76bd-4b0f-ae36-11d0f7f4b054.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82688,
+      "path": "/icdpl/icd-weekend-22-skrypty-sledzace-na-rzadowych-stronach-petycja-do-ministra-cyfryzacji",
+      "title": "ICD Weekend #22 – Skrypty śledzące na rządowych stronach: Petycja do Ministra Cyfryzacji",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png",
+      "podcast": {
+        "title": "Internet! Czas działać (polish)",
+        "slug": "icdpl",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82686,
+      "path": "/icdpl/icd-weekend-21-sztuczna-inteligencja-atakuje-ludzi-zmiany-w-ogrodku-apple",
+      "title": "ICD Weekend #21 - Sztuczna inteligencja atakuje ludzi • zmiany w ogródku Apple ",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png",
+      "podcast": {
+        "title": "Internet! Czas działać (polish)",
+        "slug": "icdpl",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/578/c0bcc435-8bbf-4246-a1ab-c20cefb76492.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82668,
+      "path": "/datascience-at-home/rust-in-the-cosmos-decoding-communication-part-i-ep-254",
+      "title": "Rust in the Cosmos: Decoding Communication Part I (Ep. 254)",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/466/e96cebff-f08e-4e49-b667-40a9f7198809.png",
+      "podcast": {
+        "title": "Data Science at Home",
+        "slug": "datascience-at-home",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/466/e96cebff-f08e-4e49-b667-40a9f7198809.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82667,
+      "path": "/thefrontierpod/ep-46-matt-genovese-ceo-and-founder-of-planorama",
+      "title": "Ep. 46: Matt Genovese, CEO and Founder of Planorama",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/588/3bc4eaf4-f28f-426d-aeb2-3776ef9ab535.png",
+      "podcast": {
+        "title": "The Frontier Podcast",
+        "slug": "thefrontierpod",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/588/3bc4eaf4-f28f-426d-aeb2-3776ef9ab535.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82679,
+      "path": "/rubyrogues/the-power-of-turbo-native-with-ayush-newatia-ruby-632",
+      "title": "The Power of Turbo Native with Ayush Newatia - RUBY 632",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/15/meLoMMa.png",
+      "podcast": {
+        "title": "Ruby Rogues",
+        "slug": "rubyrogues",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/15/meLoMMa.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82671,
+      "path": "/sedaily/authlete-and-making-oauth-accessible-with-justin-richer",
+      "title": "Authlete and Making OAuth Accessible with Justin Richer",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/1/lM7fSW24.jpg",
+      "podcast": {
+        "title": "Software Engineering Daily",
+        "slug": "sedaily",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/1/lM7fSW24.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82675,
+      "path": "/dotnet-rocks/domain-control-plane-and-azure-with-anthony-eden",
+      "title": "Domain Control Plane and Azure with Anthony Eden",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/682/9ab91684-c2e4-4ad1-81ff-6ed237464d8e.png",
+      "podcast": {
+        "title": ".NET Rocks!",
+        "slug": "dotnet-rocks",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/682/9ab91684-c2e4-4ad1-81ff-6ed237464d8e.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82672,
+      "path": "/codestorypodcast/s9-bonus-alon-arvatz-pointfive-author-of-battle-for-your-computer",
+      "title": "S9 Bonus: Alon Arvatz, Pointfive & Author of Battle for Your Computer",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/133/cc925b12-4a47-4892-a119-7f09c05dd8be.jpg",
+      "podcast": {
+        "title": "Code Story",
+        "slug": "codestorypodcast",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/133/cc925b12-4a47-4892-a119-7f09c05dd8be.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82676,
+      "path": "/happydev/james-brooks",
+      "title": "James Brooks",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/160/e8cdc221-94c5-47b6-b73a-b1da90b6d2b3.jpg",
+      "podcast": {
+        "title": "Happy Dev",
+        "slug": "happydev",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/160/e8cdc221-94c5-47b6-b73a-b1da90b6d2b3.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82669,
+      "path": "/htmlallthethings/make-a-project-get-a-job-w-puru",
+      "title": "Make a Project, Get a Job w/ Puru",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/210/3fbac023-d3fe-4d6f-9d2a-7f1ab279b3f3.png",
+      "podcast": {
+        "title": "HTML All The Things Podcast",
+        "slug": "htmlallthethings",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/210/3fbac023-d3fe-4d6f-9d2a-7f1ab279b3f3.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82677,
+      "path": "/devopsshorts/peter-guagenti-the-ai-is-an-iron-man-suite-for-the-mind",
+      "title": "Peter Guagenti - The AI is an Iron Man Suite for the Mind",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/859/86f7e67c-68a9-496b-9bf4-d1a176b8799b.jpeg",
+      "podcast": {
+        "title": "DevOps Shorts",
+        "slug": "devopsshorts",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/859/86f7e67c-68a9-496b-9bf4-d1a176b8799b.jpeg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82674,
+      "path": "/scaling-devtools/glauber-costa-from-turso",
+      "title": "Glauber Costa from Turso",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/911/d2f8e20f-2513-4c19-911e-c4197f462928.jpeg",
+      "podcast": {
+        "title": "Scaling DevTools",
+        "slug": "scaling-devtools",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/911/d2f8e20f-2513-4c19-911e-c4197f462928.jpeg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82670,
+      "path": "/i-am-tim-corey/9-steps-to-effectively-change-jobs-for-more-money-in-software-development",
+      "title": "9 Steps to Effectively Change Jobs For More Money in Software Development",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/759/6abaadb5-7367-487e-a6a0-c861f80efca1.jpg",
+      "podcast": {
+        "title": "Dev Questions with Tim Corey",
+        "slug": "i-am-tim-corey",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/759/6abaadb5-7367-487e-a6a0-c861f80efca1.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82673,
+      "path": "/podrocket/the-angular-and-wiz-merger-with-minko-gechev",
+      "title": "The Angular and Wiz merger with Minko Gechev",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/623/64ec4f79-e320-4b79-a365-39b10bc53d41.png",
+      "podcast": {
+        "title": "PodRocket - A web development podcast from LogRocket",
+        "slug": "podrocket",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/623/64ec4f79-e320-4b79-a365-39b10bc53d41.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82665,
+      "path": "/coffee-with-butterscotch/ep462-global-keys",
+      "title": "[Ep462]  Global Keys",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/482/e111f5df-ddf4-4264-a99e-78e23317b9ab.jpg",
+      "podcast": {
+        "title": "Coffee with Butterscotch: A Gamedev Comedy Podcast",
+        "slug": "coffee-with-butterscotch",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/482/e111f5df-ddf4-4264-a99e-78e23317b9ab.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82664,
+      "path": "/angularshow/a-show-s7-e7-building-a-toolchain-with-biome-emanuele-stoppa",
+      "title": "A+ Show S7 E7 | Building a Toolchain with Biome | Emanuele Stoppa",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/306/a5e1f70b-b132-4875-ae15-731b262222ad.jpg",
+      "podcast": {
+        "title": "The Angular Show",
+        "slug": "angularshow",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/306/a5e1f70b-b132-4875-ae15-731b262222ad.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82666,
+      "path": "/scrimba-podcast/early-whatsapp-engineer-jean-lee-keep-trying-new-things-in-tech",
+      "title": "Early WhatsApp Engineer Jean Lee: Keep Trying New Things in Tech!",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/459/1d09ea21-598e-4f38-a5db-bc4369bfa643.png",
+      "podcast": {
+        "title": "The Scrimba Podcast ",
+        "slug": "scrimba-podcast",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/459/1d09ea21-598e-4f38-a5db-bc4369bfa643.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82661,
+      "path": "/working-code/173-shopping-for-solutions-payments-and-compliance-auditing",
+      "title": "173: Shopping for Solutions - Payments and Compliance Auditing",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/745/61fdb72a-e89b-41aa-aa03-ffc9cd57e1b6.jpg",
+      "podcast": {
+        "title": "Working Code",
+        "slug": "working-code",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/745/61fdb72a-e89b-41aa-aa03-ffc9cd57e1b6.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82662,
+      "path": "/syntax/754-how-to-level-up-your-web-development-career",
+      "title": "754: How to Level Up Your Web Development Career",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/51/fde96616-3607-4656-8ea2-a1756d0aaff1.png",
+      "podcast": {
+        "title": "Syntax - Tasty Web Development Treats",
+        "slug": "syntax",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/51/fde96616-3607-4656-8ea2-a1756d0aaff1.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82660,
+      "path": "/sedaily/netflix-engineering-with-jay-phelps",
+      "title": "Netflix Engineering with Jay Phelps",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/1/lM7fSW24.jpg",
+      "podcast": {
+        "title": "Software Engineering Daily",
+        "slug": "sedaily",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/1/lM7fSW24.jpg"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82663,
+      "path": "/podrocket/optimizing-url-parsing-in-node-with-yagiz-nizipli",
+      "title": "Optimizing URL parsing in Node with Yagiz Nizipli",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/623/64ec4f79-e320-4b79-a365-39b10bc53d41.png",
+      "podcast": {
+        "title": "PodRocket - A web development podcast from LogRocket",
+        "slug": "podrocket",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/623/64ec4f79-e320-4b79-a365-39b10bc53d41.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82659,
+      "path": "/gotime/ship-software-not-code",
+      "title": "Ship software, not code",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/5/gotime_800x800.png",
+      "podcast": {
+        "title": "Go Time",
+        "slug": "gotime",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/5/gotime_800x800.png"
+      }
+    },
+    {
+      "type_of": "podcast_episodes",
+      "class_name": "PodcastEpisode",
+      "id": 82653,
+      "path": "/semaphoreuncut/kelsey-hightower-on-embracing-open-source",
+      "title": "Kelsey Hightower on Embracing Open Source",
+      "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/73/1072bfe4-ef4d-404f-91e0-153758e2238b.png",
+      "podcast": {
+        "title": "Semaphore Uncut",
+        "slug": "semaphoreuncut",
+        "image_url": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/podcast/image/73/1072bfe4-ef4d-404f-91e0-153758e2238b.png"
+      }
+    }
+  ]
+}

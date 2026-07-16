@@ -1,0 +1,162 @@
+{
+  "template": "/api/follows/tags",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:44:35.105Z",
+  "payload": [
+    {
+      "id": 47,
+      "name": "rails",
+      "points": 6.219507705176107
+    },
+    {
+      "id": 1,
+      "name": "ruby",
+      "points": 6.127134385045092
+    },
+    {
+      "id": 6,
+      "name": "javascript",
+      "points": 4.272588722239782
+    },
+    {
+      "id": 8,
+      "name": "webdev",
+      "points": 4.258096538021482
+    },
+    {
+      "id": 23,
+      "name": "css",
+      "points": 4.178053830347945
+    },
+    {
+      "id": 630,
+      "name": "career",
+      "points": 3.9158176280829102
+    },
+    {
+      "id": 228,
+      "name": "opensource",
+      "points": 3.70805020110221
+    },
+    {
+      "id": 56,
+      "name": "security",
+      "points": 2
+    },
+    {
+      "id": 27,
+      "name": "elixir",
+      "points": 1.96
+    },
+    {
+      "id": 2118,
+      "name": "computerscience",
+      "points": 1.666
+    },
+    {
+      "id": 125,
+      "name": "react",
+      "points": 1.5
+    },
+    {
+      "id": 203,
+      "name": "testing",
+      "points": 1.5
+    },
+    {
+      "id": 29,
+      "name": "git",
+      "points": 1.47
+    },
+    {
+      "id": 21,
+      "name": "erlang",
+      "points": 1.4405999999999999
+    },
+    {
+      "id": 112,
+      "name": "productivity",
+      "points": 1
+    },
+    {
+      "id": 2640,
+      "name": "devtips",
+      "points": 1
+    },
+    {
+      "id": 33,
+      "name": "programming",
+      "points": 1
+    },
+    {
+      "id": 956,
+      "name": "leadership",
+      "points": 1
+    },
+    {
+      "id": 169,
+      "name": "typescript",
+      "points": 1
+    },
+    {
+      "id": 57,
+      "name": "html",
+      "points": 1
+    },
+    {
+      "id": 349,
+      "name": "bash",
+      "points": 1
+    },
+    {
+      "id": 5305,
+      "name": "todayilearned",
+      "points": 0.98
+    },
+    {
+      "id": 168,
+      "name": "devops",
+      "points": 0.98
+    },
+    {
+      "id": 4722,
+      "name": "changelog",
+      "points": 0.98
+    },
+    {
+      "id": 31,
+      "name": "docker",
+      "points": 0.98
+    },
+    {
+      "id": 118,
+      "name": "linux",
+      "points": 0.98
+    },
+    {
+      "id": 104,
+      "name": "learning",
+      "points": 0.98
+    },
+    {
+      "id": 553,
+      "name": "ubuntu",
+      "points": 0.98
+    },
+    {
+      "id": 928,
+      "name": "vim",
+      "points": 0.98
+    },
+    {
+      "id": 223,
+      "name": "showdev",
+      "points": 0.98
+    },
+    {
+      "id": 25,
+      "name": "python",
+      "points": 0.47059599999999996
+    }
+  ]
+}

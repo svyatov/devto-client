@@ -28,11 +28,11 @@
   {
     "target": "/paths/~1api~1articles/post/responses/201/content",
     "expect": null,
-    "reason": "missing schema: create renders the same show template as GET /api/articles/{id}, i.e. Article (verified in app/controllers/concerns/api/articles_controller.rb)",
+    "reason": "missing schema: create/update render the same show template as GET /api/articles/{id} (ArticleShow); upstream's Article component is the request wrapper, not a response",
     "patch": {
       "application/json": {
         "schema": {
-          "$ref": "#/components/schemas/Article"
+          "$ref": "#/components/schemas/ArticleShow"
         }
       }
     }
@@ -40,11 +40,11 @@
   {
     "target": "/paths/~1api~1articles~1{id}/put/responses/200/content",
     "expect": null,
-    "reason": "missing schema: update renders the same show template as GET /api/articles/{id}, i.e. Article (verified in app/controllers/concerns/api/articles_controller.rb)",
+    "reason": "missing schema: create/update render the same show template as GET /api/articles/{id} (ArticleShow); upstream's Article component is the request wrapper, not a response",
     "patch": {
       "application/json": {
         "schema": {
-          "$ref": "#/components/schemas/Article"
+          "$ref": "#/components/schemas/ArticleShow"
         }
       }
     }
@@ -463,14 +463,15 @@
   {
     "target": "/paths/~1api~1instance/get/responses/200/content",
     "expect": null,
-    "reason": "missing schema: verified in concerns/api/instances_controller.rb",
+    "reason": "missing schema: verified in concerns/api/instances_controller.rb; context recorded as null on dev.to, typed nullable",
     "patch": {
       "application/json": {
         "schema": {
           "type": "object",
           "properties": {
             "context": {
-              "type": "string"
+              "type": "string",
+              "nullable": true
             },
             "cover_image_url": {
               "type": "string",
@@ -505,7 +506,7 @@
               "enum": ["public", "private", "pending"]
             }
           },
-          "required": ["context", "domain", "name", "version", "visibility"]
+          "required": ["domain", "name", "version", "visibility"]
         }
       }
     }
@@ -948,6 +949,763 @@
       "application/json": {
         "schema": {}
       }
+    }
+  },
+  {
+    "target": "/components/schemas/Comment/properties/image_url",
+    "expect": {
+      "type": "string",
+      "format": "url"
+    },
+    "reason": "reality correction: _comment.json.jbuilder never emits image_url; recorded fixtures confirm no comment carries it",
+    "patch": null
+  },
+  {
+    "target": "/components/schemas/Comment/properties/body_html",
+    "expect": null,
+    "reason": "missing schema: emitted by _comment.json.jbuilder for visible comments, absent from the upstream Comment schema",
+    "patch": {
+      "type": "string"
+    }
+  },
+  {
+    "target": "/components/schemas/Comment/properties/user",
+    "expect": null,
+    "reason": "missing schema: _comment.json.jbuilder renders the shared user partial ({} for deleted/hidden comments)",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "twitter_username": {
+          "type": "string",
+          "nullable": true
+        },
+        "github_username": {
+          "type": "string",
+          "nullable": true
+        },
+        "website_url": {
+          "type": "string",
+          "nullable": true
+        },
+        "profile_image": {
+          "type": "string"
+        },
+        "profile_image_90": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "target": "/components/schemas/Comment/properties/children",
+    "expect": null,
+    "reason": "missing schema: the comment tree nests replies as children, absent from the upstream Comment schema",
+    "patch": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/Comment"
+      }
+    }
+  },
+  {
+    "target": "/components/schemas/ArticleShow",
+    "expect": null,
+    "reason": "missing schema: the article show shape — like ArticleIndex but with body_html/body_markdown, and with tag_list/tags types swapped (show: tag_list is a comma-joined string, tags an array; index is the reverse). Verified against recorded fixtures.",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "type_of": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "readable_publish_date": {
+          "type": "string",
+          "nullable": true
+        },
+        "slug": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "comments_count": {
+          "type": "integer"
+        },
+        "public_reactions_count": {
+          "type": "integer"
+        },
+        "positive_reactions_count": {
+          "type": "integer"
+        },
+        "collection_id": {
+          "type": "integer",
+          "nullable": true
+        },
+        "published_timestamp": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string",
+          "nullable": true
+        },
+        "subforem_id": {
+          "type": "integer",
+          "nullable": true
+        },
+        "cover_image": {
+          "type": "string",
+          "nullable": true
+        },
+        "social_image": {
+          "type": "string"
+        },
+        "canonical_url": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "edited_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "crossposted_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "published_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "last_comment_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "reading_time_minutes": {
+          "type": "integer"
+        },
+        "tag_list": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "body_html": {
+          "type": "string",
+          "nullable": true
+        },
+        "body_markdown": {
+          "type": "string",
+          "nullable": true
+        },
+        "user": {
+          "$ref": "#/components/schemas/SharedUser"
+        },
+        "organization": {
+          "$ref": "#/components/schemas/SharedOrganization"
+        },
+        "flare_tag": {
+          "$ref": "#/components/schemas/ArticleFlareTag"
+        }
+      },
+      "required": [
+        "type_of",
+        "id",
+        "title",
+        "description",
+        "readable_publish_date",
+        "slug",
+        "path",
+        "url",
+        "comments_count",
+        "public_reactions_count",
+        "positive_reactions_count",
+        "published_timestamp",
+        "cover_image",
+        "social_image",
+        "canonical_url",
+        "created_at",
+        "edited_at",
+        "crossposted_at",
+        "published_at",
+        "last_comment_at",
+        "reading_time_minutes",
+        "tag_list",
+        "tags",
+        "body_html",
+        "body_markdown",
+        "user"
+      ]
+    }
+  },
+  {
+    "target": "/paths/~1api~1articles~1{id}/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/ArticleIndex"
+      }
+    },
+    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the show response is ArticleShow (verified against recorded fixtures)",
+    "patch": {
+      "$ref": "#/components/schemas/ArticleShow"
+    }
+  },
+  {
+    "target": "/paths/~1api~1articles~1{username}~1{slug}/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/ArticleIndex"
+      }
+    },
+    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the show response is ArticleShow (verified against recorded fixtures)",
+    "patch": {
+      "$ref": "#/components/schemas/ArticleShow"
+    }
+  },
+  {
+    "target": "/paths/~1api~1organizations~1{username}/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/Organization"
+      }
+    },
+    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the show response is Organization (verified against recorded fixtures)",
+    "patch": {
+      "$ref": "#/components/schemas/Organization"
+    }
+  },
+  {
+    "target": "/paths/~1api~1users~1{id}/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/ExtendedUser"
+      }
+    },
+    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the show response is ExtendedUser (verified against recorded fixtures)",
+    "patch": {
+      "$ref": "#/components/schemas/ExtendedUser"
+    }
+  },
+  {
+    "target": "/components/schemas/ArticleIndex/properties/collection_id",
+    "expect": null,
+    "reason": "missing field: emitted by the articles serializer, absent from the upstream schema (verified in recorded fixtures)",
+    "patch": {
+      "type": "integer",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/ArticleIndex/properties/subforem_id",
+    "expect": null,
+    "reason": "missing field: emitted by the articles serializer, absent from the upstream schema (verified in recorded fixtures)",
+    "patch": {
+      "type": "integer",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/ArticleIndex/properties/language",
+    "expect": null,
+    "reason": "missing field: emitted by the articles serializer, absent from the upstream schema (verified in recorded fixtures)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Organization/properties/id",
+    "expect": null,
+    "reason": "missing field: emitted by the organization view, absent from the upstream schema (verified in recorded fixtures)",
+    "patch": {
+      "type": "integer",
+      "format": "int64"
+    }
+  },
+  {
+    "target": "/components/schemas/Organization/properties/profile_image",
+    "expect": null,
+    "reason": "missing field: emitted by the organization view, absent from the upstream schema (verified in recorded fixtures)",
+    "patch": {
+      "type": "string"
+    }
+  },
+  {
+    "target": "/components/schemas/User/properties/twitter_username",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: null for users without a linked account (verified in recorded fixtures)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/User/properties/github_username",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: null for users without a linked account (verified in recorded fixtures)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/VideoArticle/properties/cloudinary_video_url",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: null when no cloudinary asset exists (verified in recorded fixtures)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Page/properties/social_image",
+    "expect": {
+      "type": "object",
+      "nullable": true
+    },
+    "reason": "reality correction: rendered as { url } (nullable), not an empty object (verified in recorded fixtures)",
+    "patch": {
+      "type": "object",
+      "nullable": true,
+      "properties": {
+        "url": {
+          "type": "string",
+          "nullable": true
+        }
+      }
+    }
+  },
+  {
+    "target": "/components/schemas/ExtendedUser/properties/twitter_username",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: null for users without a linked account (verified in recorded fixtures)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/ExtendedUser/properties/github_username",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: null for users without a linked account (verified in recorded fixtures)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/MyUser/properties/twitter_username",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: null for users without a linked account (verified in recorded fixtures)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/MyUser/properties/github_username",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: null for users without a linked account (verified in recorded fixtures)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/paths/~1api~1users~1me/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/MyUser"
+      }
+    },
+    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the response is MyUser (verified against recorded fixtures)",
+    "patch": {
+      "$ref": "#/components/schemas/MyUser"
+    }
+  },
+  {
+    "target": "/components/schemas/MyUser/properties/email",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: null when the user hides their email (verified in recorded fixtures)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/MyArticle",
+    "expect": null,
+    "reason": "missing schema: the articles/me serializer differs from ArticleIndex (adds published/page_views_count/body_markdown, drops readable_publish_date/social_image/tags/timestamps). Verified against recorded fixtures.",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "type_of": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "published": {
+          "type": "boolean"
+        },
+        "published_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "slug": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "comments_count": {
+          "type": "integer"
+        },
+        "public_reactions_count": {
+          "type": "integer"
+        },
+        "page_views_count": {
+          "type": "integer"
+        },
+        "published_timestamp": {
+          "type": "string"
+        },
+        "body_markdown": {
+          "type": "string"
+        },
+        "positive_reactions_count": {
+          "type": "integer"
+        },
+        "cover_image": {
+          "type": "string",
+          "nullable": true
+        },
+        "tag_list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "canonical_url": {
+          "type": "string",
+          "nullable": true
+        },
+        "reading_time_minutes": {
+          "type": "integer"
+        },
+        "user": {
+          "$ref": "#/components/schemas/SharedUser"
+        },
+        "flare_tag": {
+          "$ref": "#/components/schemas/ArticleFlareTag"
+        }
+      },
+      "required": [
+        "type_of",
+        "id",
+        "title",
+        "description",
+        "published",
+        "published_at",
+        "slug",
+        "path",
+        "url",
+        "comments_count",
+        "public_reactions_count",
+        "page_views_count",
+        "published_timestamp",
+        "body_markdown",
+        "positive_reactions_count",
+        "cover_image",
+        "tag_list",
+        "canonical_url",
+        "reading_time_minutes",
+        "user"
+      ]
+    }
+  },
+  {
+    "target": "/paths/~1api~1articles~1me/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/ArticleIndex"
+      }
+    },
+    "reason": "reality correction: articles/me responses are MyArticle, not ArticleIndex (verified against recorded fixtures)",
+    "patch": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/MyArticle"
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1articles~1me~1published/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/ArticleIndex"
+      }
+    },
+    "reason": "reality correction: articles/me responses are MyArticle, not ArticleIndex (verified against recorded fixtures)",
+    "patch": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/MyArticle"
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1articles~1me~1unpublished/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/ArticleIndex"
+      }
+    },
+    "reason": "reality correction: articles/me responses are MyArticle, not ArticleIndex (verified against recorded fixtures)",
+    "patch": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/MyArticle"
+      }
+    }
+  },
+  {
+    "target": "/paths/~1api~1articles~1me~1all/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/ArticleIndex"
+      }
+    },
+    "reason": "reality correction: articles/me responses are MyArticle, not ArticleIndex (verified against recorded fixtures)",
+    "patch": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/MyArticle"
+      }
+    }
+  },
+  {
+    "target": "/components/schemas/ReadingListItem",
+    "expect": null,
+    "reason": "missing schema: readinglist items wrap the article in { type_of, id, status, created_at, article } (verified against recorded fixtures)",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "type_of": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "article": {
+          "$ref": "#/components/schemas/ReadingListArticle"
+        }
+      },
+      "required": ["type_of", "id", "status", "created_at", "article"]
+    }
+  },
+  {
+    "target": "/paths/~1api~1readinglist/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/ArticleIndex"
+      }
+    },
+    "reason": "reality correction: readinglist returns ReadingListItem wrappers, not bare articles (verified against recorded fixtures)",
+    "patch": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/ReadingListItem"
+      }
+    }
+  },
+  {
+    "target": "/components/schemas/ReadingListArticle",
+    "expect": null,
+    "reason": "missing schema: the readinglist's nested article is ArticleIndex without tag_list/flare_tag (verified against recorded fixtures)",
+    "patch": {
+      "type": "object",
+      "properties": {
+        "type_of": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "readable_publish_date": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "comments_count": {
+          "type": "integer"
+        },
+        "public_reactions_count": {
+          "type": "integer"
+        },
+        "collection_id": {
+          "type": "integer",
+          "nullable": true
+        },
+        "published_timestamp": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string",
+          "nullable": true
+        },
+        "subforem_id": {
+          "type": "integer",
+          "nullable": true
+        },
+        "positive_reactions_count": {
+          "type": "integer"
+        },
+        "cover_image": {
+          "type": "string",
+          "nullable": true
+        },
+        "social_image": {
+          "type": "string"
+        },
+        "canonical_url": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "edited_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "crossposted_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "published_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "last_comment_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "reading_time_minutes": {
+          "type": "integer"
+        },
+        "tags": {
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/components/schemas/SharedUser"
+        },
+        "organization": {
+          "$ref": "#/components/schemas/SharedOrganization"
+        }
+      },
+      "required": [
+        "type_of",
+        "id",
+        "title",
+        "description",
+        "readable_publish_date",
+        "slug",
+        "path",
+        "url",
+        "comments_count",
+        "public_reactions_count",
+        "published_timestamp",
+        "positive_reactions_count",
+        "cover_image",
+        "social_image",
+        "canonical_url",
+        "created_at",
+        "edited_at",
+        "crossposted_at",
+        "published_at",
+        "last_comment_at",
+        "reading_time_minutes",
+        "tags",
+        "user"
+      ]
     }
   }
 ]

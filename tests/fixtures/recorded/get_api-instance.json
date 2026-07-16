@@ -1,0 +1,17 @@
+{
+  "template": "/api/instance",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:43:47.364Z",
+  "payload": {
+    "context": null,
+    "cover_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3otvb2z646ytpt1hl2rv.jpg",
+    "description": "A space to discuss and keep up software development and manage your software career",
+    "display_in_directory": true,
+    "domain": "dev.to",
+    "logo_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/8j7kvp660rqzt99zui8e.png",
+    "name": "DEV Community",
+    "tagline": "We're a place where coders share, stay up-to-date and grow their careers.",
+    "version": "edge.20260716.0",
+    "visibility": "public"
+  }
+}

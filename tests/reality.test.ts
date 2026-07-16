@@ -88,7 +88,12 @@ export function missingKeys(payload: unknown, schema: Schema): string[] {
 }
 
 /** Spec-declared keys that serializers legitimately omit when no data exists. */
-const CONDITIONAL_KEYS: Record<string, string[]> = {};
+const CONDITIONAL_KEYS: Record<string, string[]> = {
+  // emitted only when the article belongs to an org / has a flare tag
+  "/api/articles/{id}": ["organization", "flare_tag"],
+  "/api/articles/{username}/{slug}": ["organization", "flare_tag"],
+  "/api/articles": ["organization", "flare_tag"],
+};
 
 const FIXTURES_DIR = process.env.FIXTURES_DIR ?? "tests/fixtures/recorded";
 const files = existsSync(FIXTURES_DIR)

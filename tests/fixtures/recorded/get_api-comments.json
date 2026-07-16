@@ -1,0 +1,24 @@
+{
+  "template": "/api/comments",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:43:15.950Z",
+  "payload": [
+    {
+      "type_of": "comment",
+      "id_code": "3bba8",
+      "created_at": "2026-07-16T19:20:56Z",
+      "body_html": "<p>Hello Everyone, I'm Sam a developer talent connector. I'm currently connecting with experienced developers from South Africa, Europe, U.S and arround the world for remote international project opportunities. There's also a separate remote customer communication opportunity for U.S. residents, and technical experience isn't required for that role. Happy to explain more to anyone interested.</p>\n\n",
+      "user": {
+        "name": "Sam Tech",
+        "username": "sam_tech_e3c30d03221da839",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4008303,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4008303%2F1ae9c435-4bee-4626-88bb-f7152aa1742c.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4008303%2F1ae9c435-4bee-4626-88bb-f7152aa1742c.jpg"
+      },
+      "children": []
+    }
+  ]
+}

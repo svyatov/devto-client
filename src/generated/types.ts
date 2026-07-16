@@ -2440,7 +2440,7 @@ export interface paths {
           };
           content: {
             "application/json": {
-              context: string;
+              context?: string | null;
               cover_image_url?: string | null;
               description?: string | null;
               display_in_directory?: boolean;
@@ -4712,6 +4712,9 @@ export interface components {
       user: components["schemas"]["SharedUser"];
       flare_tag?: components["schemas"]["ArticleFlareTag"];
       organization?: components["schemas"]["SharedOrganization"];
+      collection_id?: number | null;
+      subforem_id?: number | null;
+      language?: string | null;
     };
     /** @description Representation of an Article with video */
     VideoArticle: {
@@ -4719,7 +4722,7 @@ export interface components {
       /** Format: int64 */
       id?: number;
       path?: string;
-      cloudinary_video_url?: string;
+      cloudinary_video_url?: string | null;
       title?: string;
       /** Format: int64 */
       user_id?: number;
@@ -4759,6 +4762,9 @@ export interface components {
       tech_stack?: string;
       tag_line?: string | null;
       story?: string | null;
+      /** Format: int64 */
+      id?: number;
+      profile_image?: string;
     };
     /** @description Representation of a followed tag */
     FollowedTag: {
@@ -4796,7 +4802,9 @@ export interface components {
       body_json?: string | null;
       /** @description If true, the page is available at '/{slug}' instead of '/page/{slug}', use with caution */
       is_top_level_path?: boolean;
-      social_image?: Record<string, never> | null;
+      social_image?: {
+        url?: string | null;
+      } | null;
       /**
        * @description Controls what kind of layout the page is rendered in
        * @default contained
@@ -4868,8 +4876,8 @@ export interface components {
       username?: string;
       name?: string;
       summary?: string | null;
-      twitter_username?: string;
-      github_username?: string;
+      twitter_username?: string | null;
+      github_username?: string | null;
       website_url?: string | null;
       location?: string | null;
       joined_at?: string;
@@ -4883,8 +4891,8 @@ export interface components {
       username?: string;
       name?: string;
       summary?: string | null;
-      twitter_username?: string;
-      github_username?: string;
+      twitter_username?: string | null;
+      github_username?: string | null;
       /** @description Email (if user allows displaying email on their profile) or nil */
       email?: string | null;
       website_url?: string | null;
@@ -4902,9 +4910,8 @@ export interface components {
       username?: string;
       name?: string;
       summary?: string | null;
-      twitter_username?: string;
-      github_username?: string;
-      /** @description Email (if user allows displaying email on their profile) or nil */
+      twitter_username?: string | null;
+      github_username?: string | null;
       email?: string | null;
       website_url?: string | null;
       location?: string | null;
@@ -4930,11 +4937,17 @@ export interface components {
       id_code?: string;
       /** Format: date-time */
       created_at?: string;
-      /**
-       * Format: url
-       * @description Podcast image url
-       */
-      image_url?: string;
+      body_html?: string;
+      user?: {
+        name?: string;
+        username?: string;
+        twitter_username?: string | null;
+        github_username?: string | null;
+        website_url?: string | null;
+        profile_image?: string;
+        profile_image_90?: string;
+      };
+      children?: components["schemas"]["Comment"][];
     };
     /** @description User invite parameters */
     UserInviteParam: {
@@ -5449,6 +5462,102 @@ export interface components {
         reactions?: number;
       };
     };
+    ArticleShow: {
+      type_of: string;
+      /** Format: int64 */
+      id: number;
+      title: string;
+      description: string;
+      readable_publish_date: string | null;
+      slug: string;
+      path: string;
+      url: string;
+      comments_count: number;
+      public_reactions_count: number;
+      positive_reactions_count: number;
+      collection_id?: number | null;
+      published_timestamp: string;
+      language?: string | null;
+      subforem_id?: number | null;
+      cover_image: string | null;
+      social_image: string;
+      canonical_url: string;
+      created_at: string;
+      edited_at: string | null;
+      crossposted_at: string | null;
+      published_at: string | null;
+      last_comment_at: string | null;
+      reading_time_minutes: number;
+      tag_list: string;
+      tags: string[];
+      body_html: string | null;
+      body_markdown: string | null;
+      user: components["schemas"]["SharedUser"];
+      organization?: components["schemas"]["SharedOrganization"];
+      flare_tag?: components["schemas"]["ArticleFlareTag"];
+    };
+    MyArticle: {
+      type_of: string;
+      /** Format: int64 */
+      id: number;
+      title: string;
+      description: string;
+      published: boolean;
+      published_at: string | null;
+      slug: string;
+      path: string;
+      url: string;
+      comments_count: number;
+      public_reactions_count: number;
+      page_views_count: number;
+      published_timestamp: string;
+      body_markdown: string;
+      positive_reactions_count: number;
+      cover_image: string | null;
+      tag_list: string[];
+      canonical_url: string | null;
+      reading_time_minutes: number;
+      user: components["schemas"]["SharedUser"];
+      flare_tag?: components["schemas"]["ArticleFlareTag"];
+    };
+    ReadingListItem: {
+      type_of: string;
+      /** Format: int64 */
+      id: number;
+      status: string;
+      created_at: string;
+      article: components["schemas"]["ReadingListArticle"];
+    };
+    ReadingListArticle: {
+      type_of: string;
+      /** Format: int64 */
+      id: number;
+      title: string;
+      description: string;
+      readable_publish_date: string;
+      slug: string;
+      path: string;
+      url: string;
+      comments_count: number;
+      public_reactions_count: number;
+      collection_id?: number | null;
+      published_timestamp: string;
+      language?: string | null;
+      subforem_id?: number | null;
+      positive_reactions_count: number;
+      cover_image: string | null;
+      social_image: string;
+      canonical_url: string;
+      created_at: string;
+      edited_at: string | null;
+      crossposted_at: string | null;
+      published_at: string | null;
+      last_comment_at: string | null;
+      reading_time_minutes: number;
+      tags: string;
+      user: components["schemas"]["SharedUser"];
+      organization?: components["schemas"]["SharedOrganization"];
+    };
   };
   responses: never;
   parameters: {
@@ -5688,7 +5797,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Article"];
+          "application/json": components["schemas"]["ArticleShow"];
         };
       };
       /** @description Unauthorized */
@@ -5779,7 +5888,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["ArticleShow"];
         };
       };
       /** @description Article Not Found */
@@ -5817,7 +5926,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Article"];
+          "application/json": components["schemas"]["ArticleShow"];
         };
       };
       /** @description Unauthorized */
@@ -5863,7 +5972,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["ArticleShow"];
         };
       };
       /** @description Article Not Found */
@@ -5895,7 +6004,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ArticleIndex"][];
+          "application/json": components["schemas"]["MyArticle"][];
         };
       };
       /** @description Unauthorized */
@@ -5927,7 +6036,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ArticleIndex"][];
+          "application/json": components["schemas"]["MyArticle"][];
         };
       };
       /** @description Unauthorized */
@@ -5959,7 +6068,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ArticleIndex"][];
+          "application/json": components["schemas"]["MyArticle"][];
         };
       };
       /** @description Unauthorized */
@@ -5991,7 +6100,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ArticleIndex"][];
+          "application/json": components["schemas"]["MyArticle"][];
         };
       };
       /** @description Unauthorized */
@@ -6496,7 +6605,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["Organization"];
         };
       };
       /** @description Not Found */
@@ -6761,7 +6870,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ArticleIndex"][];
+          "application/json": components["schemas"]["ReadingListItem"][];
         };
       };
       /** @description Unauthorized */
@@ -7339,7 +7448,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["MyUser"];
         };
       };
       /** @description Unauthorized */
@@ -7369,7 +7478,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["ExtendedUser"];
         };
       };
     };

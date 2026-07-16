@@ -139,6 +139,9 @@ The client mirrors the server, not the docs, and every deviation is explicit. Th
 | Excluded | `/api/display_ads` | Transitional alias of `/api/billboards`. |
 | Excluded | `suspended` user-role alias | Alias of `suspend`. |
 | Excluded | `GET /api/followers/organizations` | The route exists but the controller action doesn't. Calling it 404s. |
+| Privilege-gated | `POST /api/reactions`, `POST /api/reactions/toggle` | Admin-gated upstream despite looking like regular user endpoints; ordinary keys get 401. |
+| Privilege-gated | `PUT /api/articles/{id}/unpublish` | Moderator-gated; ordinary keys get 401. |
+| Quirk | `GET /api/users/me` | Returns 401 on dev.to even with a valid key that authenticates elsewhere. |
 | Corrected | duplicate `page` param on `GET /api/comments` | The spec declares it twice; the overlay removes the inline copy. |
 | Corrected | `POST /api/reactions` responses | The controller returns 201 for newly created reactions; the spec only declares 200. |
 | Added schemas | 50 or so response schemas | The upstream spec declares many 2xx responses with no schema at all, including `POST /api/articles`. The overlay fills them from the verified controller/view sources, each entry citing where. |

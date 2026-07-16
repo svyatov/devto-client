@@ -1,0 +1,64 @@
+{
+  "template": "/api/trends",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:43:53.514Z",
+  "payload": [
+    {
+      "type_of": "trend",
+      "id": 49,
+      "name": "AI-Driven Passion Analytics & 2026 World Cup",
+      "slug": "ai-driven-passion-analytics-2026-world-cup",
+      "description": "Developers are leveraging AI to bridge the gap between emotional engagement and technical data, specifically focusing on the 2026 FIFA World Cup. This trend involves building dashboards, narrative engines, and monitors that quantify passion and personal milestones through live event tracking and generative AI.",
+      "key_questions": [
+        "How can AI sentiment analysis translate the emotional intensity of live sports into actionable data?",
+        "What are the best architectures for real-time dashboards during high-traffic global events?",
+        "How can generative audio and LLMs be used to personalize user milestones through culturally-specific narratives?"
+      ],
+      "score": 1753.7132738547202,
+      "articles_count": 101,
+      "cover_image": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/articles/kg2fmu4l960dg2gzm4ad.png",
+      "first_observed_at": "2026-07-11T12:01:38Z",
+      "last_observed_at": "2026-07-16T18:01:46Z",
+      "created_at": "2026-07-11T12:01:38Z",
+      "updated_at": "2026-07-16T18:01:46Z"
+    },
+    {
+      "type_of": "trend",
+      "id": 50,
+      "name": "Zero-Backend Client-Side Utility Suites",
+      "slug": "zero-backend-client-side-utility-suites",
+      "description": "Developers are creating comprehensive collections of web utilities that perform tasks like PDF manipulation and image processing entirely within the browser. This movement prioritizes data privacy and user experience by eliminating server uploads, sign-ups, and the predatory monetization common in traditional online tools.",
+      "key_questions": [
+        "How can complex file processing be optimized using browser technologies like Web Workers and WASM?",
+        "Can client-side tools provide enough security and performance to fully replace established SaaS alternatives?",
+        "What are the best practices for managing and scaling a library of hundreds of independent client-side utilities?"
+      ],
+      "score": 183.01842468185998,
+      "articles_count": 21,
+      "cover_image": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/articles/brbb2qfsyjzek9ofgcaa.png",
+      "first_observed_at": "2026-07-12T00:03:39Z",
+      "last_observed_at": "2026-07-12T00:03:39Z",
+      "created_at": "2026-07-12T00:03:39Z",
+      "updated_at": "2026-07-12T00:04:23Z"
+    },
+    {
+      "type_of": "trend",
+      "id": 47,
+      "name": "Adoption of the HTTP QUERY Method (RFC 10008)",
+      "slug": "adoption-of-the-http-query-method-rfc-10008",
+      "description": "The new HTTP QUERY method provides a safe, idempotent way to perform complex read operations with request bodies, finally addressing the limitations of URL-based GET requests. Developers are currently navigating the friction between this new standard and legacy infrastructure like WAFs and CDNs that often misidentify the traffic as malicious.",
+      "key_questions": [
+        "How can infrastructure and security layers be updated to handle GET-like methods with request bodies?",
+        "What are the caching implications and best practices for safe methods carrying a body?",
+        "When should developers migrate existing POST-based search endpoints to the QUERY method?"
+      ],
+      "score": 124.81699483445395,
+      "articles_count": 13,
+      "cover_image": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/articles/jbb2sb5zsdtrxusnavs9.png",
+      "first_observed_at": "2026-07-07T18:03:31Z",
+      "last_observed_at": "2026-07-11T00:03:47Z",
+      "created_at": "2026-07-07T18:03:31Z",
+      "updated_at": "2026-07-11T00:03:47Z"
+    }
+  ]
+}

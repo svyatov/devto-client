@@ -1,0 +1,343 @@
+{
+  "template": "/api/videos",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:43:30.855Z",
+  "payload": [
+    {
+      "type_of": "video_article",
+      "id": 4148699,
+      "path": "/hans_bourgeois_b17a4e7652/why-i-built-realtime-calib-real-time-headless-multi-camera-calibration-1i2n",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/UD-HdDKRbP4",
+      "title": "Why I built realtime-calib: real-time, headless multi-camera calibration",
+      "user_id": 3546756,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/UD-HdDKRbP4",
+      "user": {
+        "name": "Hans Bourgeois"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4148191,
+      "path": "/samruddhi_zala_c6151520e6/mass-delete-flows-flow-versions-and-flow-interviews-4e10",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/Yinl9fv9MIc",
+      "title": "Mass Delete Flows, Flow Versions and Flow Interviews",
+      "user_id": 4029921,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://www.youtube.com/watch?v=Yinl9fv9MIc&t=328s",
+      "user": {
+        "name": "Samruddhi Zala"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4149900,
+      "path": "/guiqui/we-tried-to-build-google-maps-for-kubernetes-scaling-it-to-5000-g4c",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/AsIpyWJwaU4",
+      "title": "We tried to build Google Maps for Kubernetes. Scaling it to 5,000",
+      "user_id": 1205187,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/AsIpyWJwaU4",
+      "user": {
+        "name": "Guillermo Quiros"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4138183,
+      "path": "/waqar_akhtar_f4a1df2340f1/threadly-the-missing-memory-layer-for-professional-relationships-4mbb",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/qHZF2IVIbRk",
+      "title": "Threadly: The Missing Memory Layer for Professional Relationships",
+      "user_id": 3437221,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://www.youtube.com/watch?v=qHZF2IVIbRk",
+      "user": {
+        "name": "Waqar Akhtar"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4135857,
+      "path": "/ananyasharma_14/how-we-built-dj-roots-an-ai-powered-music-recommendation-platform-1o70",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/7Z6sC_V02Hc",
+      "title": "How We Built DJ ROOTS: An AI-Powered Music Recommendation Platform",
+      "user_id": 4027539,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://www.youtube.com/watch?v=7Z6sC_V02Hc",
+      "user": {
+        "name": "Ananya Sharma"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4141447,
+      "path": "/orbitforge_studios_1/one-tap-public-url-building-an-android-app-for-secure-port-forwarding-gk0",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/ktIQlplnin0",
+      "title": "One Tap, Public URL: Building an Android App for Secure Port Forwarding",
+      "user_id": 4028586,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/ktIQlplnin0",
+      "user": {
+        "name": "OrbitForge Studios"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4135802,
+      "path": "/egoisticcoder/studymate-ai-nm0",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/UJVNXYL6WZU",
+      "title": "StudyMate AI",
+      "user_id": 4027326,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/UJVNXYL6WZU?si=VxoN-5uAln9bpqI5",
+      "user": {
+        "name": "Abhinav Gupta"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4134561,
+      "path": "/earthwalker17/how-i-made-a-product-demo-with-claude-code-playwright-and-ffmpeg-2ach",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/KVtN_26qDYw",
+      "title": "How I Made a Product Demo with Claude Code, Playwright, and FFmpeg",
+      "user_id": 4024302,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/KVtN_26qDYw?si=lZ3hrhakmc8g2LOD",
+      "user": {
+        "name": "Eric Mono"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4136231,
+      "path": "/ishubhamkr/a-fresh-new-update-to-dummyimgin--2c1g",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/n58g88XjqSA",
+      "title": "I Built a Better Placeholder Image Generator | dummyimg.in",
+      "user_id": 2737184,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://www.youtube.com/watch?v=n58g88XjqSA",
+      "user": {
+        "name": "Shubham Kumar"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4136485,
+      "path": "/vpkstarspace/architecting-a-mern-stack-ecosystem-system-thinking-security-and-business-logic-4pd2",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/9GhIOfa2z4U",
+      "title": "Architecting a MERN Stack Ecosystem: System Thinking, Security, and Business Logic",
+      "user_id": 3948734,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/9GhIOfa2z4U?si=WI2xTs0VGJwgKG-H",
+      "user": {
+        "name": "Venkata Pavan Kumar Amarthaluri"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4130172,
+      "path": "/zhongkaifu/virtual-clothes-try-on-by-tensorsharp-56hm",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/ATAVQBIIfpg",
+      "title": "Virtual Clothes Try-On by TensorSharp",
+      "user_id": 3997340,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/ATAVQBIIfpg",
+      "user": {
+        "name": "Zhongkai Fu"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4133942,
+      "path": "/egoisticcoder/neopet-an-ai-virtual-pet-that-talks-back-470c",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/CIXbn5s5YDQ",
+      "title": "NeoPet: An AI Virtual Pet That Talks Back",
+      "user_id": 4027326,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/CIXbn5s5YDQ?si=YWP8H9FOysCytnX3",
+      "user": {
+        "name": "Abhinav Gupta"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4126897,
+      "path": "/bridgingthegapeucom/ddd-more-is-software-design-dead-in-the-age-of-automatons-5ba9",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/g5WfzxSktc4",
+      "title": "DDD & More: Is Software Design Dead in the Age of Automatons?",
+      "user_id": 4026208,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/g5WfzxSktc4",
+      "user": {
+        "name": "BridgingTheGap.eu.com"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4126775,
+      "path": "/hillcity/passion-edition-3coe",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/b--WbuUOGB4",
+      "title": "Edu-Insight Assistant: Empowering Teachers to See Students, Not Just Spreadsheets",
+      "user_id": 4025571,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/b--WbuUOGB4?si=pw2Ux28t3bkc8_2Y",
+      "user": {
+        "name": "Chibuzo Talent"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4127371,
+      "path": "/ericmwaimiri/power-bi-dax-essential-functions-explained-with-examples-kif",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/vcijg0gUXSg",
+      "title": "Power BI DAX Essential Functions — Explained with Examples",
+      "user_id": 3818862,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/vcijg0gUXSg?si=tNAzBf9zSTWmi_B3",
+      "user": {
+        "name": "EricMWaimiri"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4126567,
+      "path": "/benelabs/kubeletto-the-free-kubernetes-powered-way-to-deploy-your-app-in-minutes-25on",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/-Aianos7k1M",
+      "title": "Kubeletto: The Free, Kubernetes-Powered Way to Deploy Your App in Minutes",
+      "user_id": 4024845,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/-Aianos7k1M?si=cspJ7q6pe9ThXzGv",
+      "user": {
+        "name": "Benediktus Satriya"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4118285,
+      "path": "/dasmat13/i-built-gitworld-engine-a-github-action-that-turns-your-contributions-into-an-animated-city-302",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/BGH_xQGKWpU",
+      "title": "I Built GitWorld Engine: A GitHub Action That Turns Your Contributions into an Animated City",
+      "user_id": 4024882,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://www.youtube.com/watch?v=BGH_xQGKWpU",
+      "user": {
+        "name": "dasmat "
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4122476,
+      "path": "/ricky_ff_16878ab8c0b0d4d8/why-ai-agents-need-better-team-architecture-not-just-better-models-4d2a",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/D6H2Whmoyek",
+      "title": "Why AI Agents Need Better Team Architecture, Not Just Better Models",
+      "user_id": 3736589,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/D6H2Whmoyek?si=gYR2m9f8XABDrdot",
+      "user": {
+        "name": "Ricky FF"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4120475,
+      "path": "/ali_abbas_d8086e0f96d8173/your-ai-agent-doesnt-know-why-your-codebase-looks-like-this-thats-the-whole-problem-3kjl",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/GDTYotlRNdM",
+      "title": "Your AI agent doesn't know WHY your codebase looks like this. That's the whole problem",
+      "user_id": 3763730,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://www.youtube.com/watch?v=GDTYotlRNdM",
+      "user": {
+        "name": "Ali Abbas"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4122805,
+      "path": "/rguiu/what-i-learned-cutting-claude-codes-token-bill-by-77-3ef",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/a1uBPM7vm7I",
+      "title": "What I Learned Cutting Claude Code's Token Bill by 77%",
+      "user_id": 4021913,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/a1uBPM7vm7I",
+      "user": {
+        "name": "rguiu"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4113606,
+      "path": "/tinesh_chasiya_505f533119/build-this-premium-profile-card-with-html-css-poi",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/JU28624UROs",
+      "title": "Build This Premium Profile Card with HTML & CSS ✨",
+      "user_id": 4024058,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtube.com/watch?v=JU28624UROs",
+      "user": {
+        "name": "Tinesh Chasiya"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4143007,
+      "path": "/codebucks/build-a-stunning-developer-portfolio-with-nextjs-16-tailwind-css-v4-framer-motion-5h76",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/1qJEZVr6eXE",
+      "title": "Build a Stunning Developer Portfolio with Next.js 16, Tailwind CSS v4 & Framer Motion",
+      "user_id": 520837,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://www.youtube.com/watch?v=1qJEZVr6eXE",
+      "user": {
+        "name": "CodeBucks"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4110672,
+      "path": "/telmon_maluleka_d775640a9/i-got-featured-on-the-official-owasp-zap-blog-heres-how-i-built-an-ai-layer-on-top-of-it-1p78",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/wlUvBVNyh74",
+      "title": "I Got Featured on the Official OWASP ZAP Blog — Here's How I Built an AI Layer on Top of It published: true tags: security, ai, mcp, opensource",
+      "user_id": 4023532,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/wlUvBVNyh74?si=-Ymy1MMgrGgqfteE",
+      "user": {
+        "name": "Telmon Maluleka"
+      }
+    },
+    {
+      "type_of": "video_article",
+      "id": 4105646,
+      "path": "/tuyadeveloper/led-strip-tetris-zero-code-hardware-game-with-tuyaopen-claude-code-tutorial-49kd",
+      "cloudinary_video_url": null,
+      "video": "https://www.youtube.com/embed/oCOUf4Gzpog",
+      "title": "LED Strip Tetris: Zero-Code Hardware Game with TuyaOpen + Claude Code Tutorial",
+      "user_id": 3869169,
+      "video_duration_in_minutes": "00:00",
+      "video_source_url": "https://youtu.be/oCOUf4Gzpog?si=uOEjrJLvbv0KBL6e",
+      "user": {
+        "name": "TuyaDeveloper"
+      }
+    }
+  ]
+}

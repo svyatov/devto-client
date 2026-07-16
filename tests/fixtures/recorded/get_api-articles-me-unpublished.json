@@ -1,0 +1,110 @@
+{
+  "template": "/api/articles/me/unpublished",
+  "method": "GET",
+  "recordedAt": "2026-07-16T19:44:22.005Z",
+  "payload": [
+    {
+      "type_of": "article",
+      "id": 4160662,
+      "title": "synthetic title placeholder",
+      "description": "synthetic description placeholder",
+      "published": false,
+      "published_at": null,
+      "slug": "synthetic slug placeholder",
+      "path": "synthetic path placeholder",
+      "url": "synthetic url placeholder",
+      "comments_count": 0,
+      "public_reactions_count": 0,
+      "page_views_count": 0,
+      "published_timestamp": "",
+      "body_markdown": "synthetic body_markdown placeholder",
+      "positive_reactions_count": 0,
+      "cover_image": null,
+      "tag_list": [],
+      "canonical_url": "synthetic canonical_url placeholder",
+      "reading_time_minutes": 1,
+      "user": {
+        "name": "Leonid Svyatov",
+        "username": "svyatov",
+        "twitter_username": null,
+        "github_username": "svyatov",
+        "user_id": 122709,
+        "website_url": "https://www.svyatov.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F122709%2F4d89b6fb-d4ad-4af4-9c12-8cb53789179c.jpeg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F122709%2F4d89b6fb-d4ad-4af4-9c12-8cb53789179c.jpeg"
+      }
+    },
+    {
+      "type_of": "article",
+      "id": 4160641,
+      "title": "synthetic title placeholder",
+      "description": "synthetic description placeholder",
+      "published": false,
+      "published_at": null,
+      "slug": "synthetic slug placeholder",
+      "path": "synthetic path placeholder",
+      "url": "synthetic url placeholder",
+      "comments_count": 0,
+      "public_reactions_count": 0,
+      "page_views_count": 0,
+      "published_timestamp": "",
+      "body_markdown": "synthetic body_markdown placeholder",
+      "positive_reactions_count": 0,
+      "cover_image": null,
+      "tag_list": [],
+      "canonical_url": "synthetic canonical_url placeholder",
+      "reading_time_minutes": 1,
+      "user": {
+        "name": "Leonid Svyatov",
+        "username": "svyatov",
+        "twitter_username": null,
+        "github_username": "svyatov",
+        "user_id": 122709,
+        "website_url": "https://www.svyatov.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F122709%2F4d89b6fb-d4ad-4af4-9c12-8cb53789179c.jpeg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F122709%2F4d89b6fb-d4ad-4af4-9c12-8cb53789179c.jpeg"
+      }
+    },
+    {
+      "type_of": "article",
+      "id": 3500235,
+      "title": "synthetic title placeholder",
+      "description": "synthetic description placeholder",
+      "published": false,
+      "published_at": null,
+      "slug": "synthetic slug placeholder",
+      "path": "synthetic path placeholder",
+      "url": "synthetic url placeholder",
+      "comments_count": 0,
+      "public_reactions_count": 0,
+      "page_views_count": 0,
+      "published_timestamp": "",
+      "body_markdown": "synthetic body_markdown placeholder",
+      "positive_reactions_count": 0,
+      "cover_image": "https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Flm8wzz9xqyrni2crdjag.png",
+      "tag_list": [
+        "chrome",
+        "webdev",
+        "typescript",
+        "showdev"
+      ],
+      "canonical_url": "synthetic canonical_url placeholder",
+      "reading_time_minutes": 6,
+      "user": {
+        "name": "Leonid Svyatov",
+        "username": "svyatov",
+        "twitter_username": null,
+        "github_username": "svyatov",
+        "user_id": 122709,
+        "website_url": "https://www.svyatov.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F122709%2F4d89b6fb-d4ad-4af4-9c12-8cb53789179c.jpeg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F122709%2F4d89b6fb-d4ad-4af4-9c12-8cb53789179c.jpeg"
+      },
+      "flare_tag": {
+        "name": "showdev",
+        "bg_color_hex": "#091b47",
+        "text_color_hex": "#b2ffe1"
+      }
+    }
+  ]
+}

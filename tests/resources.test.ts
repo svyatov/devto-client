@@ -82,7 +82,8 @@ describe("namespace bindings", () => {
     expect(JSON.parse(calls[0]?.body ?? "")).toEqual({
       article: { title: "hi", body_markdown: "text", published: false },
     });
-    expectTypeOf(created).toEqualTypeOf<components["schemas"]["Article"]>();
+    expectTypeOf(created).toEqualTypeOf<components["schemas"]["ArticleShow"]>();
+    expectTypeOf(created.body_markdown).toEqualTypeOf<string | null>();
   });
 
   it("update uses the documented verb only (PUT for articles, PATCH for concepts)", async () => {
