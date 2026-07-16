@@ -2,3 +2,7 @@
 docs/
 STRATEGY.md
 CONCEPTS.md
+node_modules/
+dist/
+coverage/
+spec/composed.json
