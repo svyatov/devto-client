@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
-import { VERSION } from "../src/index.ts";
+import { DevToApiError, DevToClient } from "../src/index.ts";
 
 it("exports the package entry", () => {
-  expect(VERSION).toBe("0.1.0");
+  expect(DevToClient).toBeTypeOf("function");
+  expect(DevToApiError).toBeTypeOf("function");
 });
