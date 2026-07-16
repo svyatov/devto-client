@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { compose, type OverlayEntry } from "../scripts/compose-spec.ts";
 import { allTables } from "../src/resources/index.ts";
 
 /**
@@ -14,9 +15,10 @@ import { allTables } from "../src/resources/index.ts";
  *   does not (dead stub, R3) — deliberately neither overlaid nor implemented
  */
 describe("surface inventory", () => {
-  const spec = JSON.parse(readFileSync("spec/composed.json", "utf8")) as {
-    paths: Record<string, Record<string, unknown>>;
-  };
+  const spec = compose(
+    JSON.parse(readFileSync("spec/api_v1.json", "utf8")),
+    JSON.parse(readFileSync("spec/overlay.json", "utf8")) as OverlayEntry[],
+  ).spec as { paths: Record<string, Record<string, unknown>> };
   const verbs = new Set(["get", "post", "put", "patch", "delete"]);
 
   const specOps = new Set<string>();
