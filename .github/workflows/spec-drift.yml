@@ -14,26 +14,65 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
       - name: Fetch the upstream spec
         run: curl -sf https://raw.githubusercontent.com/forem/forem/main/swagger/v1/api_v1.json -o /tmp/upstream.json
-      - name: Compare upstream spec against the pinned snapshot
-        id: compare
+      # Structural diff (which templates/operations changed) plus a fixture
+      # staleness scan, rendered into a ready-to-paste shot list. Empty output
+      # means no drift and no stale fixtures.
+      - id: drift
+        name: Compute the shot list
         run: |
-          if ! cmp -s /tmp/upstream.json spec/api_v1.json; then
-            echo "Upstream spec has drifted from the pinned snapshot."
-            exit 1
+          npm run --silent spec-drift -- /tmp/upstream.json spec/api_v1.json > /tmp/shotlist.md
+          if [ -s /tmp/shotlist.md ]; then
+            echo "findings=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "findings=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "Snapshot matches upstream."
-      # gate on the compare step specifically — a curl network failure is not drift
-      - name: Open or refresh the drift issue
-        if: failure() && steps.compare.outcome == 'failure'
+      # One self-deduplicating shot-list issue (KTD7): its body is replaced with
+      # current findings each run, a heartbeat comment marks an unchanged body,
+      # and a clean run closes it. The shot list is generated from spec + fixture
+      # metadata (no user input) and passed via --body-file, never interpolated.
+      - name: File, refresh, or close the shot-list issue
         env:
           GH_TOKEN: ${{ github.token }}
+          FINDINGS: ${{ steps.drift.outputs.findings }}
+          TITLE: "Fixture shot list: spec drift or stale fixtures"
         run: |
-          BODY="Upstream \`swagger/v1/api_v1.json\` no longer matches \`spec/api_v1.json\`. Re-sync: update the snapshot (recording the new upstream SHA in \`spec/upstream.json\`), review the overlay, run \`npm run generate\`, and commit the diff."
-          EXISTING=$(gh issue list --state open --search "in:title upstream spec drift" --json number --jq '.[0].number')
-          if [ -n "$EXISTING" ]; then
-            gh issue comment "$EXISTING" --body "Still drifting as of $(date -u +%F)."
+          NUM=$(gh issue list --state open --search "in:title $TITLE" --json number --jq '.[0].number')
+          if [ "$FINDINGS" = "true" ]; then
+            if [ -n "$NUM" ]; then
+              CURRENT=$(gh issue view "$NUM" --json body --jq .body | tr -d '\r')
+              if [ "$CURRENT" = "$(cat /tmp/shotlist.md)" ]; then
+                gh issue comment "$NUM" --body "Still current as of $(date -u +%F)."
+              else
+                gh issue edit "$NUM" --body-file /tmp/shotlist.md
+              fi
+            else
+              gh issue create --title "$TITLE" --body-file /tmp/shotlist.md
+            fi
+          elif [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "Resolved as of $(date -u +%F): no spec drift or stale fixtures. Closing."
+            gh issue close "$NUM"
+          fi
+      # A crash in the compute step (upstream fetch returned HTML, malformed JSON,
+      # unreadable fixtures) leaves `findings` unset and skips the step above — the
+      # same silent-skip the reality-check gate widening closes. File a distinct
+      # issue so the drift alarm itself failing is visible, not just a red run.
+      - name: Report a drift-computation failure
+        if: failure() && steps.drift.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TITLE: "Spec-drift computation failed"
+        run: |
+          NUM=$(gh issue list --state open --search "in:title $TITLE" --json number --jq '.[0].number')
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "Still failing as of $(date -u +%F). Run: $RUN_URL"
           else
-            gh issue create --title "Upstream spec drift detected" --body "$BODY"
+            gh issue create --title "$TITLE" --body "The spec-drift shot-list computation errored (upstream fetch, JSON parse, or fixture scan). The drift alarm is not running until this is fixed. Run: $RUN_URL"
           fi

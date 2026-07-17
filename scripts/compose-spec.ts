@@ -20,7 +20,7 @@ export interface OverlayEntry {
 
 type Node = Record<string, unknown> | unknown[];
 
-function deepEqual(a: unknown, b: unknown): boolean {
+export function deepEqual(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 

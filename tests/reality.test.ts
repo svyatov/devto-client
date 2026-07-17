@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { compose, type OverlayEntry } from "../scripts/compose-spec.ts";
+import { deriveTemplate } from "../scripts/spec-templates.ts";
 import type { components } from "../src/generated/types.ts";
 
 /**
@@ -14,6 +15,8 @@ import type { components } from "../src/generated/types.ts";
 interface Recorded {
   template: string;
   method: string;
+  /** The concrete request path the recording hit — R8; the template is derived from it, not trusted. */
+  path: string;
   payload: unknown;
 }
 
@@ -50,15 +53,24 @@ function declaredKeys(schema: Schema): string[] {
   return Object.keys(resolved.properties ?? {});
 }
 
-function successSchema(template: string, method: string): Schema | null {
+/**
+ * Success schema for an operation, distinguishing three cases the old code
+ * conflated into `null`: the template vanished upstream (`removed`), the op
+ * exists but declares no JSON body (`none` — a legitimate 204), or a real
+ * schema (`schema`).
+ */
+type SchemaLookup = { kind: "schema"; schema: Schema } | { kind: "none" } | { kind: "removed" };
+
+function successSchema(template: string, method: string): SchemaLookup {
+  if (!(template in spec.paths)) return { kind: "removed" };
   const op = spec.paths[template]?.[method.toLowerCase()] as
     | { responses?: Record<string, { content?: { "application/json"?: { schema?: Schema } } }> }
     | undefined;
   for (const code of ["200", "201"]) {
     const schema = op?.responses?.[code]?.content?.["application/json"]?.schema;
-    if (schema) return schema;
+    if (schema) return { kind: "schema", schema };
   }
-  return null;
+  return { kind: "none" };
 }
 
 function isVacuous(payload: unknown): boolean {
@@ -93,12 +105,34 @@ const CONDITIONAL_KEYS: Record<string, string[]> = {
   "/api/articles/{id}": ["organization", "flare_tag"],
   "/api/articles/{username}/{slug}": ["organization", "flare_tag"],
   "/api/articles": ["organization", "flare_tag"],
+  "/api/articles/latest": ["organization", "flare_tag"],
 };
 
 const FIXTURES_DIR = process.env.FIXTURES_DIR ?? "tests/fixtures/recorded";
 const files = existsSync(FIXTURES_DIR)
   ? readdirSync(FIXTURES_DIR).filter((f) => f.endsWith(".json"))
   : [];
+
+/**
+ * R9 test-time chain of custody: the label is derived from the stored path, never
+ * trusted. A missing path or a mismatch fails loudly (AE3). A named function so the
+ * wiring itself is unit-tested below, not just exercised on the (clean) committed fixtures.
+ */
+function assertStoredLabel(
+  rec: { path?: unknown; method: string; template: string },
+  specPaths: Record<string, Record<string, unknown>>,
+  label = `${rec.method} ${rec.template}`,
+): void {
+  if (typeof rec.path !== "string" || rec.path === "") {
+    throw new Error(`fixture ${label} has no recorded path — re-record it`);
+  }
+  const derived = deriveTemplate(rec.path, rec.method, specPaths);
+  if (derived !== rec.template) {
+    throw new Error(
+      `template mismatch in ${label}: ${rec.method} ${rec.path} derives to ${derived}, not the labeled ${rec.template}`,
+    );
+  }
+}
 
 describe("recorded fixtures vs composed spec", () => {
   it("has committed fixtures to verify", () => {
@@ -109,20 +143,25 @@ describe("recorded fixtures vs composed spec", () => {
 
   for (const file of files) {
     const rec = JSON.parse(readFileSync(`${FIXTURES_DIR}/${file}`, "utf8")) as Recorded;
-    const schema = successSchema(rec.template, rec.method);
 
-    it(`${rec.method} ${rec.template} carries every spec-declared key`, () => {
+    it(`${rec.method} ${rec.template} is verified from its stored path`, () => {
+      assertStoredLabel(rec, spec.paths, file);
+
+      const lookup = successSchema(rec.template, rec.method);
+      if (lookup.kind === "removed") {
+        throw new Error(`template no longer exists in the spec: ${rec.template}`);
+      }
       if (isVacuous(rec.payload)) {
         vacuous.push(`${rec.method} ${rec.template}`);
         return; // vacuous — reported below, not counted as verified
       }
-      if (schema === null) {
-        // 204 or schema-less success: nothing to key-check
+      if (lookup.kind === "none") {
+        // op exists but declares no JSON body: a legitimate 204
         expect(rec.payload).toBeNull();
         return;
       }
       const allowed = CONDITIONAL_KEYS[rec.template] ?? [];
-      const missing = missingKeys(rec.payload, schema).filter((k) => !allowed.includes(k));
+      const missing = missingKeys(rec.payload, lookup.schema).filter((k) => !allowed.includes(k));
       expect(missing).toEqual([]);
     });
   }
@@ -168,5 +207,34 @@ describe("mechanism meta-tests", () => {
   it("resolves $refs through the composed spec", () => {
     expect(declaredKeys({ $ref: "#/components/schemas/ArticleIndex" })).toContain("title");
     expect(() => declaredKeys({ $ref: "#/components/schemas/Nope" })).toThrow(/unresolvable/);
+  });
+
+  it("AE3: a mislabeled fixture (path derives to a different template) is rejected", () => {
+    // path /api/users/me labeled as /api/users/{id} — literal beats param (KTD2)
+    expect(() =>
+      assertStoredLabel(
+        { method: "GET", template: "/api/users/{id}", path: "/api/users/me" },
+        spec.paths,
+      ),
+    ).toThrow(/template mismatch/);
+    // the correctly-labeled fixture passes
+    expect(() =>
+      assertStoredLabel(
+        { method: "GET", template: "/api/users/me", path: "/api/users/me" },
+        spec.paths,
+      ),
+    ).not.toThrow();
+  });
+
+  it("a fixture with no stored path is rejected", () => {
+    expect(() =>
+      assertStoredLabel({ method: "GET", template: "/api/tags", path: "" }, spec.paths),
+    ).toThrow(/no recorded path/);
+  });
+
+  it("flags a template that has vanished from the spec as removed, not schema-less", () => {
+    expect(successSchema("/api/deleted_upstream", "get")).toEqual({ kind: "removed" });
+    // a real schema-less op (unpublish → 204) is distinct
+    expect(successSchema("/api/articles/{id}/unpublish", "put").kind).toBe("none");
   });
 });

@@ -1,8 +1,9 @@
 name: reality-check
 
+# On-demand only: re-recording live dev.to responses happens when a human
+# dispatches it. This run validates against live dev.to but commits nothing —
+# PR-producing re-records happen locally via `npm run record -- --only ...`.
 on:
-  schedule:
-    - cron: "43 5 * * 1" # weekly
   workflow_dispatch:
 
 permissions:
@@ -19,29 +20,32 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      # Re-record the public keyless tier over tests/fixtures/recorded in this
-      # ephemeral checkout (nothing is committed), then run the same reality
-      # checks against the fresh payloads. The spec can stay unchanged while
-      # server behavior drifts — this is the only alarm for that surface.
+      # Re-record the fixtures over tests/fixtures/recorded in this ephemeral
+      # checkout (nothing is committed), then run the same reality checks against
+      # the fresh payloads. The spec can stay unchanged while server behavior
+      # drifts — this is the only alarm for that surface.
       # DEVTO_API_KEY must belong to a dedicated low-privilege account (see the
       # recorder's docstring): the run re-verifies the user-scope and write-cycle
       # tiers, and each keyed run leaves one unpublished draft on that account.
       # Unset secret → empty env var → the recorder degrades to the public tier.
-      - run: node --experimental-strip-types scripts/record-fixtures.ts
+      - id: record
+        run: npm run record
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
       - id: check
         run: npx vitest run tests/reality.test.ts
-      # gate on the reality tests specifically — a failed recording run (rate
-      # limit, network) is not server drift
+      # Gate on either the recording step or the reality tests failing. A crash
+      # in the recording step (rate limit, network) is invisible to the test gate
+      # alone — today's silent-red failure mode — so include its outcome too.
       - name: Open or refresh the reality-drift issue
-        if: failure() && steps.check.outcome == 'failure'
+        if: failure() && (steps.record.outcome == 'failure' || steps.check.outcome == 'failure')
         env:
           GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           EXISTING=$(gh issue list --state open --search "in:title server reality drift" --json number --jq '.[0].number')
           if [ -n "$EXISTING" ]; then
-            gh issue comment "$EXISTING" --body "Still failing as of $(date -u +%F)."
+            gh issue comment "$EXISTING" --body "Still failing as of $(date -u +%F). Run: $RUN_URL"
           else
-            gh issue create --title "Server reality drift detected" --body "Freshly re-recorded public responses no longer satisfy the reality checks (tests/reality.test.ts). The server has drifted from the composed spec — review the overlay and regenerate."
+            gh issue create --title "Server reality drift detected" --body "A manual reality-check run failed (recording or reality tests). Freshly re-recorded responses may no longer satisfy the reality checks, or the recording step crashed. Review the run and the overlay, then regenerate. Run: $RUN_URL"
           fi
