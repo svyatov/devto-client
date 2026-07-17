@@ -11,5 +11,9 @@
   "formatter": {
     "indentStyle": "space",
     "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "includes": ["**", "!src/generated/types.ts"]
   }
 }
