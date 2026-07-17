@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const recommendedArticlesListsTable = {
   list: { path: "/api/recommended_articles_lists", verb: "get", paginated: true },
@@ -9,5 +9,4 @@ export const recommendedArticlesListsTable = {
 
 recommendedArticlesListsTable satisfies OpTable;
 
-/** Recommended-articles lists: read, list, create, and update. */
-export type RecommendedArticlesListsNamespace = BoundOps<typeof recommendedArticlesListsTable>;
+export type { RecommendedArticlesListsNamespace } from "../generated/signatures.ts";

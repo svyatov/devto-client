@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const adminUsersTable = {
   list: { path: "/api/admin/users", verb: "get", paginated: true },
@@ -10,6 +10,7 @@ export const adminUsersTable = {
   updateNotificationSettings: {
     path: "/api/admin/users/{id}/notification_settings",
     verb: "put",
+    bodyKey: "notification_setting",
   },
   updateStatus: { path: "/api/admin/users/{id}/status", verb: "put" },
   identities: { path: "/api/admin/users/{user_id}/identities", verb: "get" },
@@ -22,5 +23,4 @@ export const adminUsersTable = {
 
 adminUsersTable satisfies OpTable;
 
-/** Admin user administration: profile, email, status, identities, notes, and merges. Requires admin credentials. */
-export type AdminUsersNamespace = BoundOps<typeof adminUsersTable>;
+export type { AdminUsersNamespace } from "../generated/signatures.ts";

@@ -1,14 +1,13 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const badgesTable = {
   list: { path: "/api/badges", verb: "get", paginated: true },
-  create: { path: "/api/badges", verb: "post" },
+  create: { path: "/api/badges", verb: "post", bodyKey: "badge" },
   get: { path: "/api/badges/{id}", verb: "get" },
-  update: { path: "/api/badges/{id}", verb: "patch" },
+  update: { path: "/api/badges/{id}", verb: "patch", bodyKey: "badge" },
   delete: { path: "/api/badges/{id}", verb: "delete" },
 } as const;
 
 badgesTable satisfies OpTable;
 
-/** Badge definitions: CRUD. Mutations require admin credentials. */
-export type BadgesNamespace = BoundOps<typeof badgesTable>;
+export type { BadgesNamespace } from "../generated/signatures.ts";

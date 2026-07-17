@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const reactionsTable = {
   create: { path: "/api/reactions", verb: "post" },
@@ -7,5 +7,4 @@ export const reactionsTable = {
 
 reactionsTable satisfies OpTable;
 
-/** Reactions: create one, or toggle it on/off (toggle needs the category, reactable id, and reactable type). Admin-gated upstream; ordinary keys get 401. */
-export type ReactionsNamespace = BoundOps<typeof reactionsTable>;
+export type { ReactionsNamespace } from "../generated/signatures.ts";

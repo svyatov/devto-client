@@ -4738,8 +4738,7 @@ export interface components {
       article?: {
         title?: string;
         body_markdown?: string;
-        /** @default false */
-        published: boolean;
+        published?: boolean;
         series?: string | null;
         main_image?: string | null;
         canonical_url?: string | null;

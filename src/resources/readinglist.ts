@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const readinglistTable = {
   list: { path: "/api/readinglist", verb: "get", paginated: true },
@@ -6,5 +6,4 @@ export const readinglistTable = {
 
 readinglistTable satisfies OpTable;
 
-/** Your reading list (saved articles). Requires authentication. */
-export type ReadinglistNamespace = BoundOps<typeof readinglistTable>;
+export type { ReadinglistNamespace } from "../generated/signatures.ts";

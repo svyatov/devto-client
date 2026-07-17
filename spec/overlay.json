@@ -1707,5 +1707,16 @@
         "user"
       ]
     }
+  },
+  {
+    "target": "/components/schemas/Article/properties/article/properties/published",
+    "expect": {
+      "type": "boolean",
+      "default": false
+    },
+    "reason": "ergonomic correction (KTD2): openapi-typescript v7 marks @default fields required; a server-defaulted field must not surface as caller-required, else create({ title }) would not compile. Drop the default so `published` types as optional.",
+    "patch": {
+      "type": "boolean"
+    }
   }
 ]

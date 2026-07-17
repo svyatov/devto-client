@@ -24,21 +24,22 @@ function harness(...payloads: unknown[]) {
   return { client: new DevToClient({ apiKey: "k", fetch }), calls };
 }
 
-describe("namespace bindings", () => {
-  it("articles.getByPath hits /api/articles/{username}/{slug}", async () => {
-    const { client, calls } = harness({});
-    await client.articles.getByPath({
-      path: { username: "jess", slug: "some-post" },
-    });
-    expect(calls[0]).toMatchObject({
-      method: "GET",
-      url: "https://dev.to/api/articles/jess/some-post",
-    });
+describe("namespace bindings — the Call rule", () => {
+  it("AE1: positional path params hit the right URLs (0-, 1-, 2-arity)", async () => {
+    const { client, calls } = harness({}, {}, {});
+    await client.articles.get(123);
+    await client.articles.getByPath("jess", "some-post");
+    await client.articles.list();
+    expect(calls.map((c) => c.url)).toEqual([
+      "https://dev.to/api/articles/123",
+      "https://dev.to/api/articles/jess/some-post",
+      "https://dev.to/api/articles",
+    ]);
   });
 
-  it("URL-encodes path params", async () => {
+  it("URL-encodes positional path params", async () => {
     const { client, calls } = harness({});
-    await client.articles.get({ path: { id: "a/b" as unknown as number } });
+    await client.articles.get("a/b" as unknown as number);
     expect(calls[0]?.url).toBe("https://dev.to/api/articles/a%2Fb");
   });
 
@@ -56,7 +57,7 @@ describe("namespace bindings", () => {
     ]);
   });
 
-  it("reactions.toggle sends query params, not a body", async () => {
+  it("reactions.toggle sends flat params as query, not a body", async () => {
     const { client, calls } = harness({
       result: "create",
       category: "like",
@@ -65,7 +66,9 @@ describe("namespace bindings", () => {
       reactable_type: "Article",
     });
     const result = await client.reactions.toggle({
-      query: { category: "like", reactable_id: 7, reactable_type: "Article" },
+      category: "like",
+      reactable_id: 7,
+      reactable_type: "Article",
     });
     expect(calls[0]).toMatchObject({
       method: "POST",
@@ -75,16 +78,12 @@ describe("namespace bindings", () => {
     expect(result.result).toBe("create");
   });
 
-  it("articles.create sends the JSON body and returns the typed Article", async () => {
-    const { client, calls } = harness({
-      id: 1,
-      title: "hi",
-      type_of: "article",
-    });
+  it("AE2/R3: create wraps flat inner fields under the bodyKey and returns the typed Article", async () => {
+    const { client, calls } = harness({ id: 1, title: "hi", type_of: "article" });
     const created = await client.articles.create({
-      body: {
-        article: { title: "hi", body_markdown: "text", published: false },
-      },
+      title: "hi",
+      body_markdown: "text",
+      published: false,
     });
     expect(calls[0]?.method).toBe("POST");
     expect(JSON.parse(calls[0]?.body ?? "")).toEqual({
@@ -94,62 +93,59 @@ describe("namespace bindings", () => {
     expectTypeOf(created.body_markdown).toEqualTypeOf<string | null>();
   });
 
-  it("update uses the documented verb only (PUT for articles, PATCH for concepts)", async () => {
+  it("AE2: update sends the wrapped body with the path id, documented verbs only", async () => {
     const { client, calls } = harness({}, {});
-    await client.articles.update({
-      path: { id: 1 },
-      body: { article: { published: true } },
-    });
-    await client.concepts.update({ path: { id: 1 }, body: {} });
-    expect(calls.map((c) => c.method)).toEqual(["PUT", "PATCH"]);
+    await client.articles.update(1, { published: true });
+    await client.concepts.update(1, {});
+    expect(calls[0]).toMatchObject({ method: "PUT", url: "https://dev.to/api/articles/1" });
+    expect(JSON.parse(calls[0]?.body ?? "")).toEqual({ article: { published: true } });
+    expect(calls[1]?.method).toBe("PATCH");
   });
 
   it("billboards.unpublish hits PUT /api/billboards/{id}/unpublish", async () => {
     const { client, calls } = harness({});
-    await client.billboards.unpublish({ path: { id: 3 } });
+    await client.billboards.unpublish(3);
     expect(calls[0]).toMatchObject({
       method: "PUT",
       url: "https://dev.to/api/billboards/3/unpublish",
     });
   });
 
-  it("segments add/remove users send arrays in the body", async () => {
+  it("R3: a flat (non-wrapper) body op passes its fields through unwrapped", async () => {
     const { client, calls } = harness({}, {});
-    await client.segments.addUsers({
-      path: { id: 5 },
-      body: { user_ids: [1, 2, 3] },
-    });
-    await client.segments.removeUsers({
-      path: { id: 5 },
-      body: { user_ids: [4] },
-    });
+    await client.segments.addUsers(5, { user_ids: [1, 2, 3] });
+    await client.segments.removeUsers(5, { user_ids: [4] });
     expect(calls[0]?.url).toBe("https://dev.to/api/segments/5/add_users");
     expect(JSON.parse(calls[0]?.body ?? "")).toEqual({ user_ids: [1, 2, 3] });
     expect(calls[1]?.url).toBe("https://dev.to/api/segments/5/remove_users");
   });
 
-  it("admin user status update sends the documented body", async () => {
+  it("admin user status update sends the documented flat body", async () => {
     const { client, calls } = harness({});
-    await client.admin.users.updateStatus({
-      path: { id: 9 },
-      body: { status: "Suspended", note: "spam" },
-    });
+    await client.admin.users.updateStatus(9, { status: "Suspended", note: "spam" });
     expect(calls[0]).toMatchObject({
       method: "PUT",
       url: "https://dev.to/api/admin/users/9/status",
     });
-    expect(JSON.parse(calls[0]?.body ?? "")).toEqual({
-      status: "Suspended",
-      note: "spam",
-    });
+    expect(JSON.parse(calls[0]?.body ?? "")).toEqual({ status: "Suspended", note: "spam" });
   });
 
-  it("missing path params throw before any request is made", async () => {
+  it("R7: missing positional path params reject before any request is made", async () => {
     const { client, calls } = harness();
     await expect(
-      // @ts-expect-error — path arg is required
+      // @ts-expect-error — id path param is required
       client.articles.get(),
     ).rejects.toThrow(/missing path param/);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("AE5: the trailing options argument carries signal, keeping transport out of params", async () => {
+    const controller = new AbortController();
+    controller.abort(new Error("stop"));
+    const { client, calls } = harness();
+    await expect(
+      client.articles.search({ q: "test" }, { signal: controller.signal }),
+    ).rejects.toThrow(/stop/);
     expect(calls).toHaveLength(0);
   });
 
@@ -159,7 +155,7 @@ describe("namespace bindings", () => {
       { raw_url: "https://s3/raw" },
     );
     const presigned = await client.agentSessions.presign();
-    const raw = await client.agentSessions.rawUrl({ path: { id: "42" } });
+    const raw = await client.agentSessions.rawUrl("42");
     expect(calls.map((c) => c.url)).toEqual([
       "https://dev.to/api/agent_sessions/presign",
       "https://dev.to/api/agent_sessions/42/raw_url",
@@ -188,7 +184,7 @@ describe("namespace bindings", () => {
 });
 
 describe("iterator variants", () => {
-  it("paginated lists expose an All iterator that pages until empty", async () => {
+  it("AE4: paginated lists expose an All iterator that pages until empty", async () => {
     const pages: Record<string, unknown> = {
       "1": [{ id: 1 }, { id: 2 }],
       "2": [{ id: 3 }],
@@ -206,9 +202,7 @@ describe("iterator variants", () => {
     const client = new DevToClient({ fetch });
 
     const seen: number[] = [];
-    for await (const article of client.articles.listAll({
-      query: { tag: "go", per_page: 2 },
-    })) {
+    for await (const article of client.articles.listAll({ tag: "go", per_page: 2 })) {
       seen.push(article.id as number);
     }
     expect(seen).toEqual([1, 2, 3]);
@@ -217,14 +211,48 @@ describe("iterator variants", () => {
     expect(calls[0]?.url).toContain("page=1");
     expect(calls).toHaveLength(3);
   });
+
+  it("an iterator over a path-parametrized paginated op keeps the positional id", async () => {
+    const { client, calls } = harness([]);
+    for await (const _ of client.concepts.articlesAll(7)) {
+      // no items — the empty page terminates immediately
+    }
+    expect(calls[0]?.url).toContain("/api/concepts/7/articles");
+    expect(calls[0]?.url).toContain("page=1");
+  });
+
+  it("AE5: the `<name>All` iterator forwards a trailing AbortSignal past a path id", async () => {
+    // Exercises the iterator's opts index at pathNames.length + 1 with a
+    // positional id present: concepts.articlesAll(id, params, { signal }).
+    const controller = new AbortController();
+    controller.abort(new Error("stop"));
+    const { client } = harness();
+    await expect(
+      client.concepts.articlesAll(7, {}, { signal: controller.signal }).next(),
+    ).rejects.toThrow(/stop/);
+  });
 });
 
 describe("bindOps guards", () => {
-  it("passes an AbortSignal through to the request", async () => {
+  it("AE5: passes an AbortSignal through a query op with params omitted", async () => {
     const controller = new AbortController();
     controller.abort(new Error("stop"));
     const { client, calls } = harness();
-    await expect(client.articles.list({ signal: controller.signal })).rejects.toThrow(/stop/);
+    await expect(client.articles.list(undefined, { signal: controller.signal })).rejects.toThrow(
+      /stop/,
+    );
+    expect(calls).toHaveLength(0);
+  });
+
+  it("AE5: passes an AbortSignal through a no-query/no-body op (opts follows the path arg)", async () => {
+    // billboards.unpublish has no query and no body, so opts sits at the
+    // pathNames.length + 0 index — the branch every other signal test skips.
+    const controller = new AbortController();
+    controller.abort(new Error("stop"));
+    const { client, calls } = harness();
+    await expect(client.billboards.unpublish(3, { signal: controller.signal })).rejects.toThrow(
+      /stop/,
+    );
     expect(calls).toHaveLength(0);
   });
 
@@ -248,9 +276,9 @@ describe("type-level enforcement", () => {
   it("compile-time contracts hold", () => {
     const { client } = harness();
     // @ts-expect-error — getByPath requires both username and slug
-    void client.articles.getByPath({ path: { username: "jess" } }).catch(() => {});
-    // @ts-expect-error — update body must be the documented article payload wrapper
-    void client.articles.update({ path: { id: 1 }, body: { title: "raw" } }).catch(() => {});
+    void client.articles.getByPath("jess").catch(() => {});
+    // @ts-expect-error — an unknown inner field is rejected by the flattened body type
+    void client.articles.update(1, { not_a_field: true }).catch(() => {});
     // @ts-expect-error — no such verb on this path: comments are read-only
     void client.comments.create;
     expect(true).toBe(true);

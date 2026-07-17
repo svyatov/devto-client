@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const followsTable = {
   create: { path: "/api/follows", verb: "post" },
@@ -7,5 +7,4 @@ export const followsTable = {
 
 followsTable satisfies OpTable;
 
-/** Follows: create a follow and list the tags you follow. */
-export type FollowsNamespace = BoundOps<typeof followsTable>;
+export type { FollowsNamespace } from "../generated/signatures.ts";

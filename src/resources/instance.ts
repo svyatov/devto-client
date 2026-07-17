@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const instanceTable = {
   get: { path: "/api/instance", verb: "get" },
@@ -6,5 +6,4 @@ export const instanceTable = {
 
 instanceTable satisfies OpTable;
 
-/** Metadata for the connected Forem instance. */
-export type InstanceNamespace = BoundOps<typeof instanceTable>;
+export type { InstanceNamespace } from "../generated/signatures.ts";

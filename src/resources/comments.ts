@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const commentsTable = {
   list: { path: "/api/comments", verb: "get", paginated: true },
@@ -7,5 +7,4 @@ export const commentsTable = {
 
 commentsTable satisfies OpTable;
 
-/** Comment threads: list an article's or podcast's comments and read a single thread. */
-export type CommentsNamespace = BoundOps<typeof commentsTable>;
+export type { CommentsNamespace } from "../generated/signatures.ts";

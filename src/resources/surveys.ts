@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const surveysTable = {
   list: { path: "/api/surveys", verb: "get", paginated: true },
@@ -9,5 +9,4 @@ export const surveysTable = {
 
 surveysTable satisfies OpTable;
 
-/** Surveys: list, read a survey, and inspect its poll votes and text responses. */
-export type SurveysNamespace = BoundOps<typeof surveysTable>;
+export type { SurveysNamespace } from "../generated/signatures.ts";

@@ -25,13 +25,15 @@ import { DevToClient } from "devto-client";
 
 const devto = new DevToClient(); // public endpoints need no key
 
-const articles = await devto.articles.list({ query: { tag: "typescript", per_page: 3 } });
+const articles = await devto.articles.list({ tag: "typescript", per_page: 3 });
 for (const article of articles) {
   console.log(article.title, article.url); // fully typed, autocomplete included
 }
 ```
 
 That's a real request against dev.to. The response type comes from Forem's own OpenAPI spec, so `article.` in your editor lists exactly what the server sends.
+
+Every method follows one call shape: required path ids come first as positional arguments (`articles.get(123)`, `articles.getByPath("ben", "my-slug")`), then everything else (query params or body fields) goes in a single flat object, then an optional `{ signal }` for aborting. You never say whether a value travels as a path, query, or body slot; that's the client's job. The parameter names in your editor are the real ones, generated from the spec, so `getByPath` autocompletes as `(username, slug)`, not `(arg0, arg1)`.
 
 ## Authentication
 
@@ -41,25 +43,21 @@ Grab an API key from dev.to under Settings → Extensions → DEV Community API 
 const devto = new DevToClient({ apiKey: process.env.DEVTO_API_KEY });
 
 const draft = await devto.articles.create({
-  body: {
-    article: {
-      title: "Hello from devto-client",
-      body_markdown: "Drafted via the API.",
-      published: false,
-    },
-  },
+  title: "Hello from devto-client",
+  body_markdown: "Drafted via the API.",
+  published: false,
 });
 console.log(`draft #${draft.id} created`);
 ```
 
-The key travels in the `api-key` header on every request. The client refuses `http://` base URLs so it can't leak in cleartext (see self-hosted instances below for the escape hatch).
+You pass the article fields flat. On the wire dev.to wants them wrapped in `{ "article": { ... } }`, and the client adds that wrapper for you — one less bit of transport trivia to remember. The key travels in the `api-key` header on every request. The client refuses `http://` base URLs so it can't leak in cleartext (see self-hosted instances below for the escape hatch).
 
 ## Pagination
 
 The API paginates with `page` and `per_page` and sends no pagination metadata, so knowing when to stop is your problem. Worse, servers may cap `per_page` below what you asked for, which makes a short page indistinguishable from the last page. The iterator variants handle this for you by walking pages until an empty one:
 
 ```ts
-for await (const article of devto.articles.listAll({ query: { tag: "devops" } })) {
+for await (const article of devto.articles.listAll({ tag: "devops" })) {
   console.log(article.title);
 }
 ```
@@ -74,7 +72,7 @@ Every non-2xx response throws a single error class carrying the HTTP status and 
 import { DevToApiError } from "devto-client";
 
 try {
-  await devto.articles.get({ path: { id: 999999999 } });
+  await devto.articles.get(999999999);
 } catch (err) {
   if (err instanceof DevToApiError) {
     console.log(err.status); // 404
@@ -97,13 +95,15 @@ const devto = new DevToClient({
 });
 ```
 
-A `Retry-After` above `maxDelayMs` throws immediately instead of parking your process; an arbitrary self-hosted instance could otherwise tell you to sleep for an hour. Every request also accepts an `AbortSignal` that cancels mid-backoff, not just mid-request:
+A `Retry-After` above `maxDelayMs` throws immediately instead of parking your process; an arbitrary self-hosted instance could otherwise tell you to sleep for an hour. The trailing options argument on every method carries an `AbortSignal` that cancels mid-backoff, not just mid-request:
 
 ```ts
 const controller = new AbortController();
-const promise = devto.articles.list({ signal: controller.signal });
+const promise = devto.articles.get(123, { signal: controller.signal });
 controller.abort(); // rejects promptly, even if the client was waiting out a 429
 ```
+
+Signal lives in that trailing argument, not the params object, so aborting never collides with a real query or body field. For a method whose params are optional, pass `undefined` first: `devto.articles.list(undefined, { signal })`.
 
 ## Self-hosted Forem instances
 
@@ -129,7 +129,7 @@ Types generate from Forem's own rswag spec (`swagger/v1/api_v1.json`, pinned in 
 
 ## Deviations from the upstream spec
 
-The client mirrors the server, not the docs, and every deviation is explicit. The full machine-readable list is [`spec/overlay.json`](spec/overlay.json); the highlights:
+The call surface is ergonomic, but the core stays faithful to the server: response types mirror what dev.to actually sends, not what the docs claim, and every deviation is explicit. The full machine-readable list is [`spec/overlay.json`](spec/overlay.json); the highlights:
 
 | Kind | What | Why |
 | --- | --- | --- |
@@ -151,7 +151,21 @@ Fixture-backed tests verify recorded reality for the public and user-scope tiers
 
 ## The documented verb, nothing else
 
-Rails accepts PUT and PATCH interchangeably on update routes. The client exposes only the verb the spec documents for each endpoint (`articles.update` is PUT, `concepts.update` is PATCH), staying a strict mirror.
+Rails accepts PUT and PATCH interchangeably on update routes. The client exposes only the verb the spec documents for each endpoint (`articles.update` is PUT, `concepts.update` is PATCH). The ergonomic surface reshapes how you _call_ an endpoint; it never invents endpoints or verbs the spec doesn't have.
+
+## The escape hatch
+
+When you need an endpoint the typed surface doesn't cover, or want to send a request exactly your way, drop to the raw transport:
+
+```ts
+const controller = new AbortController();
+const raw = await devto.request<unknown>("GET", "/api/articles/latest", {
+  query: { page: 1 },
+  signal: controller.signal,
+});
+```
+
+`client.request(method, path, opts)` still layers on the versioned header, auth, retries, and error handling — it only hands you back control over the path and payload. It's the one place the `{ query, body, signal }` options object survives, precisely because a raw call has no spec to derive its shape from.
 
 ## Contributing
 

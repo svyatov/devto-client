@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const profileImagesTable = {
   get: { path: "/api/profile_images/{username}", verb: "get" },
@@ -6,5 +6,4 @@ export const profileImagesTable = {
 
 profileImagesTable satisfies OpTable;
 
-/** A user's profile-image URLs, looked up by username. */
-export type ProfileImagesNamespace = BoundOps<typeof profileImagesTable>;
+export type { ProfileImagesNamespace } from "../generated/signatures.ts";

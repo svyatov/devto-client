@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 // GET /api/followers/organizations is deliberately absent: the route exists in
 // forem but the controller action does not — a dead stub, excluded per R3.
@@ -8,5 +8,4 @@ export const followersTable = {
 
 followersTable satisfies OpTable;
 
-/** Your followers. (`/api/followers/organizations` is a dead upstream stub and is deliberately absent.) */
-export type FollowersNamespace = BoundOps<typeof followersTable>;
+export type { FollowersNamespace } from "../generated/signatures.ts";

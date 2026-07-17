@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const analyticsTable = {
   dashboard: { path: "/api/analytics/dashboard", verb: "get" },
@@ -13,5 +13,4 @@ export const analyticsTable = {
 
 analyticsTable satisfies OpTable;
 
-/** Author analytics: dashboard, engagement, historical, and referrer breakdowns for your own content. */
-export type AnalyticsNamespace = BoundOps<typeof analyticsTable>;
+export type { AnalyticsNamespace } from "../generated/signatures.ts";

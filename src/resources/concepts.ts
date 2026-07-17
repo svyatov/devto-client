@@ -1,14 +1,13 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const conceptsTable = {
   list: { path: "/api/concepts", verb: "get", paginated: true },
   get: { path: "/api/concepts/{id}", verb: "get" },
-  update: { path: "/api/concepts/{id}", verb: "patch" },
+  update: { path: "/api/concepts/{id}", verb: "patch", bodyKey: "concept" },
   articles: { path: "/api/concepts/{id}/articles", verb: "get", paginated: true },
   search: { path: "/api/concepts/search", verb: "get" },
 } as const;
 
 conceptsTable satisfies OpTable;
 
-/** Concepts: read, update, search, and list a concept's articles. */
-export type ConceptsNamespace = BoundOps<typeof conceptsTable>;
+export type { ConceptsNamespace } from "../generated/signatures.ts";

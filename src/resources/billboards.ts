@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const billboardsTable = {
   list: { path: "/api/billboards", verb: "get" },
@@ -10,5 +10,4 @@ export const billboardsTable = {
 
 billboardsTable satisfies OpTable;
 
-/** Billboards (display ads): CRUD plus unpublish. Requires admin credentials. */
-export type BillboardsNamespace = BoundOps<typeof billboardsTable>;
+export type { BillboardsNamespace } from "../generated/signatures.ts";

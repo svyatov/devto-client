@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const usersTable = {
   get: { path: "/api/users/{id}", verb: "get" },
@@ -17,5 +17,4 @@ export const usersTable = {
 
 usersTable satisfies OpTable;
 
-/** Users: public profile reads, the authenticated `me` profile, and moderation actions (limit, spam, suspend, trust, unpublish) that require moderator credentials. */
-export type UsersNamespace = BoundOps<typeof usersTable>;
+export type { UsersNamespace } from "../generated/signatures.ts";

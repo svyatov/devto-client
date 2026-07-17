@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const segmentsTable = {
   list: { path: "/api/segments", verb: "get" },
@@ -12,5 +12,4 @@ export const segmentsTable = {
 
 segmentsTable satisfies OpTable;
 
-/** Audience segments: CRUD plus membership management. Requires admin credentials. */
-export type SegmentsNamespace = BoundOps<typeof segmentsTable>;
+export type { SegmentsNamespace } from "../generated/signatures.ts";

@@ -38,7 +38,8 @@
     "compose": "node --experimental-strip-types scripts/compose-spec.ts",
     "record": "node --experimental-strip-types scripts/record-fixtures.ts",
     "spec-drift": "node --experimental-strip-types scripts/spec-drift.ts",
-    "generate": "npm run compose && npx -y openapi-typescript@7.13.0 spec/composed.json -o src/generated/types.ts && biome check --write src/generated/types.ts",
+    "generate": "npm run compose && npx -y openapi-typescript@7.13.0 spec/composed.json -o src/generated/types.ts && node --experimental-strip-types scripts/generate-signatures.ts && biome check --write src/generated/types.ts src/generated/signatures.ts src/generated/routing.ts",
+    "check:drift": "node --experimental-strip-types scripts/generate-signatures.ts && biome check --write src/generated/signatures.ts src/generated/routing.ts && git diff --exit-code -- src/generated/signatures.ts src/generated/routing.ts",
     "prepublishOnly": "npm run build && npx publint && npx attw --pack . --profile esm-only"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const agentSessionsTable = {
   list: { path: "/api/agent_sessions", verb: "get" },
@@ -12,5 +12,4 @@ export const agentSessionsTable = {
 
 agentSessionsTable satisfies OpTable;
 
-/** Agent sessions, plus the undocumented presign and raw-url helpers verified in Forem's routes. */
-export type AgentSessionsNamespace = BoundOps<typeof agentSessionsTable>;
+export type { AgentSessionsNamespace } from "../generated/signatures.ts";

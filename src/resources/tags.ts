@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const tagsTable = {
   list: { path: "/api/tags", verb: "get", paginated: true },
@@ -6,5 +6,4 @@ export const tagsTable = {
 
 tagsTable satisfies OpTable;
 
-/** The instance's tags. */
-export type TagsNamespace = BoundOps<typeof tagsTable>;
+export type { TagsNamespace } from "../generated/signatures.ts";

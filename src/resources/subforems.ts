@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const subforemsTable = {
   list: { path: "/api/subforems", verb: "get" },
@@ -6,5 +6,4 @@ export const subforemsTable = {
 
 subforemsTable satisfies OpTable;
 
-/** Subforems (sub-communities) on the instance. */
-export type SubforemsNamespace = BoundOps<typeof subforemsTable>;
+export type { SubforemsNamespace } from "../generated/signatures.ts";

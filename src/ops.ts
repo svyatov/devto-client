@@ -1,12 +1,15 @@
 /**
  * Declarative operation tables (KTD12): each resource method is a data entry
- * `{ path, verb, paginated?, undocumented? }` keyed into the generated `paths`
- * types, bound by the one builder below. The surface-inventory test diffs
+ * `{ path, verb, bodyKey?, paginated?, undocumented? }` keyed into the generated
+ * `paths` types (`bodyKey` is required for single-key wrapper bodies, forbidden
+ * otherwise), bound by the one builder below. The surface-inventory test diffs
  * these tables against the composed spec's operation list.
  */
+import { opRouting } from "./generated/routing.ts";
 import type { paths } from "./generated/types.ts";
 import type { RequestOptions } from "./http.ts";
 import { paginate } from "./pagination.ts";
+import { pathParamNames } from "./path-template.ts";
 
 type HttpVerb = "get" | "post" | "put" | "patch" | "delete";
 
@@ -14,21 +17,36 @@ type VerbsOf<P extends keyof paths> = {
   [V in HttpVerb]: paths[P][V] extends Record<string, unknown> ? V : never;
 }[HttpVerb];
 
-/** An entry must name a real path and a verb that path actually documents (KTD10). */
+/**
+ * A `bodyKey` slot tied to a single (path, verb): if the op's body is a
+ * single-key object wrapper it MUST be declared and name that key (completeness
+ * + correctness, KTD4); otherwise it is forbidden (`?: never`). A wrong, stale,
+ * or missing `bodyKey` is therefore a compile error.
+ */
+type BodyKeySlot<P extends keyof paths, V extends keyof paths[P]> = [
+  WrapperKeyOf<NonNullable<BodyOf<OpAt<P, V>>>>,
+] extends [never]
+  ? { bodyKey?: never }
+  : { bodyKey: WrapperKeyOf<NonNullable<BodyOf<OpAt<P, V>>>> };
+
+/**
+ * An entry must name a real path and a verb that path actually documents (KTD10),
+ * and — distributed per verb — carry the `bodyKey` its body shape demands (KTD4).
+ */
 export type OpEntry = {
   [P in keyof paths]: {
-    path: P;
-    verb: VerbsOf<P>;
-    /** list endpoint driven by page/per_page — gets an iterator variant */
-    paginated?: true;
-    /** verified in Forem routes but absent from upstream docs (KTD11) */
-    undocumented?: true;
-  };
+    [V in VerbsOf<P>]: {
+      path: P;
+      verb: V;
+      /** list endpoint driven by page/per_page — gets an iterator variant */
+      paginated?: true;
+      /** verified in Forem routes but absent from upstream docs (KTD11) */
+      undocumented?: true;
+    } & BodyKeySlot<P, V>;
+  }[VerbsOf<P>];
 }[keyof paths];
 
 export type OpTable = Record<string, OpEntry>;
-
-type OpOf<E extends OpEntry> = paths[E["path"]][E["verb"] & keyof paths[E["path"]]];
 
 type JsonOf<R> = R extends { content: { "application/json": infer B } } ? B : undefined;
 type SuccessOf<O> = O extends { responses: infer R }
@@ -48,62 +66,177 @@ type QueryOf<O> = O extends { parameters: { query?: infer Q } }
     ? Exclude<Q, undefined>
     : never
   : never;
+// A no-body op is generated as `requestBody?: never`; guard the optional branch
+// against that, or it spuriously infers `unknown` and reads as a body (breaking R8).
 type BodyOf<O> = O extends { requestBody: { content: { "application/json": infer B } } }
   ? B
-  : O extends { requestBody?: { content: { "application/json": infer B } } }
-    ? B | undefined
+  : O extends { requestBody?: infer RB }
+    ? [RB] extends [never]
+      ? never
+      : NonNullable<RB> extends { content: { "application/json": infer B } }
+        ? B | undefined
+        : never
     : never;
 
 // the generator marks `query` itself required when any query param is required
 type QueryRequired<O> = O extends { parameters: { query: Record<string, unknown> } } ? true : false;
 
-type ArgsOf<O> = ([PathParamsOf<O>] extends [never] ? unknown : { path: PathParamsOf<O> }) &
-  ([QueryOf<O>] extends [never]
-    ? unknown
-    : QueryRequired<O> extends true
-      ? { query: QueryOf<O> }
-      : { query?: QueryOf<O> }) &
-  ([BodyOf<O>] extends [never]
-    ? unknown
-    : undefined extends BodyOf<O>
-      ? { body?: BodyOf<O> }
-      : { body: BodyOf<O> }) & { signal?: AbortSignal };
-
 type RequiredKeysOf<T> = {
   [K in keyof T]-?: Partial<Pick<T, K>> extends Pick<T, K> ? never : K;
 }[keyof T];
 
-/** No required keys (path, required query, required body) → args object itself is optional. */
-type Call<O> = [RequiredKeysOf<ArgsOf<O>>] extends [never]
-  ? (args?: ArgsOf<O>) => Promise<SuccessOf<O>>
-  : (args: ArgsOf<O>) => Promise<SuccessOf<O>>;
-
 type ItemOf<O> = SuccessOf<O> extends readonly (infer T)[] ? T : never;
 type IterQueryOf<O> = [QueryOf<O>] extends [never] ? never : Omit<QueryOf<O>, "page">;
-type IterArgsOf<O> = Omit<ArgsOf<O>, "query"> &
-  ([RequiredKeysOf<IterQueryOf<O>>] extends [never]
-    ? { query?: IterQueryOf<O> }
-    : { query: IterQueryOf<O> });
-type IterCall<O> = [RequiredKeysOf<IterArgsOf<O>>] extends [never]
-  ? (args?: IterArgsOf<O>) => AsyncGenerator<ItemOf<O>, void, undefined>
-  : (args: IterArgsOf<O>) => AsyncGenerator<ItemOf<O>, void, undefined>;
 
-export type BoundOps<T extends OpTable> = { [K in keyof T]: Call<OpOf<T[K]>> } & {
-  [K in keyof T as T[K]["paginated"] extends true ? `${K & string}All` : never]: IterCall<
-    OpOf<T[K]>
+// ---------------------------------------------------------------------------
+// Call rule (ergonomic surface). Positional required path params in URL order,
+// then one flat params object (query OR unwrapped body — never both, R8), then
+// a trailing options bag. The generic `CallSig`/`IterCallSig` below are the
+// spec-derived reference the generated labeled interfaces are pinned against
+// (KTD2); they carry the true shape but not the parameter names, which only
+// `src/generated/signatures.ts` supplies.
+// ---------------------------------------------------------------------------
+
+/** The `paths`-indexed operation object for a (path, verb) pair. */
+export type OpAt<P extends keyof paths, V extends keyof paths[P]> = paths[P][V];
+
+/** Trailing per-call options — transport concerns kept out of the params object. */
+export type CallOptions = { signal?: AbortSignal };
+
+export type CallResult<P extends keyof paths, V extends keyof paths[P]> = Promise<
+  SuccessOf<OpAt<P, V>>
+>;
+export type IterResult<P extends keyof paths, V extends keyof paths[P]> = AsyncGenerator<
+  ItemOf<OpAt<P, V>>,
+  void,
+  undefined
+>;
+
+/** Flat query params for an op (the generator emits this for query-routed ops). */
+export type CallQuery<P extends keyof paths, V extends keyof paths[P]> = QueryOf<OpAt<P, V>>;
+/** Flat body for a non-wrapper body op. */
+export type CallBody<P extends keyof paths, V extends keyof paths[P]> = NonNullable<
+  BodyOf<OpAt<P, V>>
+>;
+/** Unwrapped inner fields of a single-key wrapper body (R3), keyed by `bodyKey`. */
+export type CallBodyInner<
+  P extends keyof paths,
+  V extends keyof paths[P],
+  K extends string,
+> = NonNullable<BodyOf<OpAt<P, V>>>[K & keyof NonNullable<BodyOf<OpAt<P, V>>>];
+/** Flat iterator query for an op — same rule, minus the iterator-driven `page`. */
+export type IterQuery<P extends keyof paths, V extends keyof paths[P]> = IterQueryOf<OpAt<P, V>>;
+
+// -- Structural derivation used only by the generic reference sigs (KTD2) --
+
+type IsUnion<T, C = T> = T extends unknown ? ([C] extends [T] ? false : true) : never;
+type IsSingle<T> = [T] extends [never] ? false : IsUnion<T> extends true ? false : true;
+
+/** Keys of `T` whose (non-null) value is a plain object — not an array, not a primitive. */
+type ObjectKeys<T> = {
+  [K in keyof T]-?: NonNullable<T[K]> extends readonly unknown[]
+    ? never
+    : NonNullable<T[K]> extends Record<string, unknown>
+      ? K
+      : never;
+}[keyof T];
+
+/** The wrapper key of a single-key object-valued body, or `never` if it isn't one. */
+export type WrapperKeyOf<B> = [keyof B] extends [ObjectKeys<B>]
+  ? IsSingle<keyof B> extends true
+    ? keyof B & string
+    : never
+  : never;
+
+type UnwrapBody<B> = [WrapperKeyOf<B>] extends [never] ? B : B[WrapperKeyOf<B> & keyof B];
+
+/** The flat params object for an op: query if present, else the (unwrapped) body, else `never`. */
+type FlatSlot<O> = [QueryOf<O>] extends [never]
+  ? [BodyOf<O>] extends [never]
+    ? never
+    : UnwrapBody<NonNullable<BodyOf<O>>>
+  : QueryOf<O>;
+
+// requestBody is universally optional upstream, so a body slot is always optional;
+// a query slot is required only when the spec marks the whole query object required.
+type ParamsRequired<O> = [QueryOf<O>] extends [never] ? false : QueryRequired<O>;
+
+type ParamsTail<O> = [FlatSlot<O>] extends [never]
+  ? [opts?: CallOptions]
+  : ParamsRequired<O> extends true
+    ? [params: FlatSlot<O>, opts?: CallOptions]
+    : [params?: FlatSlot<O>, opts?: CallOptions];
+
+type IterParamsTail<O> = [IterQueryOf<O>] extends [never]
+  ? [opts?: CallOptions]
+  : [RequiredKeysOf<IterQueryOf<O>>] extends [never]
+    ? [params?: IterQueryOf<O>, opts?: CallOptions]
+    : [params: IterQueryOf<O>, opts?: CallOptions];
+
+/** Path `{param}` names in URL order, parsed from the template at the type level. */
+export type PathParamNames<S extends string> = S extends `${string}{${infer Name}}${infer Rest}`
+  ? [Name, ...PathParamNames<Rest>]
+  : [];
+
+// Recursive (not mapped) so the empty-path case is a clean `[]` tuple that spreads
+// correctly; a homomorphic mapped type over an empty tuple degrades to an array.
+type PathTuple<O, Names extends readonly string[]> = Names extends readonly [
+  infer H extends string,
+  ...infer T extends string[],
+]
+  ? [PathParamsOf<O>[H & keyof PathParamsOf<O>], ...PathTuple<O, T>]
+  : [];
+
+/** Spec-derived reference signature — true shape, positional order, unnamed params (KTD2). */
+export type CallSig<P extends keyof paths, V extends keyof paths[P]> = (
+  ...args: [...PathTuple<OpAt<P, V>, PathParamNames<P & string>>, ...ParamsTail<OpAt<P, V>>]
+) => CallResult<P, V>;
+
+export type IterCallSig<P extends keyof paths, V extends keyof paths[P]> = (
+  ...args: [...PathTuple<OpAt<P, V>, PathParamNames<P & string>>, ...IterParamsTail<OpAt<P, V>>]
+) => IterResult<P, V>;
+
+/**
+ * The spec-derived reference namespace for a table: each op keyed to its generic
+ * `CallSig`, each paginated op to an extra `<name>All` `IterCallSig`. The KTD2
+ * contract test pins each generated interface as mutually assignable to this, so
+ * the generated labeled signatures cannot drift from the spec in type or arity.
+ */
+export type NamespaceOf<T extends OpTable> = {
+  [K in keyof T]: CallSig<T[K]["path"], T[K]["verb"] & keyof paths[T[K]["path"]]>;
+} & {
+  [K in keyof T as T[K]["paginated"] extends true ? `${K & string}All` : never]: IterCallSig<
+    T[K]["path"],
+    T[K]["verb"] & keyof paths[T[K]["path"]]
   >;
 };
 
+/** `true` iff A and B are mutually assignable — the KTD2 pin's comparison. */
+export type MutuallyAssignable<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+
+/** `true` iff op `O` does not declare both a query object and a request body (R8). */
+export type NoQueryAndBody<O> = [QueryOf<O>] extends [never]
+  ? true
+  : [BodyOf<O>] extends [never]
+    ? true
+    : false;
+
+/** `true` iff NO operation in `paths` declares both a query object and a body (R8). */
+export type NoQueryAndBodyOp = [
+  {
+    [P in keyof paths]: {
+      [V in VerbsOf<P>]: NoQueryAndBody<OpAt<P, V>> extends true
+        ? never
+        : `${P & string} ${V & string}`;
+    }[VerbsOf<P>];
+  }[keyof paths],
+] extends [never]
+  ? true
+  : false;
+
 export type RequestFn = <R>(method: string, path: string, opts?: RequestOptions) => Promise<R>;
 
-interface RawArgs {
-  path?: Record<string, string | number>;
-  query?: Record<string, string | number | boolean | undefined>;
-  body?: unknown;
-  signal?: AbortSignal;
-}
-
-function fillPath(template: string, params: Record<string, string | number> = {}): string {
+function fillPath(template: string, params: Record<string, string | number>): string {
   return template.replaceAll(/\{(\w+)\}/g, (_, name: string) => {
     const value = params[name];
     if (value === undefined) throw new Error(`missing path param "${name}" for ${template}`);
@@ -111,31 +244,64 @@ function fillPath(template: string, params: Record<string, string | number> = {}
   });
 }
 
-export function bindOps<T extends OpTable>(rf: RequestFn, table: T): BoundOps<T> {
+/**
+ * Binds a table to the Call rule (KTD3/KTD4): positional path values fill the
+ * template in URL order, one flat params object routes to body or query by the
+ * op's kind (`opRouting`) — wrapped under `bodyKey` when the body is a single-key
+ * wrapper — and a trailing `opts.signal` reaches transport. Ops with no query or
+ * body take no params object, so their `opts` follows the positional args.
+ */
+export function bindOps<T extends OpTable>(rf: RequestFn, table: T): NamespaceOf<T> {
   const ns: Record<string, unknown> = {};
   for (const [name, entry] of Object.entries(table)) {
-    // async so a missing path param rejects instead of throwing synchronously
-    const call = async (args: RawArgs = {}) => {
-      const opts: RequestOptions = {};
-      if (args.query) opts.query = args.query;
-      if (args.body !== undefined) opts.body = args.body;
-      if (args.signal) opts.signal = args.signal;
-      return rf(entry.verb.toUpperCase(), fillPath(entry.path, args.path), opts);
+    const pathNames = pathParamNames(entry.path);
+    const route = opRouting[`${entry.verb} ${entry.path}`];
+    const { bodyKey } = entry;
+    const method = entry.verb.toUpperCase();
+
+    const send = (
+      pathValues: unknown[],
+      params: unknown,
+      opts: CallOptions | undefined,
+    ): Promise<unknown> => {
+      const pathParams: Record<string, string | number> = {};
+      pathNames.forEach((n, i) => {
+        pathParams[n] = pathValues[i] as string | number;
+      });
+      const reqOpts: RequestOptions = {};
+      if (params !== undefined) {
+        if (route === "body") reqOpts.body = bodyKey ? { [bodyKey]: params } : params;
+        else reqOpts.query = params as Record<string, string | number | boolean | undefined>;
+      }
+      if (opts?.signal) reqOpts.signal = opts.signal;
+      return rf(method, fillPath(entry.path, pathParams), reqOpts);
     };
-    ns[name] = call;
+
+    // async so a missing path param rejects instead of throwing synchronously (R7)
+    ns[name] = async (...args: unknown[]) => {
+      const pathValues = args.slice(0, pathNames.length);
+      const params = route === undefined ? undefined : args[pathNames.length];
+      const opts = args[pathNames.length + (route === undefined ? 0 : 1)] as
+        | CallOptions
+        | undefined;
+      return send(pathValues, params, opts);
+    };
+
     if (entry.paginated) {
       if (`${name}All` in table) {
         throw new Error(`table key "${name}All" collides with the iterator variant of "${name}"`);
       }
-      ns[`${name}All`] = (args: RawArgs = {}) =>
-        paginate(
+      ns[`${name}All`] = (...args: unknown[]) => {
+        const pathValues = args.slice(0, pathNames.length);
+        const params = (args[pathNames.length] ?? {}) as Record<string, unknown>;
+        const opts = args[pathNames.length + 1] as CallOptions | undefined;
+        return paginate(
           (page, perPage) =>
-            call({ ...args, query: { ...args.query, page, per_page: perPage } }) as Promise<
-              unknown[]
-            >,
-          typeof args.query?.per_page === "number" ? { perPage: args.query.per_page } : {},
+            send(pathValues, { ...params, page, per_page: perPage }, opts) as Promise<unknown[]>,
+          typeof params.per_page === "number" ? { perPage: params.per_page } : {},
         );
+      };
     }
   }
-  return ns as BoundOps<T>;
+  return ns as NamespaceOf<T>;
 }

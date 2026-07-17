@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const organizationsTable = {
   list: { path: "/api/organizations", verb: "get", paginated: true },
@@ -21,5 +21,4 @@ export const organizationsTable = {
 
 organizationsTable satisfies OpTable;
 
-/** Organizations: listings, reads by id or username, member and article listings, and authenticated CRUD. */
-export type OrganizationsNamespace = BoundOps<typeof organizationsTable>;
+export type { OrganizationsNamespace } from "../generated/signatures.ts";

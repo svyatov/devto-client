@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const podcastEpisodesTable = {
   list: { path: "/api/podcast_episodes", verb: "get", paginated: true },
@@ -6,5 +6,4 @@ export const podcastEpisodesTable = {
 
 podcastEpisodesTable satisfies OpTable;
 
-/** Published podcast episodes. */
-export type PodcastEpisodesNamespace = BoundOps<typeof podcastEpisodesTable>;
+export type { PodcastEpisodesNamespace } from "../generated/signatures.ts";

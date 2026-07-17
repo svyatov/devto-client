@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const healthChecksTable = {
   app: { path: "/api/health_checks/app", verb: "get" },
@@ -8,5 +8,4 @@ export const healthChecksTable = {
 
 healthChecksTable satisfies OpTable;
 
-/** Instance health probes: app, cache, and database liveness. */
-export type HealthChecksNamespace = BoundOps<typeof healthChecksTable>;
+export type { HealthChecksNamespace } from "../generated/signatures.ts";

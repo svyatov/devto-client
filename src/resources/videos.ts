@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const videosTable = {
   list: { path: "/api/videos", verb: "get", paginated: true },
@@ -6,5 +6,4 @@ export const videosTable = {
 
 videosTable satisfies OpTable;
 
-/** Articles published with a video. */
-export type VideosNamespace = BoundOps<typeof videosTable>;
+export type { VideosNamespace } from "../generated/signatures.ts";

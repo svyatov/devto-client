@@ -1,13 +1,13 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const articlesTable = {
   list: { path: "/api/articles", verb: "get", paginated: true },
   latest: { path: "/api/articles/latest", verb: "get", paginated: true },
   search: { path: "/api/articles/search", verb: "get", paginated: true },
   semanticSearch: { path: "/api/articles/semantic_search", verb: "get", paginated: true },
-  create: { path: "/api/articles", verb: "post" },
+  create: { path: "/api/articles", verb: "post", bodyKey: "article" },
   get: { path: "/api/articles/{id}", verb: "get" },
-  update: { path: "/api/articles/{id}", verb: "put" },
+  update: { path: "/api/articles/{id}", verb: "put", bodyKey: "article" },
   unpublish: { path: "/api/articles/{id}/unpublish", verb: "put" },
   getByPath: { path: "/api/articles/{username}/{slug}", verb: "get" },
   me: { path: "/api/articles/me", verb: "get", paginated: true },
@@ -18,5 +18,4 @@ export const articlesTable = {
 
 articlesTable satisfies OpTable;
 
-/** Articles: public listings and search, single-article reads, authenticated create/update, and your own drafts via the `me` operations. */
-export type ArticlesNamespace = BoundOps<typeof articlesTable>;
+export type { ArticlesNamespace } from "../generated/signatures.ts";

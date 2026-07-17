@@ -1,4 +1,4 @@
-import type { BoundOps, OpTable } from "../ops.ts";
+import type { OpTable } from "../ops.ts";
 
 export const trendsTable = {
   list: { path: "/api/trends", verb: "get", paginated: true },
@@ -8,5 +8,4 @@ export const trendsTable = {
 
 trendsTable satisfies OpTable;
 
-/** Trends: list, read a trend, and list a trend's articles. */
-export type TrendsNamespace = BoundOps<typeof trendsTable>;
+export type { TrendsNamespace } from "../generated/signatures.ts";

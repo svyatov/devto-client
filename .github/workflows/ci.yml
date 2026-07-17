@@ -23,4 +23,5 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run check
+      - run: npm run check:drift
       - run: npm test
