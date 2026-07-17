@@ -83,7 +83,7 @@ export class DevToClient {
   readonly videos: VideosNamespace;
   /** A user's profile-image URLs, looked up by username. */
   readonly profileImages: ProfileImagesNamespace;
-  /** Create or toggle reactions. */
+  /** Create or toggle reactions. Admin-gated upstream; ordinary keys get 401. */
   readonly reactions: ReactionsNamespace;
   /** Metadata for the connected Forem instance. */
   readonly instance: InstanceNamespace;
