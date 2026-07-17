@@ -1,7 +1,8 @@
 {
   "template": "/api/tags",
   "method": "GET",
-  "recordedAt": "2026-07-16T19:43:19.129Z",
+  "recordedAt": "2026-07-17T13:11:19.810Z",
+  "path": "/api/tags",
   "payload": [
     {
       "id": 8,

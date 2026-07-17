@@ -1,7 +1,8 @@
 {
   "template": "/api/videos",
   "method": "GET",
-  "recordedAt": "2026-07-16T19:43:30.855Z",
+  "recordedAt": "2026-07-17T13:11:31.375Z",
+  "path": "/api/videos",
   "payload": [
     {
       "type_of": "video_article",

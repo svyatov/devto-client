@@ -1,21 +1,22 @@
 {
   "template": "/api/organizations/{username}",
   "method": "GET",
-  "recordedAt": "2026-07-16T19:43:37.452Z",
+  "recordedAt": "2026-07-17T13:11:37.959Z",
+  "path": "/api/organizations/googleai",
   "payload": {
     "type_of": "organization",
-    "id": 11939,
-    "username": "gde",
-    "name": "Google Developer Experts",
-    "summary": "The official place for discovering GDE-created content and exploring how experts leverage Google technologies.",
-    "twitter_username": "",
+    "id": 11026,
+    "username": "googleai",
+    "name": "Google AI",
+    "summary": "Our goal is to equip developers with the most advanced models to build new applications, helpful tools to write better and faster code, and make it easy to integrate across platforms and devices.",
+    "twitter_username": "googleai",
     "github_username": "",
-    "url": "",
+    "url": "https://ai.google/",
     "location": "",
     "tech_stack": "",
-    "tag_line": "",
+    "tag_line": "Making AI helpful for everyone. ",
     "story": "",
-    "joined_at": "2025-11-19T16:18:45Z",
-    "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Forganization%2Fprofile_image%2F11939%2Fe3080d5b-ecde-42a8-b089-bafecc31fa97.png"
+    "joined_at": "2025-06-13T17:16:31Z",
+    "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Forganization%2Fprofile_image%2F11026%2F386b14d3-cc9a-4270-aba0-3e41cdfb9d85.jpg"
   }
 }

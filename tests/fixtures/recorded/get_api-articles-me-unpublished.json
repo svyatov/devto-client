@@ -2,6 +2,7 @@
   "template": "/api/articles/me/unpublished",
   "method": "GET",
   "recordedAt": "2026-07-16T19:44:22.005Z",
+  "path": "/api/articles/me/unpublished",
   "payload": [
     {
       "type_of": "article",

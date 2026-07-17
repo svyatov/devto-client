@@ -2,6 +2,7 @@
   "template": "/api/users/me",
   "method": "GET",
   "recordedAt": "2026-07-16T19:44:12.162Z",
+  "path": "/api/users/me",
   "payload": {
     "type_of": "user",
     "id": 122709,

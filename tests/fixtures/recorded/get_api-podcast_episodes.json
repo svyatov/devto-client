@@ -1,7 +1,8 @@
 {
   "template": "/api/podcast_episodes",
   "method": "GET",
-  "recordedAt": "2026-07-16T19:43:27.773Z",
+  "recordedAt": "2026-07-17T13:11:28.306Z",
+  "path": "/api/podcast_episodes",
   "payload": [
     {
       "type_of": "podcast_episodes",

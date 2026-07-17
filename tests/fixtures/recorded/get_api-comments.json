@@ -1,7 +1,8 @@
 {
   "template": "/api/comments",
   "method": "GET",
-  "recordedAt": "2026-07-16T19:43:15.950Z",
+  "recordedAt": "2026-07-17T13:11:16.383Z",
+  "path": "/api/comments",
   "payload": [
     {
       "type_of": "comment",
@@ -17,6 +18,40 @@
         "website_url": null,
         "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4008303%2F1ae9c435-4bee-4626-88bb-f7152aa1742c.jpg",
         "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4008303%2F1ae9c435-4bee-4626-88bb-f7152aa1742c.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3bbkn",
+      "created_at": "2026-07-17T05:21:21Z",
+      "body_html": "<p>I can be wrong but <code>jobs -p</code> returning nothing in a non-interactive shell is such a quiet way to lose, because the cleanup line is right there in the script and reads like it works. The trap is the real fix, and I'd argue it's the fix even when you collect <code>$!</code> correctly, since the parent dying is the more common failure of the two. Worth noting the trap won't save you from a <code>kill -9</code> on the parent either, so for anything that pegs every core I'd have the loop time-limit itself as a backstop. Two days of <code>while :; do :; done</code> is a great argument that the spinner should never outlive its purpose regardless of who's supposed to clean it up.</p>\n\n",
+      "user": {
+        "name": "Nazar Boyko",
+        "username": "nazar-boyko",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 1875383,
+        "website_url": "http://nazarboyko.com/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1875383%2Fbaa58f3a-24b4-4cd1-bea6-034acfb76210.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1875383%2Fbaa58f3a-24b4-4cd1-bea6-034acfb76210.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3bc6f",
+      "created_at": "2026-07-17T11:46:16Z",
+      "body_html": "<p>This is a good example of why agent reliability extends beyond prompt quality. Once an agent can spawn subprocesses, you've crossed into systems engineering territory. Every background task should have a lifecycle: ownership, timeout, heartbeat, and guaranteed cleanup even if the parent crashes or the session is interrupted. We've seen similar issues when agents launch long-running builds, local inference servers, or stress tests. A trap helps, but process groups, watchdogs, and explicit resource budgets make these failures much harder to trigger. AI agents don't just generate code anymore they're operating systems clients, and they need to be treated with the same discipline as any other automation.</p>\n\n",
+      "user": {
+        "name": "Mateo Ruiz",
+        "username": "mateo_ruiz_6992b1fce47843",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 3954372,
+        "website_url": "https://www.itpathsolutions.com/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F3954372%2Fd5544456-41d1-4a3c-bca3-aab867c15c59.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F3954372%2Fd5544456-41d1-4a3c-bca3-aab867c15c59.png"
       },
       "children": []
     }

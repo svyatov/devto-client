@@ -1,26 +1,27 @@
 {
   "template": "/api/trends",
   "method": "GET",
-  "recordedAt": "2026-07-16T19:43:53.514Z",
+  "recordedAt": "2026-07-17T13:11:55.382Z",
+  "path": "/api/trends",
   "payload": [
     {
       "type_of": "trend",
       "id": 49,
-      "name": "AI-Driven Passion Analytics & 2026 World Cup",
-      "slug": "ai-driven-passion-analytics-2026-world-cup",
-      "description": "Developers are leveraging AI to bridge the gap between emotional engagement and technical data, specifically focusing on the 2026 FIFA World Cup. This trend involves building dashboards, narrative engines, and monitors that quantify passion and personal milestones through live event tracking and generative AI.",
+      "name": "AI-Powered World Cup 2026 Passion Projects",
+      "slug": "ai-powered-world-cup-2026-passion-projects",
+      "description": "Developers are leveraging AI to bridge the gap between technical monitoring and personal enthusiasm for the 2026 FIFA World Cup. These projects focus on real-time data visualization, sentiment analysis, and narrative generation to gamify and track the tournament experience.",
       "key_questions": [
-        "How can AI sentiment analysis translate the emotional intensity of live sports into actionable data?",
-        "What are the best architectures for real-time dashboards during high-traffic global events?",
-        "How can generative audio and LLMs be used to personalize user milestones through culturally-specific narratives?"
+        "How can AI be used to quantify abstract concepts like fan passion and intensity during live sporting events?",
+        "What techniques allow developers to transform mundane daily data into immersive, sports-themed narratives using LLMs?",
+        "How do developers integrate real-time sports data streams into personalized monitoring tools and dashboards?"
       ],
-      "score": 1753.7132738547202,
-      "articles_count": 101,
+      "score": 1500.4511210592939,
+      "articles_count": 94,
       "cover_image": "https://dev-to-uploads.s3.us-east-2.amazonaws.com/uploads/articles/kg2fmu4l960dg2gzm4ad.png",
       "first_observed_at": "2026-07-11T12:01:38Z",
-      "last_observed_at": "2026-07-16T18:01:46Z",
+      "last_observed_at": "2026-07-17T12:01:47Z",
       "created_at": "2026-07-11T12:01:38Z",
-      "updated_at": "2026-07-16T18:01:46Z"
+      "updated_at": "2026-07-17T12:01:47Z"
     },
     {
       "type_of": "trend",

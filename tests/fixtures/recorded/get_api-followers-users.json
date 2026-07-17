@@ -1,7 +1,8 @@
 {
   "template": "/api/followers/users",
   "method": "GET",
-  "recordedAt": "2026-07-16T19:44:31.773Z",
+  "recordedAt": "2026-07-17T13:12:36.357Z",
+  "path": "/api/followers/users",
   "payload": [
     {
       "type_of": "user_follower",

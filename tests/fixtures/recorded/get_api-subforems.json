@@ -1,7 +1,8 @@
 {
   "template": "/api/subforems",
   "method": "GET",
-  "recordedAt": "2026-07-16T19:43:50.438Z",
+  "recordedAt": "2026-07-17T13:11:51.694Z",
+  "path": "/api/subforems",
   "payload": [
     {
       "id": 1,
@@ -58,15 +59,6 @@
       "cover_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/etixkjcs50ddkp6wlv4p.png"
     },
     {
-      "id": 43,
-      "domain": "gg.forem.com",
-      "root": false,
-      "name": "Gamers Forem",
-      "description": "An inclusive community for gaming enthusiasts",
-      "logo_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/d89n749pwv3d05i93pfd.png",
-      "cover_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/gg6i5z7ureeu96cayz19.png"
-    },
-    {
       "id": 61,
       "domain": "parenting.forem.com",
       "root": false,
@@ -92,6 +84,15 @@
       "description": "A community of golfers and golfing enthusiasts",
       "logo_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/nijx8yj8r5psetuqsw5z.png",
       "cover_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/p2khtue7prp0t5p0pouh.png"
+    },
+    {
+      "id": 43,
+      "domain": "gg.forem.com",
+      "root": false,
+      "name": "Gamers Forem",
+      "description": "An inclusive community for gaming enthusiasts",
+      "logo_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/d89n749pwv3d05i93pfd.png",
+      "cover_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/gg6i5z7ureeu96cayz19.png"
     },
     {
       "id": 46,
@@ -130,15 +131,6 @@
       "cover_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ujjn1ap9mpq8bwzn76em.png"
     },
     {
-      "id": 39,
-      "domain": "core.forem.com",
-      "root": false,
-      "name": "Forem Core",
-      "description": "Discussing the core forem open source software project — features, bugs, performance, self-hosting.",
-      "logo_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/upzbzgpb13b3e0dfxf51.png",
-      "cover_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7qi7bzwq9yok35no2owa.png"
-    },
-    {
       "id": 63,
       "domain": "hmpljs.forem.com",
       "root": false,
@@ -146,6 +138,15 @@
       "description": "For developers using HMPL.js to build fast, lightweight web apps. A space to share projects, ask questions, and discuss server-driven templating",
       "logo_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3yl1tok1l7116unun3e9.png",
       "cover_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/5ccjfqjnhjn866cfyngt.png"
+    },
+    {
+      "id": 39,
+      "domain": "core.forem.com",
+      "root": false,
+      "name": "Forem Core",
+      "description": "Discussing the core forem open source software project — features, bugs, performance, self-hosting.",
+      "logo_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/upzbzgpb13b3e0dfxf51.png",
+      "cover_image_url": "https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7qi7bzwq9yok35no2owa.png"
     },
     {
       "id": 35,
