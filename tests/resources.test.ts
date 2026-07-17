@@ -27,7 +27,9 @@ function harness(...payloads: unknown[]) {
 describe("namespace bindings", () => {
   it("articles.getByPath hits /api/articles/{username}/{slug}", async () => {
     const { client, calls } = harness({});
-    await client.articles.getByPath({ path: { username: "jess", slug: "some-post" } });
+    await client.articles.getByPath({
+      path: { username: "jess", slug: "some-post" },
+    });
     expect(calls[0]).toMatchObject({
       method: "GET",
       url: "https://dev.to/api/articles/jess/some-post",
@@ -74,9 +76,15 @@ describe("namespace bindings", () => {
   });
 
   it("articles.create sends the JSON body and returns the typed Article", async () => {
-    const { client, calls } = harness({ id: 1, title: "hi", type_of: "article" });
+    const { client, calls } = harness({
+      id: 1,
+      title: "hi",
+      type_of: "article",
+    });
     const created = await client.articles.create({
-      body: { article: { title: "hi", body_markdown: "text", published: false } },
+      body: {
+        article: { title: "hi", body_markdown: "text", published: false },
+      },
     });
     expect(calls[0]?.method).toBe("POST");
     expect(JSON.parse(calls[0]?.body ?? "")).toEqual({
@@ -88,7 +96,10 @@ describe("namespace bindings", () => {
 
   it("update uses the documented verb only (PUT for articles, PATCH for concepts)", async () => {
     const { client, calls } = harness({}, {});
-    await client.articles.update({ path: { id: 1 }, body: { article: { published: true } } });
+    await client.articles.update({
+      path: { id: 1 },
+      body: { article: { published: true } },
+    });
     await client.concepts.update({ path: { id: 1 }, body: {} });
     expect(calls.map((c) => c.method)).toEqual(["PUT", "PATCH"]);
   });
@@ -104,8 +115,14 @@ describe("namespace bindings", () => {
 
   it("segments add/remove users send arrays in the body", async () => {
     const { client, calls } = harness({}, {});
-    await client.segments.addUsers({ path: { id: 5 }, body: { user_ids: [1, 2, 3] } });
-    await client.segments.removeUsers({ path: { id: 5 }, body: { user_ids: [4] } });
+    await client.segments.addUsers({
+      path: { id: 5 },
+      body: { user_ids: [1, 2, 3] },
+    });
+    await client.segments.removeUsers({
+      path: { id: 5 },
+      body: { user_ids: [4] },
+    });
     expect(calls[0]?.url).toBe("https://dev.to/api/segments/5/add_users");
     expect(JSON.parse(calls[0]?.body ?? "")).toEqual({ user_ids: [1, 2, 3] });
     expect(calls[1]?.url).toBe("https://dev.to/api/segments/5/remove_users");
@@ -121,7 +138,10 @@ describe("namespace bindings", () => {
       method: "PUT",
       url: "https://dev.to/api/admin/users/9/status",
     });
-    expect(JSON.parse(calls[0]?.body ?? "")).toEqual({ status: "Suspended", note: "spam" });
+    expect(JSON.parse(calls[0]?.body ?? "")).toEqual({
+      status: "Suspended",
+      note: "spam",
+    });
   });
 
   it("missing path params throw before any request is made", async () => {
@@ -151,7 +171,10 @@ describe("namespace bindings", () => {
   it("keyless call to a public endpoint succeeds; api-key endpoint surfaces the 401 shape", async () => {
     const fetch = (async (url: string | URL | Request) =>
       String(url).endsWith("/api/articles")
-        ? new Response("[]", { status: 200, headers: { "content-type": "application/json" } })
+        ? new Response("[]", {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          })
         : new Response(JSON.stringify({ error: "unauthorized", status: 401 }), {
             status: 401,
           })) as typeof globalThis.fetch;
@@ -183,7 +206,9 @@ describe("iterator variants", () => {
     const client = new DevToClient({ fetch });
 
     const seen: number[] = [];
-    for await (const article of client.articles.listAll({ query: { tag: "go", per_page: 2 } })) {
+    for await (const article of client.articles.listAll({
+      query: { tag: "go", per_page: 2 },
+    })) {
       seen.push(article.id as number);
     }
     expect(seen).toEqual([1, 2, 3]);
