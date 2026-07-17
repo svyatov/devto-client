@@ -46,6 +46,8 @@ export const tagsTable = {
 
 Add `paginated: true` if it's a `page`/`per_page` list endpoint (a `list` entry then also gets a `listAll` iterator for free; the twin is always your key name plus `All`), and `undocumented: true` if the route is real but absent from Forem's docs. The path and verb are checked against the composed spec at the type level, so a typo won't compile.
 
+If the endpoint needs more than an ordinary key, flag that in the JSDoc rather than trusting yourself to remember. The namespace comment above `export type XNamespace` and the matching property comment in `src/client.ts` should both carry a short note ("Requires admin credentials.", "Requires moderator credentials."), and a surprising gate belongs in the README deviations table too. The one that bites is the endpoint that looks like a plain user action but isn't: reactions are admin-gated upstream, so an ordinary key gets a 401 nothing in the types warns you about.
+
 One last step: `tests/surface-inventory.test.ts` asserts a hard operation count, the "100% of the surface" gate. Bump both numbers in the count assertion (they're the upstream total plus the code-only extras). That test enforces three-way parity between the spec, the tables, and that count, so it fails loudly if you added a table entry without a matching spec operation, or vice versa. Green there means you're done.
 
 ## Never edit the generated types
