@@ -10,4 +10,5 @@ export const billboardsTable = {
 
 billboardsTable satisfies OpTable;
 
+/** Billboards (display ads): CRUD plus unpublish. Requires admin credentials. */
 export type BillboardsNamespace = BoundOps<typeof billboardsTable>;

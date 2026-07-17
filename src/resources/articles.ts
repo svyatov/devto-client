@@ -18,4 +18,5 @@ export const articlesTable = {
 
 articlesTable satisfies OpTable;
 
+/** Articles: public listings and search, single-article reads, authenticated create/update, and your own drafts via the `me` operations. */
 export type ArticlesNamespace = BoundOps<typeof articlesTable>;

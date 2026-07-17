@@ -10,4 +10,5 @@ export const badgesTable = {
 
 badgesTable satisfies OpTable;
 
+/** Badge definitions: CRUD. Mutations require admin credentials. */
 export type BadgesNamespace = BoundOps<typeof badgesTable>;

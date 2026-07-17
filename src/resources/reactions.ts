@@ -7,4 +7,5 @@ export const reactionsTable = {
 
 reactionsTable satisfies OpTable;
 
+/** Reactions: create one, or toggle it on/off (toggle needs the category, reactable id, and reactable type). */
 export type ReactionsNamespace = BoundOps<typeof reactionsTable>;

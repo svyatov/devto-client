@@ -21,4 +21,5 @@ export const organizationsTable = {
 
 organizationsTable satisfies OpTable;
 
+/** Organizations: listings, reads by id or username, member and article listings, and authenticated CRUD. */
 export type OrganizationsNamespace = BoundOps<typeof organizationsTable>;

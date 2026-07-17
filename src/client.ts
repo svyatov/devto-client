@@ -52,36 +52,70 @@ import { type TrendsNamespace, trendsTable } from "./resources/trends.ts";
 import { type UsersNamespace, usersTable } from "./resources/users.ts";
 import { type VideosNamespace, videosTable } from "./resources/videos.ts";
 
+/**
+ * Typed client for the dev.to (Forem) v1 API. Construct once and reuse; each
+ * property is a resource namespace whose methods map to REST operations.
+ * Public endpoints work keyless — pass an api-key via {@link ClientOptions.apiKey}
+ * for authenticated, moderation, and admin routes.
+ */
 export class DevToClient {
   private readonly config: ResolvedConfig;
 
+  /** Articles: read, search, publish, and manage your own drafts via the `me` operations. */
   readonly articles: ArticlesNamespace;
+  /** Comment threads on articles and podcast episodes. */
   readonly comments: CommentsNamespace;
+  /** User profiles, plus moderation actions that require moderator credentials. */
   readonly users: UsersNamespace;
+  /** Organizations, their members, and their articles. */
   readonly organizations: OrganizationsNamespace;
+  /** The users following you. Requires authentication. */
   readonly followers: FollowersNamespace;
+  /** Create a follow and list the tags you follow. */
   readonly follows: FollowsNamespace;
+  /** The instance's tags. */
   readonly tags: TagsNamespace;
+  /** Your saved-articles reading list. Requires authentication. */
   readonly readinglist: ReadinglistNamespace;
+  /** Published podcast episodes. */
   readonly podcastEpisodes: PodcastEpisodesNamespace;
+  /** Articles published with a video. */
   readonly videos: VideosNamespace;
+  /** A user's profile-image URLs, looked up by username. */
   readonly profileImages: ProfileImagesNamespace;
+  /** Create or toggle reactions. */
   readonly reactions: ReactionsNamespace;
+  /** Metadata for the connected Forem instance. */
   readonly instance: InstanceNamespace;
+  /** Sub-communities on the instance. */
   readonly subforems: SubforemsNamespace;
+  /** App, cache, and database liveness probes. */
   readonly healthChecks: HealthChecksNamespace;
+  /** Trends and their articles. */
   readonly trends: TrendsNamespace;
+  /** Surveys and their poll results. */
   readonly surveys: SurveysNamespace;
+  /** Concepts and their articles. */
   readonly concepts: ConceptsNamespace;
+  /** Agent sessions, plus the undocumented presign and raw-url helpers. */
   readonly agentSessions: AgentSessionsNamespace;
+  /** Badge definitions. Mutations require admin credentials. */
   readonly badges: BadgesNamespace;
+  /** Badges awarded to users. Awarding requires admin credentials. */
   readonly badgeAchievements: BadgeAchievementsNamespace;
+  /** Billboards (display ads). Requires admin credentials. */
   readonly billboards: BillboardsNamespace;
+  /** Static instance pages. Mutations require admin credentials. */
   readonly pages: PagesNamespace;
+  /** Audience segments and their membership. Requires admin credentials. */
   readonly segments: SegmentsNamespace;
+  /** Recommended-articles lists. */
   readonly recommendedArticlesLists: RecommendedArticlesListsNamespace;
+  /** Analytics for your own content. */
   readonly analytics: AnalyticsNamespace;
+  /** Update the status of an abuse/feedback report. Requires moderator credentials. */
   readonly feedbackMessages: FeedbackMessagesNamespace;
+  /** Admin-only resources: user administration, concepts, and request redirects. Requires admin credentials. */
   readonly admin: {
     users: AdminUsersNamespace;
     concepts: AdminConceptsNamespace;

@@ -6,4 +6,5 @@ export const instanceTable = {
 
 instanceTable satisfies OpTable;
 
+/** Metadata for the connected Forem instance. */
 export type InstanceNamespace = BoundOps<typeof instanceTable>;

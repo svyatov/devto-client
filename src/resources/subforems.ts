@@ -6,4 +6,5 @@ export const subforemsTable = {
 
 subforemsTable satisfies OpTable;
 
+/** Subforems (sub-communities) on the instance. */
 export type SubforemsNamespace = BoundOps<typeof subforemsTable>;

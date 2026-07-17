@@ -6,4 +6,5 @@ export const profileImagesTable = {
 
 profileImagesTable satisfies OpTable;
 
+/** A user's profile-image URLs, looked up by username. */
 export type ProfileImagesNamespace = BoundOps<typeof profileImagesTable>;

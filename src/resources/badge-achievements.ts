@@ -9,4 +9,5 @@ export const badgeAchievementsTable = {
 
 badgeAchievementsTable satisfies OpTable;
 
+/** Badge achievements (a badge awarded to a user): list, create, read, delete. Awarding requires admin credentials. */
 export type BadgeAchievementsNamespace = BoundOps<typeof badgeAchievementsTable>;

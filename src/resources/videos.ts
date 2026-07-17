@@ -6,4 +6,5 @@ export const videosTable = {
 
 videosTable satisfies OpTable;
 
+/** Articles published with a video. */
 export type VideosNamespace = BoundOps<typeof videosTable>;

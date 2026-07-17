@@ -9,4 +9,5 @@ export const recommendedArticlesListsTable = {
 
 recommendedArticlesListsTable satisfies OpTable;
 
+/** Recommended-articles lists: read, list, create, and update. */
 export type RecommendedArticlesListsNamespace = BoundOps<typeof recommendedArticlesListsTable>;

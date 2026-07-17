@@ -12,4 +12,5 @@ export const agentSessionsTable = {
 
 agentSessionsTable satisfies OpTable;
 
+/** Agent sessions, plus the undocumented presign and raw-url helpers verified in Forem's routes. */
 export type AgentSessionsNamespace = BoundOps<typeof agentSessionsTable>;

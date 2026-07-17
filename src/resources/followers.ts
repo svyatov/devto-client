@@ -8,4 +8,5 @@ export const followersTable = {
 
 followersTable satisfies OpTable;
 
+/** Your followers. (`/api/followers/organizations` is a dead upstream stub and is deliberately absent.) */
 export type FollowersNamespace = BoundOps<typeof followersTable>;

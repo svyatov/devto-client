@@ -7,4 +7,5 @@ export const followsTable = {
 
 followsTable satisfies OpTable;
 
+/** Follows: create a follow and list the tags you follow. */
 export type FollowsNamespace = BoundOps<typeof followsTable>;

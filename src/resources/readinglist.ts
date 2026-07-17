@@ -6,4 +6,5 @@ export const readinglistTable = {
 
 readinglistTable satisfies OpTable;
 
+/** Your reading list (saved articles). Requires authentication. */
 export type ReadinglistNamespace = BoundOps<typeof readinglistTable>;

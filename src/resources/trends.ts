@@ -8,4 +8,5 @@ export const trendsTable = {
 
 trendsTable satisfies OpTable;
 
+/** Trends: list, read a trend, and list a trend's articles. */
 export type TrendsNamespace = BoundOps<typeof trendsTable>;

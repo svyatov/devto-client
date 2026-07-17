@@ -3,6 +3,7 @@ import { DevToApiError, type ErrorEnvelope } from "./errors.ts";
 const ACCEPT_V1 = "application/vnd.forem.api-v1+json";
 const IDEMPOTENT = new Set(["GET", "HEAD", "PUT", "DELETE", "OPTIONS"]);
 
+/** Retry policy for transient failures: 429 responses (any method) and 5xx on idempotent methods. */
 export interface RetryOptions {
   /** Total attempts including the first request. Default 3. */
   attempts?: number;
@@ -12,6 +13,7 @@ export interface RetryOptions {
   baseDelayMs?: number;
 }
 
+/** Options for constructing a {@link DevToClient}. */
 export interface ClientOptions {
   /** Forem API key. Optional — public endpoints work keyless. */
   apiKey?: string;
@@ -25,9 +27,13 @@ export interface ClientOptions {
   fetch?: typeof globalThis.fetch;
 }
 
+/** Per-request options for the low-level {@link DevToClient.request} escape hatch. */
 export interface RequestOptions {
+  /** Query parameters; `undefined` values are dropped, others are stringified. */
   query?: Record<string, string | number | boolean | undefined>;
+  /** Request body, JSON-serialized (sets `content-type: application/json` unless overridden). */
   body?: unknown;
+  /** Abort signal; aborting rejects the call and cancels any pending retry backoff. */
   signal?: AbortSignal;
   /** Merged into the request; the versioned Accept header always wins. */
   headers?: Record<string, string>;
