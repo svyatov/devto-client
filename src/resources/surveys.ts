@@ -9,4 +9,5 @@ export const surveysTable = {
 
 surveysTable satisfies OpTable;
 
+/** Surveys: list, read a survey, and inspect its poll votes and text responses. */
 export type SurveysNamespace = BoundOps<typeof surveysTable>;

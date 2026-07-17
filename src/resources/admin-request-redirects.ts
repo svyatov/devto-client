@@ -10,4 +10,5 @@ export const adminRequestRedirectsTable = {
 
 adminRequestRedirectsTable satisfies OpTable;
 
+/** Admin URL-redirect rules: CRUD. Requires admin credentials. */
 export type AdminRequestRedirectsNamespace = BoundOps<typeof adminRequestRedirectsTable>;

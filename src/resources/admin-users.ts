@@ -22,4 +22,5 @@ export const adminUsersTable = {
 
 adminUsersTable satisfies OpTable;
 
+/** Admin user administration: profile, email, status, identities, notes, and merges. Requires admin credentials. */
 export type AdminUsersNamespace = BoundOps<typeof adminUsersTable>;

@@ -12,4 +12,5 @@ export const segmentsTable = {
 
 segmentsTable satisfies OpTable;
 
+/** Audience segments: CRUD plus membership management. Requires admin credentials. */
 export type SegmentsNamespace = BoundOps<typeof segmentsTable>;

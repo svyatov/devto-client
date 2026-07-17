@@ -6,4 +6,5 @@ export const tagsTable = {
 
 tagsTable satisfies OpTable;
 
+/** The instance's tags. */
 export type TagsNamespace = BoundOps<typeof tagsTable>;

@@ -153,6 +153,10 @@ Fixture-backed tests verify recorded reality for the public and user-scope tiers
 
 Rails accepts PUT and PATCH interchangeably on update routes. The client exposes only the verb the spec documents for each endpoint (`articles.update` is PUT, `concepts.update` is PATCH), staying a strict mirror.
 
+## Contributing
+
+Most contributions come down to teaching the client an endpoint it doesn't cover yet, and [CONTRIBUTING.md](CONTRIBUTING.md) walks you from a fresh clone through that first PR: setup, the two quality gates, and the add-an-endpoint loop.
+
 ## License
 
 [MIT](LICENSE)

@@ -8,4 +8,5 @@ export const healthChecksTable = {
 
 healthChecksTable satisfies OpTable;
 
+/** Instance health probes: app, cache, and database liveness. */
 export type HealthChecksNamespace = BoundOps<typeof healthChecksTable>;

@@ -6,4 +6,5 @@ export const feedbackMessagesTable = {
 
 feedbackMessagesTable satisfies OpTable;
 
+/** Feedback messages: update the status of an abuse/feedback report. Requires moderator credentials. */
 export type FeedbackMessagesNamespace = BoundOps<typeof feedbackMessagesTable>;

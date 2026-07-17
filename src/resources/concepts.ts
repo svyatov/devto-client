@@ -10,4 +10,5 @@ export const conceptsTable = {
 
 conceptsTable satisfies OpTable;
 
+/** Concepts: read, update, search, and list a concept's articles. */
 export type ConceptsNamespace = BoundOps<typeof conceptsTable>;

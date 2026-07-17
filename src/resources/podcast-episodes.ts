@@ -6,4 +6,5 @@ export const podcastEpisodesTable = {
 
 podcastEpisodesTable satisfies OpTable;
 
+/** Published podcast episodes. */
 export type PodcastEpisodesNamespace = BoundOps<typeof podcastEpisodesTable>;

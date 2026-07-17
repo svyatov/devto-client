@@ -11,4 +11,5 @@ export const adminConceptsTable = {
 
 adminConceptsTable satisfies OpTable;
 
+/** Admin concept management: CRUD plus lookback triggering. Requires admin credentials. */
 export type AdminConceptsNamespace = BoundOps<typeof adminConceptsTable>;

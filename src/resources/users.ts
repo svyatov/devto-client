@@ -17,4 +17,5 @@ export const usersTable = {
 
 usersTable satisfies OpTable;
 
+/** Users: public profile reads, the authenticated `me` profile, and moderation actions (limit, spam, suspend, trust, unpublish) that require moderator credentials. */
 export type UsersNamespace = BoundOps<typeof usersTable>;

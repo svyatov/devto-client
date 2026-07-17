@@ -7,4 +7,5 @@ export const commentsTable = {
 
 commentsTable satisfies OpTable;
 
+/** Comment threads: list an article's or podcast's comments and read a single thread. */
 export type CommentsNamespace = BoundOps<typeof commentsTable>;

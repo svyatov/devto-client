@@ -10,4 +10,5 @@ export const pagesTable = {
 
 pagesTable satisfies OpTable;
 
+/** Static instance pages: CRUD. Mutations require admin credentials. */
 export type PagesNamespace = BoundOps<typeof pagesTable>;
