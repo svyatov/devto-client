@@ -24,7 +24,7 @@ function defaultSpecPaths(): SpecPaths {
 }
 
 const isParam = (seg: string): boolean => seg.startsWith("{") && seg.endsWith("}");
-const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+export const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** A template matches a path when literals line up and each `{param}` eats one segment. */
 const compiledCache = new Map<string, RegExp>();

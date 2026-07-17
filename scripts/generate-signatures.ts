@@ -4,9 +4,10 @@
  * composed spec (path template → positional names/order/types; query/body →
  * flat params slot) and the op tables (`bodyKey` → wrapper authority). Field
  * types point at `src/ops.ts` helpers indexing `src/generated/types.ts` rather
- * than duplicating shapes; only names and arity are emitted here. The generic
- * `CallSig`/`IterCallSig` in `ops.ts` is the spec-derived reference these are
- * pinned against (KTD2). Output is deterministic and Biome-formatted downstream.
+ * than duplicating shapes; only names and arity are emitted here. The generator
+ * is the single authority for names and arity; `tests/generate-signatures.ts`
+ * checks every op's positional arity against its path template. Output is
+ * deterministic and Biome-formatted downstream.
  *
  * Two files are produced:
  *   src/generated/signatures.ts — the labeled namespace interfaces (types)

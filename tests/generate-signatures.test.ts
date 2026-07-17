@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { generate, loadSpec } from "../scripts/generate-signatures.ts";
+import { escapeRegex } from "../scripts/spec-templates.ts";
+import { pathParamNames } from "../src/path-template.ts";
+import { allTables } from "../src/resources/index.ts";
 
 /**
  * The generator's contract: labeled Call-rule members with true names/order/types,
@@ -54,6 +57,44 @@ describe("generate-signatures", () => {
     // no-params ops are absent from the routing manifest
     expect(routing).not.toContain('"get /api/articles/{id}":');
     expect(routing).not.toContain('"get /api/articles/{username}/{slug}":');
+  });
+
+  it("gives every op exactly its path-template positional arity, over all tables", () => {
+    // Leading `name: primitive` slots, before the flat `params`/`opts` slots.
+    const positionalArity = (args: string): number => {
+      let n = 0;
+      for (const part of args.split(", ")) {
+        if (part.startsWith("params") || part.startsWith("opts")) break;
+        n++;
+      }
+      return n;
+    };
+    const argsOf = (member: string, path: string, verb: string, kind: "Call" | "Iter"): string => {
+      const m = signatures.match(
+        new RegExp(
+          `\\b${escapeRegex(member)}: \\(([^)]*)\\) => ${kind}Result<"${escapeRegex(path)}", "${verb}">`,
+        ),
+      );
+      if (!m) throw new Error(`no ${kind} member for ${member} (${verb} ${path})`);
+      return m[1] as string;
+    };
+
+    let checked = 0;
+    for (const table of Object.values(allTables)) {
+      for (const [name, entry] of Object.entries(table)) {
+        const expected = pathParamNames(entry.path).length;
+        expect(positionalArity(argsOf(name, entry.path, entry.verb, "Call"))).toBe(expected);
+        checked++;
+        if (entry.paginated) {
+          expect(positionalArity(argsOf(`${name}All`, entry.path, entry.verb, "Iter"))).toBe(
+            expected,
+          );
+          checked++;
+        }
+      }
+    }
+    // Non-vacuity: the loop actually exercised the whole surface, incl. 0/1/2-arity ops.
+    expect(checked).toBeGreaterThan(30);
   });
 
   it("is deterministic — regenerating produces byte-identical output", () => {

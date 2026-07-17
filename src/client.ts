@@ -126,37 +126,40 @@ export class DevToClient {
     this.config = resolveConfig(options);
     const rf: RequestFn = (method, path, opts) => request(this.config, method, path, opts);
 
-    this.articles = bindOps(rf, articlesTable);
-    this.comments = bindOps(rf, commentsTable);
-    this.users = bindOps(rf, usersTable);
-    this.organizations = bindOps(rf, organizationsTable);
-    this.followers = bindOps(rf, followersTable);
-    this.follows = bindOps(rf, followsTable);
-    this.tags = bindOps(rf, tagsTable);
-    this.readinglist = bindOps(rf, readinglistTable);
-    this.podcastEpisodes = bindOps(rf, podcastEpisodesTable);
-    this.videos = bindOps(rf, videosTable);
-    this.profileImages = bindOps(rf, profileImagesTable);
-    this.reactions = bindOps(rf, reactionsTable);
-    this.instance = bindOps(rf, instanceTable);
-    this.subforems = bindOps(rf, subforemsTable);
-    this.healthChecks = bindOps(rf, healthChecksTable);
-    this.trends = bindOps(rf, trendsTable);
-    this.surveys = bindOps(rf, surveysTable);
-    this.concepts = bindOps(rf, conceptsTable);
-    this.agentSessions = bindOps(rf, agentSessionsTable);
-    this.badges = bindOps(rf, badgesTable);
-    this.badgeAchievements = bindOps(rf, badgeAchievementsTable);
-    this.billboards = bindOps(rf, billboardsTable);
-    this.pages = bindOps(rf, pagesTable);
-    this.segments = bindOps(rf, segmentsTable);
-    this.recommendedArticlesLists = bindOps(rf, recommendedArticlesListsTable);
-    this.analytics = bindOps(rf, analyticsTable);
-    this.feedbackMessages = bindOps(rf, feedbackMessagesTable);
+    this.articles = bindOps<ArticlesNamespace>(rf, articlesTable);
+    this.comments = bindOps<CommentsNamespace>(rf, commentsTable);
+    this.users = bindOps<UsersNamespace>(rf, usersTable);
+    this.organizations = bindOps<OrganizationsNamespace>(rf, organizationsTable);
+    this.followers = bindOps<FollowersNamespace>(rf, followersTable);
+    this.follows = bindOps<FollowsNamespace>(rf, followsTable);
+    this.tags = bindOps<TagsNamespace>(rf, tagsTable);
+    this.readinglist = bindOps<ReadinglistNamespace>(rf, readinglistTable);
+    this.podcastEpisodes = bindOps<PodcastEpisodesNamespace>(rf, podcastEpisodesTable);
+    this.videos = bindOps<VideosNamespace>(rf, videosTable);
+    this.profileImages = bindOps<ProfileImagesNamespace>(rf, profileImagesTable);
+    this.reactions = bindOps<ReactionsNamespace>(rf, reactionsTable);
+    this.instance = bindOps<InstanceNamespace>(rf, instanceTable);
+    this.subforems = bindOps<SubforemsNamespace>(rf, subforemsTable);
+    this.healthChecks = bindOps<HealthChecksNamespace>(rf, healthChecksTable);
+    this.trends = bindOps<TrendsNamespace>(rf, trendsTable);
+    this.surveys = bindOps<SurveysNamespace>(rf, surveysTable);
+    this.concepts = bindOps<ConceptsNamespace>(rf, conceptsTable);
+    this.agentSessions = bindOps<AgentSessionsNamespace>(rf, agentSessionsTable);
+    this.badges = bindOps<BadgesNamespace>(rf, badgesTable);
+    this.badgeAchievements = bindOps<BadgeAchievementsNamespace>(rf, badgeAchievementsTable);
+    this.billboards = bindOps<BillboardsNamespace>(rf, billboardsTable);
+    this.pages = bindOps<PagesNamespace>(rf, pagesTable);
+    this.segments = bindOps<SegmentsNamespace>(rf, segmentsTable);
+    this.recommendedArticlesLists = bindOps<RecommendedArticlesListsNamespace>(
+      rf,
+      recommendedArticlesListsTable,
+    );
+    this.analytics = bindOps<AnalyticsNamespace>(rf, analyticsTable);
+    this.feedbackMessages = bindOps<FeedbackMessagesNamespace>(rf, feedbackMessagesTable);
     this.admin = {
-      users: bindOps(rf, adminUsersTable),
-      concepts: bindOps(rf, adminConceptsTable),
-      requestRedirects: bindOps(rf, adminRequestRedirectsTable),
+      users: bindOps<AdminUsersNamespace>(rf, adminUsersTable),
+      concepts: bindOps<AdminConceptsNamespace>(rf, adminConceptsTable),
+      requestRedirects: bindOps<AdminRequestRedirectsNamespace>(rf, adminRequestRedirectsTable),
     };
   }
 

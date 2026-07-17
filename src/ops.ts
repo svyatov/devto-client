@@ -56,11 +56,6 @@ type SuccessOf<O> = O extends { responses: infer R }
       | (204 extends keyof R ? undefined : never)
   : never;
 
-type PathParamsOf<O> = O extends { parameters: { path: infer P } }
-  ? P extends Record<string, unknown>
-    ? P
-    : never
-  : never;
 type QueryOf<O> = O extends { parameters: { query?: infer Q } }
   ? Exclude<Q, undefined> extends Record<string, unknown>
     ? Exclude<Q, undefined>
@@ -78,23 +73,15 @@ type BodyOf<O> = O extends { requestBody: { content: { "application/json": infer
         : never
     : never;
 
-// the generator marks `query` itself required when any query param is required
-type QueryRequired<O> = O extends { parameters: { query: Record<string, unknown> } } ? true : false;
-
-type RequiredKeysOf<T> = {
-  [K in keyof T]-?: Partial<Pick<T, K>> extends Pick<T, K> ? never : K;
-}[keyof T];
-
 type ItemOf<O> = SuccessOf<O> extends readonly (infer T)[] ? T : never;
 type IterQueryOf<O> = [QueryOf<O>] extends [never] ? never : Omit<QueryOf<O>, "page">;
 
 // ---------------------------------------------------------------------------
 // Call rule (ergonomic surface). Positional required path params in URL order,
 // then one flat params object (query OR unwrapped body — never both, R8), then
-// a trailing options bag. The generic `CallSig`/`IterCallSig` below are the
-// spec-derived reference the generated labeled interfaces are pinned against
-// (KTD2); they carry the true shape but not the parameter names, which only
-// `src/generated/signatures.ts` supplies.
+// a trailing options bag. The helpers below type each slot; the generator
+// (`scripts/generate-signatures.ts`) supplies the parameter names and arity in
+// `src/generated/signatures.ts`.
 // ---------------------------------------------------------------------------
 
 /** The `paths`-indexed operation object for a (path, verb) pair. */
@@ -127,7 +114,7 @@ export type CallBodyInner<
 /** Flat iterator query for an op — same rule, minus the iterator-driven `page`. */
 export type IterQuery<P extends keyof paths, V extends keyof paths[P]> = IterQueryOf<OpAt<P, V>>;
 
-// -- Structural derivation used only by the generic reference sigs (KTD2) --
+// -- Structural helpers feeding BodyKeySlot's wrapper-key detection (KTD4). --
 
 type IsUnion<T, C = T> = T extends unknown ? ([C] extends [T] ? false : true) : never;
 type IsSingle<T> = [T] extends [never] ? false : IsUnion<T> extends true ? false : true;
@@ -147,72 +134,6 @@ export type WrapperKeyOf<B> = [keyof B] extends [ObjectKeys<B>]
     ? keyof B & string
     : never
   : never;
-
-type UnwrapBody<B> = [WrapperKeyOf<B>] extends [never] ? B : B[WrapperKeyOf<B> & keyof B];
-
-/** The flat params object for an op: query if present, else the (unwrapped) body, else `never`. */
-type FlatSlot<O> = [QueryOf<O>] extends [never]
-  ? [BodyOf<O>] extends [never]
-    ? never
-    : UnwrapBody<NonNullable<BodyOf<O>>>
-  : QueryOf<O>;
-
-// requestBody is universally optional upstream, so a body slot is always optional;
-// a query slot is required only when the spec marks the whole query object required.
-type ParamsRequired<O> = [QueryOf<O>] extends [never] ? false : QueryRequired<O>;
-
-type ParamsTail<O> = [FlatSlot<O>] extends [never]
-  ? [opts?: CallOptions]
-  : ParamsRequired<O> extends true
-    ? [params: FlatSlot<O>, opts?: CallOptions]
-    : [params?: FlatSlot<O>, opts?: CallOptions];
-
-type IterParamsTail<O> = [IterQueryOf<O>] extends [never]
-  ? [opts?: CallOptions]
-  : [RequiredKeysOf<IterQueryOf<O>>] extends [never]
-    ? [params?: IterQueryOf<O>, opts?: CallOptions]
-    : [params: IterQueryOf<O>, opts?: CallOptions];
-
-/** Path `{param}` names in URL order, parsed from the template at the type level. */
-export type PathParamNames<S extends string> = S extends `${string}{${infer Name}}${infer Rest}`
-  ? [Name, ...PathParamNames<Rest>]
-  : [];
-
-// Recursive (not mapped) so the empty-path case is a clean `[]` tuple that spreads
-// correctly; a homomorphic mapped type over an empty tuple degrades to an array.
-type PathTuple<O, Names extends readonly string[]> = Names extends readonly [
-  infer H extends string,
-  ...infer T extends string[],
-]
-  ? [PathParamsOf<O>[H & keyof PathParamsOf<O>], ...PathTuple<O, T>]
-  : [];
-
-/** Spec-derived reference signature — true shape, positional order, unnamed params (KTD2). */
-export type CallSig<P extends keyof paths, V extends keyof paths[P]> = (
-  ...args: [...PathTuple<OpAt<P, V>, PathParamNames<P & string>>, ...ParamsTail<OpAt<P, V>>]
-) => CallResult<P, V>;
-
-export type IterCallSig<P extends keyof paths, V extends keyof paths[P]> = (
-  ...args: [...PathTuple<OpAt<P, V>, PathParamNames<P & string>>, ...IterParamsTail<OpAt<P, V>>]
-) => IterResult<P, V>;
-
-/**
- * The spec-derived reference namespace for a table: each op keyed to its generic
- * `CallSig`, each paginated op to an extra `<name>All` `IterCallSig`. The KTD2
- * contract test pins each generated interface as mutually assignable to this, so
- * the generated labeled signatures cannot drift from the spec in type or arity.
- */
-export type NamespaceOf<T extends OpTable> = {
-  [K in keyof T]: CallSig<T[K]["path"], T[K]["verb"] & keyof paths[T[K]["path"]]>;
-} & {
-  [K in keyof T as T[K]["paginated"] extends true ? `${K & string}All` : never]: IterCallSig<
-    T[K]["path"],
-    T[K]["verb"] & keyof paths[T[K]["path"]]
-  >;
-};
-
-/** `true` iff A and B are mutually assignable — the KTD2 pin's comparison. */
-export type MutuallyAssignable<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
 /** `true` iff op `O` does not declare both a query object and a request body (R8). */
 export type NoQueryAndBody<O> = [QueryOf<O>] extends [never]
@@ -251,7 +172,7 @@ function fillPath(template: string, params: Record<string, string | number>): st
  * wrapper — and a trailing `opts.signal` reaches transport. Ops with no query or
  * body take no params object, so their `opts` follows the positional args.
  */
-export function bindOps<T extends OpTable>(rf: RequestFn, table: T): NamespaceOf<T> {
+export function bindOps<N>(rf: RequestFn, table: OpTable): N {
   const ns: Record<string, unknown> = {};
   for (const [name, entry] of Object.entries(table)) {
     const pathNames = pathParamNames(entry.path);
@@ -303,5 +224,5 @@ export function bindOps<T extends OpTable>(rf: RequestFn, table: T): NamespaceOf
       };
     }
   }
-  return ns as NamespaceOf<T>;
+  return ns as N;
 }

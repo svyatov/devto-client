@@ -3,6 +3,7 @@ import { DevToClient } from "../src/client.ts";
 import { DevToApiError } from "../src/errors.ts";
 import type { components } from "../src/generated/types.ts";
 import { bindOps } from "../src/ops.ts";
+import { allTables } from "../src/resources/index.ts";
 
 type Call = { method: string; url: string; body: string | null };
 
@@ -230,6 +231,30 @@ describe("iterator variants", () => {
     await expect(
       client.concepts.articlesAll(7, {}, { signal: controller.signal }).next(),
     ).rejects.toThrow(/stop/);
+  });
+});
+
+describe("namespace/table pairing", () => {
+  // bindOps<N> no longer type-links its N to the table argument (KTD2), so a
+  // wrong-table bind (`bindOps<ArticlesNamespace>(rf, usersTable)`) compiles.
+  // This walks the same key→table map the client construction mirrors and
+  // asserts each client namespace exposes exactly its own table's methods.
+  it("binds every client namespace to its own table's methods", () => {
+    const { client } = harness();
+    for (const [key, table] of Object.entries(allTables)) {
+      const ns = key
+        .split(".")
+        .reduce((obj, seg) => (obj as Record<string, unknown>)[seg], client as unknown) as Record<
+        string,
+        unknown
+      >;
+      const expected = new Set(
+        Object.entries(table).flatMap(([name, entry]) =>
+          entry.paginated ? [name, `${name}All`] : [name],
+        ),
+      );
+      expect(new Set(Object.keys(ns))).toEqual(expected);
+    }
   });
 });
 
