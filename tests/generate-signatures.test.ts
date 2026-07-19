@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generate, loadSpec } from "../scripts/generate-signatures.ts";
+import { generate, loadSpec, namespaceName } from "../scripts/generate-signatures.ts";
 import { escapeRegex } from "../scripts/spec-templates.ts";
 import { pathParamNames } from "../src/path-template.ts";
 import { allTables } from "../src/resources/index.ts";
@@ -10,41 +10,41 @@ import { allTables } from "../src/resources/index.ts";
  * single-line output `generate()` returns.
  */
 const spec = loadSpec();
-const { signatures, routing } = generate(spec);
+const { signatures, schemas, routing } = generate(spec);
 
 describe("generate-signatures", () => {
   it("emits 0-, 1-, and 2-arity path signatures with true names, order, and types", () => {
+    expect(signatures).toContain("get: (id: number, opts?: CallOptions) => Promise<Article>;");
     expect(signatures).toContain(
-      'get: (id: number, opts?: CallOptions) => CallResult<"/api/articles/{id}", "get">;',
-    );
-    expect(signatures).toContain(
-      'getByPath: (username: string, slug: string, opts?: CallOptions) => CallResult<"/api/articles/{username}/{slug}", "get">;',
+      "getByPath: (username: string, slug: string, opts?: CallOptions) => Promise<Article>;",
     );
     // 0-arity op with only optional query keeps the params object optional
     expect(signatures).toContain(
-      'list: (params?: CallQuery<"/api/articles", "get">, opts?: CallOptions) => CallResult<"/api/articles", "get">;',
+      "list: (params?: ArticleListParams, opts?: CallOptions) => Promise<ArticleSummary[]>;",
     );
   });
 
   it("makes the params object required for a required-query op (AE3), optional otherwise", () => {
-    expect(signatures).toContain(
-      'semanticSearch: (params: CallQuery<"/api/articles/semantic_search", "get">',
-    );
-    expect(signatures).toContain('search: (params?: CallQuery<"/api/articles/search", "get">');
+    // the `?` on the slot carries required-vs-optional; the type is the named alias
+    expect(signatures).toContain("semanticSearch: (params: ArticleSemanticSearchParams,");
+    expect(signatures).toContain("search: (params?: ArticleSearchParams,");
   });
 
   it("unwraps a single-key body op to flat inner fields, leaves a flat body unchanged", () => {
+    // the unwrap distinction now lives in the param alias definition (schemas.ts):
     // wrapper op → CallBodyInner keyed by bodyKey
-    expect(signatures).toContain(
-      'create: (params?: CallBodyInner<"/api/articles", "post", "article">',
+    expect(schemas).toContain(
+      'export type ArticleCreateParams = Prettify<CallBodyInner<"/api/articles", "post", "article">>;',
     );
     // flat-body op (UserInviteParam { email, name }) → CallBody, no unwrap
-    expect(signatures).toContain('create: (params?: CallBody<"/api/admin/users", "post">');
+    expect(schemas).toContain(
+      'export type AdminUserCreateParams = Prettify<CallBody<"/api/admin/users", "post">>;',
+    );
   });
 
   it("emits an `<name>All` iterator twin for paginated ops", () => {
     expect(signatures).toContain(
-      'listAll: (params?: IterQuery<"/api/articles", "get">, opts?: CallOptions) => IterResult<"/api/articles", "get">;',
+      'listAll: (params?: ArticleListAllParams, opts?: CallOptions) => IterResult<"/api/articles", "get">;',
     );
     // a non-paginated op gets no twin
     expect(signatures).not.toContain("getByPathAll:");
@@ -69,26 +69,28 @@ describe("generate-signatures", () => {
       }
       return n;
     };
-    const argsOf = (member: string, path: string, verb: string, kind: "Call" | "Iter"): string => {
-      const m = signatures.match(
-        new RegExp(
-          `\\b${escapeRegex(member)}: \\(([^)]*)\\) => ${kind}Result<"${escapeRegex(path)}", "${verb}">`,
-        ),
-      );
-      if (!m) throw new Error(`no ${kind} member for ${member} (${verb} ${path})`);
+    // Friendly returns (Promise<Article>) drop the path/verb anchor, so locate
+    // each member inside its own namespace block — member names are unique there.
+    const blockOf = (iface: string): string => {
+      const m = signatures.match(new RegExp(`export interface ${iface} \\{([\\s\\S]*?)\\n\\}`));
+      if (!m) throw new Error(`no interface ${iface}`);
+      return m[1] as string;
+    };
+    const argsOf = (block: string, member: string): string => {
+      const m = block.match(new RegExp(`\\b${escapeRegex(member)}: \\(([^)]*)\\) =>`));
+      if (!m) throw new Error(`no member ${member}`);
       return m[1] as string;
     };
 
     let checked = 0;
-    for (const table of Object.values(allTables)) {
+    for (const [resourceKey, table] of Object.entries(allTables)) {
+      const block = blockOf(namespaceName(resourceKey));
       for (const [name, entry] of Object.entries(table)) {
         const expected = pathParamNames(entry.path).length;
-        expect(positionalArity(argsOf(name, entry.path, entry.verb, "Call"))).toBe(expected);
+        expect(positionalArity(argsOf(block, name))).toBe(expected);
         checked++;
         if (entry.paginated) {
-          expect(positionalArity(argsOf(`${name}All`, entry.path, entry.verb, "Iter"))).toBe(
-            expected,
-          );
+          expect(positionalArity(argsOf(block, `${name}All`))).toBe(expected);
           checked++;
         }
       }

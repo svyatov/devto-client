@@ -1,5 +1,46 @@
 export { DevToClient } from "./client.ts";
 export { DevToApiError, type ErrorEnvelope } from "./errors.ts";
+// Friendly types (KTD5): `DevTo` is the namespace home for every alias (zero
+// collisions), plus a curated flat re-export of the names that don't clash with
+// a `lib.dom` global. The two that do — `Comment` and `RequestRedirect` (fetch's
+// redirect mode) — are reachable only as `DevTo.Comment` / `DevTo.RequestRedirect`.
+export type * as DevTo from "./generated/schemas.ts";
+export type {
+  AdminUser,
+  AdminUserIdentity,
+  AdminUserNote,
+  AgentSession,
+  AgentSessionSummary,
+  Article,
+  ArticleSummary,
+  Badge,
+  BadgeAchievement,
+  Billboard,
+  Concept,
+  ExtendedUser,
+  FollowedTag,
+  HealthCheckMessage,
+  MyArticle,
+  MyUser,
+  Organization,
+  OrganizationSummary,
+  Page,
+  PodcastEpisodeSummary,
+  PollTextResponse,
+  PollVote,
+  ReactionResult,
+  ReadingListItem,
+  RecommendedArticlesList,
+  Segment,
+  SegmentBulkResult,
+  Subforem,
+  Survey,
+  SurveyWithPolls,
+  Tag,
+  Trend,
+  User,
+  VideoArticle,
+} from "./generated/schemas.ts";
 export type { ClientOptions, RequestOptions, RetryOptions } from "./http.ts";
 export type { AdminConceptsNamespace } from "./resources/admin-concepts.ts";
 export type { AdminRequestRedirectsNamespace } from "./resources/admin-request-redirects.ts";

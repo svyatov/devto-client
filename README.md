@@ -123,6 +123,34 @@ Public endpoints (articles, comments, tags, and friends) send `Access-Control-Al
 
 These are server configuration, not documented API contract, so treat them as guidance that can change without notice. As of mid-2026, dev.to allows roughly 3 GET requests per second and 1 write per second per API key, returning 429 with a `Retry-After` header (which proxies sometimes strip). Admin keys are exempt. The default retry policy absorbs occasional 429s; a sustained crawl needs pacing on your side.
 
+## Types you can import
+
+Hover `devto.articles.get(1)` and your editor shows `Promise<Article>` instead of a path-indexed blob you have to decode. Every result backed by a real schema has a friendly name, and every one of those names is importable:
+
+```ts
+import type { Article, ArticleSummary, User } from "devto-client";
+
+function render(article: Article) {
+  /* … */
+}
+```
+
+These are plain 1:1 aliases over the spec schemas. `Article` is exactly the `ArticleShow` schema; `ArticleSummary` is the lighter `ArticleIndex` that the list endpoints return. There's no merged god-type here, and no hand-written shape that can drift from the server. When the spec changes the alias changes with it, so a mismatch is a build error rather than a silent lie.
+
+Method params get names too. `articles.search` takes `ArticleSearchParams`, `articles.create` takes `ArticleCreateParams`, and they hover as a flat field list instead of an `Omit<…> & {…}` intersection you'd have to squint at. You won't usually import these by hand, since you pass the fields as a plain object and let inference do the naming. When you do want the type itself, to annotate a wrapper function for instance, reach for it through the `DevTo` namespace below (`DevTo.ArticleSearchParams`), which is where the param names live.
+
+A few schema names collide with browser globals. `Comment` is a DOM node, `RequestRedirect` is a fetch mode, and flat-importing either would shadow the real one. Those live only under the `DevTo` namespace, which is the collision-free home for every alias:
+
+```ts
+import type { DevTo } from "devto-client";
+
+function reply(comment: DevTo.Comment) {
+  /* … */
+}
+```
+
+`DevTo.*` reaches every friendly name, colliding or not, so lean on it whenever a bare import would be ambiguous.
+
 ## How the types are made
 
 Types generate from Forem's own rswag spec (`swagger/v1/api_v1.json`, pinned in [`spec/api_v1.json`](spec/api_v1.json)) composed with [`spec/overlay.json`](spec/overlay.json), a list of corrections where the upstream spec is missing schemas or disagrees with what the server actually sends. Each overlay entry records why it exists, which makes the spec-vs-reality gap machine-readable and each entry a candidate PR to Forem. A daily CI job diffs the pinned snapshot against upstream — structurally, so it names which path templates and operations changed — and flags any recorded fixture that has aged past its freshness window, filing an issue with the exact re-record command for each affected fixture. From there you re-record live responses from dev.to on demand, one endpoint at a time, instead of on a weekly schedule that dev.to's per-IP throttling made flaky; a manual reality-check run still type-checks fresh recordings against the spec, catching the server drifting under an unchanged spec.

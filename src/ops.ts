@@ -90,6 +90,13 @@ export type OpAt<P extends keyof paths, V extends keyof paths[P]> = paths[P][V];
 /** Trailing per-call options — transport concerns kept out of the params object. */
 export type CallOptions = { signal?: AbortSignal };
 
+/**
+ * Flatten an assembled intersection into a single field list so param aliases
+ * hover as a flat object, not `Omit<…> & {…}` (KTD4). Applied to params only —
+ * entity aliases stay plain `type X = …` so they render as a clickable name.
+ */
+export type Prettify<T> = { [K in keyof T]: T[K] } & {};
+
 export type CallResult<P extends keyof paths, V extends keyof paths[P]> = Promise<
   SuccessOf<OpAt<P, V>>
 >;
