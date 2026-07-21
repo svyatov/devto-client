@@ -107,6 +107,7 @@ import type {
   PodcastEpisodeSummary,
   PollTextResponse,
   PollVote,
+  ProfileImage,
   ReactionCreateParams,
   ReactionResult,
   ReactionToggleParams,
@@ -225,7 +226,7 @@ export interface OrganizationsNamespace {
     opts?: CallOptions,
   ) => IterResult<"/api/organizations", "get">;
   create: (params?: OrganizationCreateParams, opts?: CallOptions) => Promise<OrganizationSummary>;
-  get: (id: number, opts?: CallOptions) => CallResult<"/api/organizations/{id}", "get">;
+  get: (id: number, opts?: CallOptions) => Promise<Organization>;
   update: (
     id: number,
     params?: OrganizationUpdateParams,
@@ -298,10 +299,7 @@ export interface VideosNamespace {
 }
 
 export interface ProfileImagesNamespace {
-  get: (
-    username: string,
-    opts?: CallOptions,
-  ) => CallResult<"/api/profile_images/{username}", "get">;
+  get: (username: string, opts?: CallOptions) => Promise<ProfileImage>;
 }
 
 export interface ReactionsNamespace {
@@ -326,7 +324,7 @@ export interface HealthChecksNamespace {
 export interface TrendsNamespace {
   list: (params?: TrendListParams, opts?: CallOptions) => Promise<Trend[]>;
   listAll: (params?: TrendListAllParams, opts?: CallOptions) => IterResult<"/api/trends", "get">;
-  get: (id_or_slug: string, opts?: CallOptions) => CallResult<"/api/trends/{id_or_slug}", "get">;
+  get: (id_or_slug: string, opts?: CallOptions) => Promise<Trend>;
   articles: (
     trend_id_or_slug: string,
     params?: TrendArticlesParams,
@@ -409,16 +407,9 @@ export interface BadgeAchievementsNamespace {
 
 export interface BillboardsNamespace {
   list: (opts?: CallOptions) => Promise<Billboard[]>;
-  create: (
-    params?: BillboardCreateParams,
-    opts?: CallOptions,
-  ) => CallResult<"/api/billboards", "post">;
+  create: (params?: BillboardCreateParams, opts?: CallOptions) => Promise<Billboard>;
   get: (id: number, opts?: CallOptions) => Promise<Billboard>;
-  update: (
-    id: number,
-    params?: BillboardUpdateParams,
-    opts?: CallOptions,
-  ) => CallResult<"/api/billboards/{id}", "put">;
+  update: (id: number, params?: BillboardUpdateParams, opts?: CallOptions) => Promise<Billboard>;
   unpublish: (id: number, opts?: CallOptions) => Promise<void>;
 }
 
@@ -433,7 +424,7 @@ export interface PagesNamespace {
 export interface SegmentsNamespace {
   list: (params?: SegmentListParams, opts?: CallOptions) => Promise<Segment[]>;
   create: (opts?: CallOptions) => Promise<Segment>;
-  get: (id: number, opts?: CallOptions) => CallResult<"/api/segments/{id}", "get">;
+  get: (id: number, opts?: CallOptions) => Promise<Segment>;
   delete: (id: number, opts?: CallOptions) => Promise<Segment>;
   addUsers: (
     id: number,
