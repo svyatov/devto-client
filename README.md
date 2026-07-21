@@ -1,10 +1,10 @@
 # devto-client
 
-[![npm](https://img.shields.io/npm/v/devto-client)](https://www.npmjs.com/package/devto-client)
-[![CI](https://github.com/svyatov/devto-client/actions/workflows/ci.yml/badge.svg)](https://github.com/svyatov/devto-client/actions/workflows/ci.yml)
-[![coverage](https://img.shields.io/codecov/c/github/svyatov/devto-client)](https://codecov.io/gh/svyatov/devto-client)
-[![types](https://img.shields.io/badge/types-included-blue)](https://www.npmjs.com/package/devto-client)
-[![node](https://img.shields.io/node/v/devto-client)](https://nodejs.org)
+[![npm version](https://img.shields.io/npm/v/devto-client?style=flat-square)](https://www.npmjs.com/package/devto-client)
+[![CI](https://img.shields.io/github/actions/workflow/status/svyatov/devto-client/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/svyatov/devto-client/actions/workflows/ci.yml)
+[![coverage](https://img.shields.io/codecov/c/github/svyatov/devto-client?style=flat-square)](https://codecov.io/gh/svyatov/devto-client)
+[![minzipped size](https://img.shields.io/bundlephobia/minzip/devto-client?style=flat-square)](https://bundlephobia.com/package/devto-client)
+[![license](https://img.shields.io/npm/l/devto-client?style=flat-square)](./LICENSE)
 
 An unofficial, zero-dependency TypeScript client for the [dev.to (Forem) v1 API](https://developers.forem.com/api/v1). Every endpoint typed, every correctness trap handled by default.
 
@@ -34,6 +34,45 @@ for (const article of articles) {
 That's a real request against dev.to. The response type comes from Forem's own OpenAPI spec, so `article.` in your editor lists exactly what the server sends.
 
 Every method follows one call shape: required path ids come first as positional arguments (`articles.get(123)`, `articles.getByPath("ben", "my-slug")`), then everything else (query params or body fields) goes in a single flat object, then an optional `{ signal }` for aborting. You never say whether a value travels as a path, query, or body slot; that's the client's job. The parameter names in your editor are the real ones, generated from the spec, so `getByPath` autocompletes as `(username, slug)`, not `(arg0, arg1)`.
+
+## What's covered
+
+Each property on the client is a resource namespace, and the tier column tells you what credentials it needs before you write the code:
+
+| Namespace | Covers | Tier |
+| --- | --- | --- |
+| `devto.articles` | Read, search, publish, and manage your own drafts via the `me` operations | public / api-key |
+| `devto.comments` | Comment threads on articles and podcast episodes | public |
+| `devto.users` | User profiles, plus moderation actions | public / moderator |
+| `devto.organizations` | Organizations, their members, and their articles | public |
+| `devto.followers` | The users following you | api-key |
+| `devto.follows` | Create a follow and list the tags you follow | api-key |
+| `devto.tags` | The instance's tags | public |
+| `devto.readinglist` | Your saved-articles reading list | api-key |
+| `devto.podcastEpisodes` | Published podcast episodes | public |
+| `devto.videos` | Articles published with a video | public |
+| `devto.profileImages` | A user's profile-image URLs, looked up by username | public |
+| `devto.reactions` | Create or toggle reactions | admin |
+| `devto.instance` | Metadata for the connected Forem instance | public |
+| `devto.subforems` | Sub-communities on the instance | public |
+| `devto.healthChecks` | App, cache, and database liveness probes | public |
+| `devto.trends` | Trends and their articles | public |
+| `devto.surveys` | Surveys and their poll results | api-key |
+| `devto.concepts` | Concepts and their articles | public |
+| `devto.agentSessions` | Agent sessions, plus the undocumented presign and raw-url helpers | api-key |
+| `devto.badges` | Badge definitions; mutations need admin | public / admin |
+| `devto.badgeAchievements` | Badges awarded to users; awarding needs admin | public / admin |
+| `devto.billboards` | Billboards (display ads) | admin |
+| `devto.pages` | Static instance pages; mutations need admin | public / admin |
+| `devto.segments` | Audience segments and their membership | admin |
+| `devto.recommendedArticlesLists` | Recommended-articles lists | api-key |
+| `devto.analytics` | Analytics for your own content | api-key |
+| `devto.feedbackMessages` | Update the status of an abuse/feedback report | moderator |
+| `devto.admin.users` | User administration | admin |
+| `devto.admin.concepts` | Concept administration | admin |
+| `devto.admin.requestRedirects` | Request redirects | admin |
+
+`reactions` looks like a regular user endpoint and isn't: Forem gates it on admin upstream, so an ordinary key gets a 401. The same goes for `articles.unpublish`, which wants a moderator. Anything missing from this table is still reachable through [the escape hatch](#the-escape-hatch) at the bottom.
 
 ## Authentication
 
@@ -104,6 +143,14 @@ controller.abort(); // rejects promptly, even if the client was waiting out a 42
 ```
 
 Signal lives in that trailing argument, not the params object, so aborting never collides with a real query or body field. For a method whose params are optional, pass `undefined` first: `devto.articles.list(undefined, { signal })`.
+
+There's no `timeout` option, because the platform already has one:
+
+```ts
+const article = await devto.articles.get(123, { signal: AbortSignal.timeout(5_000) });
+```
+
+Watch the scope, though. That signal covers the whole call, backoff included, so it's a deadline for the entire operation rather than a per-attempt limit. A request that gets 429'd twice will burn most of its five seconds parked in `Retry-After` waits and then give up. If you want each attempt to get its own budget, set `retry: false` and drive the retries yourself.
 
 ## Self-hosted Forem instances
 
@@ -184,7 +231,7 @@ The call surface is ergonomic, but the core stays faithful to the server: respon
 
 | Kind | What | Why |
 | --- | --- | --- |
-| Included, undocumented | `agentSessions.presign` (`POST /api/agent_sessions/presign`) | Exists in Forem's routes, absent from the spec. Marked `undocumented` in its operation table. |
+| Included, undocumented | `agentSessions.presign` (`POST /api/agent_sessions/presign`) | Exists in Forem's routes, absent from the spec. Marked `undocumented` in its [operation table](src/resources/agent-sessions.ts). |
 | Included, undocumented | `agentSessions.rawUrl` (`GET /api/agent_sessions/{id}/raw_url`) | Same. |
 | Excluded | listings endpoints | Dead upstream stubs returning empty responses. |
 | Excluded | `/api/display_ads` | Transitional alias of `/api/billboards`. |
@@ -220,7 +267,9 @@ const raw = await devto.request<unknown>("GET", "/api/articles/latest", {
 
 ## Contributing
 
-Most contributions come down to teaching the client an endpoint it doesn't cover yet, and [CONTRIBUTING.md](CONTRIBUTING.md) walks you from a fresh clone through that first PR: setup, the two quality gates, and the add-an-endpoint loop.
+Most contributions come down to teaching the client an endpoint it doesn't cover yet, and [CONTRIBUTING.md](CONTRIBUTING.md) walks you from a fresh clone through that first PR: setup, the two quality gates, and the add-an-endpoint loop. The [Code of Conduct](CODE_OF_CONDUCT.md) applies to everyone taking part.
+
+Version history lives in [CHANGELOG.md](CHANGELOG.md). Security problems have their own private reporting route in [SECURITY.md](SECURITY.md); please use that instead of a public issue.
 
 ## License
 
