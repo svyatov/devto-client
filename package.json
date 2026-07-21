@@ -1,6 +1,6 @@
 {
   "name": "devto-client",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Typed, zero-dependency client for the dev.to (Forem) v1 API",
   "license": "MIT",
   "author": "Leonid Svyatov <leonid@svyatov.com>",
