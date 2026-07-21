@@ -89,24 +89,30 @@ function isVacuous(payload: unknown): boolean {
  */
 function missingKeys(payload: unknown, schema: Schema): string[] {
   const resolved = deref(schema);
+  const seen = carriedKeys(payload);
   if (resolved.type === "array" && resolved.items) {
     if (!Array.isArray(payload)) return ["<payload is not an array>"];
-    const seen = new Set(payload.flatMap((el) => Object.keys(el as Record<string, unknown>)));
     return declaredKeys(resolved.items).filter((k) => !seen.has(k));
   }
   if (payload === null || typeof payload !== "object") return ["<payload is not an object>"];
-  const keys = new Set(Object.keys(payload));
-  return declaredKeys(resolved).filter((k) => !keys.has(k));
+  return declaredKeys(resolved).filter((k) => !seen.has(k));
 }
 
-/** Spec-declared keys that serializers legitimately omit when no data exists. */
-const CONDITIONAL_KEYS: Record<string, string[]> = {
-  // emitted only when the article belongs to an org / has a flare tag
-  "/api/articles/{id}": ["organization", "flare_tag"],
-  "/api/articles/{username}/{slug}": ["organization", "flare_tag"],
-  "/api/articles": ["organization", "flare_tag"],
-  "/api/articles/latest": ["organization", "flare_tag"],
-};
+/** Keys any element of the payload actually carries; a bare object counts as one element. */
+function carriedKeys(payload: unknown): Set<string> {
+  const elements = Array.isArray(payload) ? payload : [payload];
+  return new Set(
+    elements.flatMap((el) => (el !== null && typeof el === "object" ? Object.keys(el) : [])),
+  );
+}
+
+/**
+ * Keys the article serializer emits only when the data exists — org membership, a flare tag.
+ * Not checked per endpoint: whether a given page of articles happens to contain one is a coin
+ * flip, and that flakiness has filed a false drift alarm twice. The drift signal lives in the
+ * "still sent somewhere" test below instead, which fails if the server drops a key everywhere.
+ */
+const CONDITIONAL_KEYS = ["organization", "flare_tag"];
 
 const FIXTURES_DIR = process.env.FIXTURES_DIR ?? "tests/fixtures/recorded";
 const files = existsSync(FIXTURES_DIR)
@@ -140,6 +146,7 @@ describe("recorded fixtures vs composed spec", () => {
   });
 
   const vacuous: string[] = [];
+  const seenConditional = new Set<string>();
 
   for (const file of files) {
     const rec = JSON.parse(readFileSync(`${FIXTURES_DIR}/${file}`, "utf8")) as Recorded;
@@ -160,8 +167,12 @@ describe("recorded fixtures vs composed spec", () => {
         expect(rec.payload).toBeNull();
         return;
       }
-      const allowed = CONDITIONAL_KEYS[rec.template] ?? [];
-      const missing = missingKeys(rec.payload, lookup.schema).filter((k) => !allowed.includes(k));
+      const carried = carriedKeys(rec.payload);
+      for (const k of CONDITIONAL_KEYS) if (carried.has(k)) seenConditional.add(k);
+
+      const missing = missingKeys(rec.payload, lookup.schema).filter(
+        (k) => !CONDITIONAL_KEYS.includes(k),
+      );
       expect(missing).toEqual([]);
     });
   }
@@ -172,6 +183,13 @@ describe("recorded fixtures vs composed spec", () => {
     }
     // vacuous entries must be the exception, not the recorded tier
     expect(vacuous.length).toBeLessThan(Math.max(1, files.length / 2));
+  });
+
+  // The alarm the per-endpoint allowlist used to raise, minus the coin flip: skipping a
+  // conditional key everywhere would hide the server dropping it everywhere, so prove at
+  // least one fixture still carries each one.
+  it("proves each conditional key is still sent somewhere", () => {
+    expect(CONDITIONAL_KEYS.filter((k) => !seenConditional.has(k))).toEqual([]);
   });
 });
 
@@ -202,6 +220,16 @@ describe("mechanism meta-tests", () => {
     const corrupted: components["schemas"]["ArticleIndex"] = { type_of: 42 };
     void corrupted;
     expect(true).toBe(true);
+  });
+
+  // Skipping the conditional keys everywhere is only safe while every schema declaring them is
+  // an article serializer, where they really are conditional. A fifth name here means some other
+  // response grew an `organization` that the skip would silently stop checking.
+  it("only the article serializers declare the conditional keys", () => {
+    const owners = Object.entries(spec.components.schemas)
+      .filter(([, s]) => CONDITIONAL_KEYS.some((k) => s.properties?.[k]))
+      .map(([name]) => name);
+    expect(owners).toEqual(["ArticleIndex", "ArticleShow", "MyArticle", "ReadingListArticle"]);
   });
 
   it("resolves $refs through the composed spec", () => {
