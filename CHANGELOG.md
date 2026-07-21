@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/svyatov/devto-client/compare/v1.0.0...v1.0.1) (2026-07-21)
+
+
+### Documentation
+
+* **contributing:** explain how releases publish ([7e9b095](https://github.com/svyatov/devto-client/commit/7e9b0951f1b55f71bd7ffb2144ae3501baee808f))
+
 ## 1.0.0 (2026-07-21)
 
 
