@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { DevToClient } from "../src/client.ts";
 import { DevToApiError } from "../src/errors.ts";
-import { abortReason, sleep } from "../src/http.ts";
+import { abortReason, resolveConfig, sleep } from "../src/http.ts";
 
 const json = (body: unknown, status = 200, headers: Record<string, string> = {}): Response =>
   new Response(JSON.stringify(body), {
@@ -132,6 +132,18 @@ describe("request building", () => {
     const { client: c, calls } = client({ baseUrl: "https://forem.example/" }, json([]));
     await c.request("GET", "/api/articles");
     expect(calls[0]?.url).toBe("https://forem.example/api/articles");
+  });
+
+  it("strips a trailing slash run without backtracking", () => {
+    expect(resolveConfig({ baseUrl: `https://forem.example${"/".repeat(50)}` }).baseUrl).toBe(
+      "https://forem.example",
+    );
+    // a slash run followed by a non-slash matches nothing; the old `\/+$` retried
+    // at every slash, so this took minutes instead of microseconds
+    const evil = `https://forem.example/${"/".repeat(50_000)}x`;
+    const started = performance.now();
+    expect(resolveConfig({ baseUrl: evil }).baseUrl).toBe(evil);
+    expect(performance.now() - started).toBeLessThan(100);
   });
 
   it("serializes query params, dropping undefined values", async () => {
