@@ -89,7 +89,7 @@ const draft = await devto.articles.create({
 console.log(`draft #${draft.id} created`);
 ```
 
-You pass the article fields flat. On the wire dev.to wants them wrapped in `{ "article": { ... } }`, and the client adds that wrapper for you — one less bit of transport trivia to remember. The key travels in the `api-key` header on every request. The client refuses `http://` base URLs so it can't leak in cleartext (see self-hosted instances below for the escape hatch).
+You pass the article fields flat. On the wire dev.to wants them wrapped in `{ "article": { ... } }`, and the client adds that wrapper for you, one less bit of transport trivia to remember. The key travels in the `api-key` header on every request. The client refuses `http://` base URLs so it can't leak in cleartext (see self-hosted instances below for the escape hatch).
 
 ## Pagination
 
@@ -185,7 +185,9 @@ controller.abort(); // rejects promptly, even if the client was waiting out a 42
 
 An abort surfaces your own reason, so `instanceof DevToTimeoutError` tells a deadline apart from a cancellation you initiated. Signal lives in that trailing options argument, not the params object, so aborting never collides with a real query or body field. For a method whose params are optional, pass `undefined` first: `devto.articles.list(undefined, { signal })`. `timeoutMs` lives there too, if one call needs a different budget than the client's default.
 
-If you point `baseUrl` at a Forem instance you don't control, `timeoutMs` is your trust boundary. There's no separate ceiling on a server-supplied `Retry-After` anymore, so a hostile instance can ask you to sleep for an hour and the deadline is the only thing that says no. Set it to something you're willing to wait.
+If you point `baseUrl` at a Forem instance you don't control, `timeoutMs` is what bounds your patience. There's no separate ceiling on a server-supplied `Retry-After` anymore, so a hostile instance can ask you to sleep for an hour and the deadline is the only thing that says no. Set it to something you're willing to wait.
+
+It bounds time, not bytes. Responses are buffered whole before parsing, so an instance that answers fast with a gigabyte still costs you a gigabyte of memory. Treat the deadline as one control among several rather than the whole boundary, and don't point the client at a host you wouldn't trust with a plain `fetch`.
 
 ## Self-hosted Forem instances
 
@@ -242,7 +244,7 @@ const archive = new DevToClient({ pace }); // same pacer, one shared budget
 
 Each client holds its own budget unless you hand two of them the same pacer. Worth knowing: dev.to throttles per IP as well as per key, so two clients on one machine already share a server-side budget whether or not they share a pacer. Independent pacers under-protect you rather than merely over-pacing.
 
-Turn it off with `pace: false`. The main reason to is an admin key, which is exempt upstream — the client can't detect one, and the only reliable probe would be `/api/users/me`, the endpoint that intermittently 401s on a perfectly good key. So pacing stays on for everyone and admins opt out by hand.
+Turn it off with `pace: false`. The main reason to is an admin key, which is exempt upstream. The client can't detect one, and the only reliable probe would be `/api/users/me`, the endpoint that intermittently 401s on a perfectly good key. So pacing stays on for everyone and admins opt out by hand.
 
 One boundary to be aware of if you fire many calls concurrently. Every deadline clock starts when its call is created, so more than roughly `timeoutMs × rate` requests in flight at once (about 90 reads at the defaults) means the tail of the burst exhausts its deadline waiting for a slot and fails with `DevToTimeoutError`. That's deliberate: a request that can't start inside its own budget should say so rather than queue invisibly.
 
@@ -278,7 +280,7 @@ function reply(comment: DevTo.Comment) {
 
 ## How the types are made
 
-Types generate from Forem's own rswag spec (`swagger/v1/api_v1.json`, pinned in [`spec/api_v1.json`](spec/api_v1.json)) composed with [`spec/overlay.json`](spec/overlay.json), a list of corrections where the upstream spec is missing schemas or disagrees with what the server actually sends. Each overlay entry records why it exists, which makes the spec-vs-reality gap machine-readable and each entry a candidate PR to Forem. A daily CI job diffs the pinned snapshot against upstream — structurally, so it names which path templates and operations changed — and flags any recorded fixture that has aged past its freshness window, filing an issue with the exact re-record command for each affected fixture. From there you re-record live responses from dev.to on demand, one endpoint at a time, instead of on a weekly schedule that dev.to's per-IP throttling made flaky; a manual reality-check run still type-checks fresh recordings against the spec, catching the server drifting under an unchanged spec.
+Types generate from Forem's own rswag spec (`swagger/v1/api_v1.json`, pinned in [`spec/api_v1.json`](spec/api_v1.json)) composed with [`spec/overlay.json`](spec/overlay.json), a list of corrections where the upstream spec is missing schemas or disagrees with what the server actually sends. Each overlay entry records why it exists, which makes the spec-vs-reality gap machine-readable and each entry a candidate PR to Forem. A daily CI job diffs the pinned snapshot against upstream (structurally, so it names which path templates and operations changed) and flags any recorded fixture that has aged past its freshness window, filing an issue with the exact re-record command for each affected fixture. From there you re-record live responses from dev.to on demand, one endpoint at a time, instead of on a weekly schedule that dev.to's per-IP throttling made flaky; a manual reality-check run still type-checks fresh recordings against the spec, catching the server drifting under an unchanged spec.
 
 ## Deviations from the upstream spec
 
@@ -318,7 +320,7 @@ const raw = await devto.request<unknown>("GET", "/api/articles/latest", {
 });
 ```
 
-`client.request(method, path, opts)` still layers on the versioned header, auth, retries, and error handling — it only hands you back control over the path and payload. It's the one place the `{ query, body, signal }` options object survives, precisely because a raw call has no spec to derive its shape from.
+`client.request(method, path, opts)` still layers on the versioned header, auth, retries, and error handling: it only hands you back control over the path and payload. It's the one place the `{ query, body, signal }` options object survives, precisely because a raw call has no spec to derive its shape from.
 
 ## Contributing
 

@@ -25,7 +25,7 @@ export interface RetryOptions {
   /** First backoff step for 5xx, doubling with jitter per attempt. Default 500ms. */
   baseDelayMs?: number;
   /**
-   * Flat wait for a 429 that carries no usable `Retry-After`. Default 5s — five
+   * Flat wait for a 429 that carries no usable `Retry-After`. Default 5s: five
    * times Forem's one-second throttle window, which leaves the 30s default
    * deadline room for the wait plus a following attempt. Flat rather than
    * exponential because a fixed window has nothing to grow into.
@@ -35,7 +35,7 @@ export interface RetryOptions {
 
 /** Options for constructing a {@link DevToClient}. */
 export interface ClientOptions {
-  /** Forem API key. Optional — public endpoints work keyless. */
+  /** Forem API key. Optional: public endpoints work keyless. */
   apiKey?: string;
   /** Defaults to https://dev.to; set for self-hosted Forem instances. */
   baseUrl?: string;
@@ -44,7 +44,7 @@ export interface ClientOptions {
   /** `false` disables retries entirely. */
   retry?: RetryOptions | false;
   /**
-   * Deadline for a whole call — every attempt, every backoff wait, every pacing
+   * Deadline for a whole call: every attempt, every backoff wait, every pacing
    * hold, and the response body read, together. Default 30s. One call is one HTTP
    * request, so each page of an `All` iterator carries its own; bound a whole walk
    * with your own `signal` instead. Expiry rejects with `DevToTimeoutError`.
@@ -53,13 +53,13 @@ export interface ClientOptions {
   /**
    * Self-pacing against dev.to's per-second budgets, on by default. Pass a pacer
    * from `createPacer` to tune it, share one between clients to share a budget, or
-   * pass `false` to disable it — which is the right setting for an admin key,
+   * pass `false` to disable it, which is the right setting for an admin key,
    * since those are throttle-exempt upstream and the client cannot detect them.
    */
   pace?: Pacer | false;
   /**
    * Called with transport metadata for every response, success or failure, before
-   * the body is read. This is where cache status reaches a successful call — a
+   * the body is read. This is where cache status reaches a successful call: a
    * `fromCache` 200 means a CDN answered, which for an authenticated read may mean
    * it answered with someone else's bytes. Throwing from here cannot affect the call.
    */
@@ -67,9 +67,9 @@ export interface ClientOptions {
   /**
    * Default headers merged into every request. Set a `user-agent` to identify
    * your app, for instance. Per-request `headers` override these; the versioned
-   * Accept header and the api-key always win. Pass your Forem key via `apiKey`,
-   * not here; a key set through `headers` skips the redirect-leak guard. Browsers
-   * ignore a custom `user-agent`, so the setting only takes effect off the browser.
+   * Accept header and the api-key always win. Prefer `apiKey` for your Forem key,
+   * though one set here gets the same redirect-leak guard. Browsers ignore a
+   * custom `user-agent`, so that setting only takes effect off the browser.
    */
   headers?: Record<string, string>;
   /** Injectable for tests. Defaults to the global fetch. */
@@ -114,7 +114,7 @@ export function resolveConfig(options: ClientOptions): ResolvedConfig {
   }
   if (parsed.protocol === "http:" && options.allowInsecureHttp !== true) {
     throw new Error(
-      "baseUrl must be https — the api-key would transit cleartext. Set allowInsecureHttp: true to override.",
+      "baseUrl must be https. The api-key would transit cleartext. Set allowInsecureHttp: true to override.",
     );
   }
   const resolvedSleep = options.sleep ?? sleep;
@@ -146,7 +146,7 @@ function parseRetryAfter(header: string | null): number | null {
   return header !== null && /^\d+$/.test(header) ? Number(header) * 1000 : null;
 }
 
-/** Exponential with downward jitter. Unbounded — the call deadline is the ceiling. */
+/** Exponential with downward jitter. Unbounded. The call deadline is the ceiling. */
 function backoffDelay(attempt: number, retry: Required<RetryOptions>): number {
   return retry.baseDelayMs * 2 ** (attempt - 1) * (0.5 + Math.random() * 0.5);
 }
@@ -154,7 +154,7 @@ function backoffDelay(attempt: number, retry: Required<RetryOptions>): number {
 /**
  * Headers only. This cannot fold into {@link toApiError}: the retry decision needs
  * the cache flag *before* the error is built, and building the error consumes the
- * body — after which the headers are still readable but the response is spent.
+ * body, after which the headers are still readable but the response is spent.
  */
 export function readTransportMeta(res: Response): ResponseMeta {
   const age = res.headers.get("age");
@@ -181,7 +181,7 @@ async function toApiError(res: Response, meta: ResponseMeta): Promise<DevToApiEr
       envelope = parsed as ErrorEnvelope;
     }
   } catch {
-    // not JSON — rawBody carries it
+    // not JSON: rawBody carries it
   }
   return new DevToApiError(res.status, envelope, rawBody, meta);
 }
@@ -199,7 +199,14 @@ export async function request<T>(
     if (value !== undefined) url.searchParams.set(key, String(value));
   }
 
-  const headers = new Headers({ ...config.headers, ...opts.headers });
+  // `set` per entry rather than one spread of both objects: a spread compares keys
+  // case-sensitively, so a per-request `x-foo` would survive alongside a
+  // client-level `X-Foo` and Headers would comma-join the two instead of letting
+  // the per-request value win
+  const headers = new Headers();
+  for (const source of [config.headers, opts.headers]) {
+    for (const [key, value] of Object.entries(source ?? {})) headers.set(key, value);
+  }
   // weakest precedence, unlike accept and api-key below: a caller who names the
   // library in their own user-agent replaces ours rather than collecting both.
   // `has` rather than an object-spread default so `User-Agent` matches too.
@@ -209,8 +216,10 @@ export async function request<T>(
 
   const init: RequestInit = { method, headers };
   // fetch strips Authorization on cross-origin redirects but forwards custom
-  // headers like api-key — refuse redirects outright rather than leak the key
-  if (config.apiKey !== undefined) init.redirect = "error";
+  // headers like api-key. Refuse redirects outright rather than leak the key.
+  // Asked of the assembled headers, not `config.apiKey`, so a key a caller
+  // supplied through `headers` is guarded the same way.
+  if (headers.has("api-key")) init.redirect = "error";
   if (opts.body !== undefined) {
     init.body = JSON.stringify(opts.body);
     if (!headers.has("content-type")) headers.set("content-type", "application/json");
@@ -236,7 +245,7 @@ export async function request<T>(
 
     // KTD1: one controller per attempt, armed until the body is consumed. Composing
     // `AbortSignal.any([opts.signal, AbortSignal.timeout(...)])` instead would pile
-    // one composite per page onto a caller signal reused across a listAll walk —
+    // one composite per page onto a caller signal reused across a listAll walk:
     // the documented Node leak. The finally below is what keeps that from happening.
     const controller = new AbortController();
     const deadline = expired();
@@ -245,7 +254,7 @@ export async function request<T>(
       if (opts.signal) controller.abort(abortReason(opts.signal));
     };
     // a listener added to an already-aborted signal never fires, and the caller
-    // may have aborted while we were paced or backing off — check, then subscribe
+    // may have aborted while we were paced or backing off: check, then subscribe
     if (opts.signal?.aborted) {
       clearTimeout(timer);
       throw abortReason(opts.signal);
@@ -279,7 +288,7 @@ export async function request<T>(
         return (text === "" ? undefined : JSON.parse(text)) as T;
       }
 
-      // a cached 429 replays the same stored bytes on every attempt — it cannot be
+      // a cached 429 replays the same stored bytes on every attempt: it cannot be
       // won, and each try spends rate budget on the way (R3). 5xx is excluded: a
       // short-TTL cached 500 can still recover on a later attempt.
       const retriesLeft = retry !== null && attempt < retry.attempts;

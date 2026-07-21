@@ -74,7 +74,7 @@ const res429 = (retryAfter?: string, headers: Record<string, string> = {}): Resp
 /** Yields to the event loop so an abort lands mid-flight rather than before the call starts. */
 const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 5));
 
-/** A fetch that resolves nothing, ever — the hang this whole deadline exists to end. */
+/** A fetch that resolves nothing, ever: the hang this whole deadline exists to end. */
 const stallingFetch = ((_url: string | URL | Request, init?: RequestInit) =>
   new Promise<Response>((_resolve, reject) => {
     init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
@@ -137,6 +137,18 @@ describe("request building", () => {
     const b = client({}, json([]));
     await b.client.request("GET", "/api/articles");
     expect(b.calls[0]?.init.redirect).toBeUndefined();
+  });
+
+  it("refuses redirects for an api-key supplied through headers, not just apiKey", async () => {
+    // the guard used to read `config.apiKey`, so this key travelled on a
+    // followable redirect straight to whatever host the server named
+    const a = client({ headers: { "api-key": "secret" } }, json([]));
+    await a.client.request("GET", "/api/articles/me");
+    expect(a.calls[0]?.init.redirect).toBe("error");
+
+    const b = client({}, json([]));
+    await b.client.request("GET", "/api/articles", { headers: { "API-Key": "secret" } });
+    expect(b.calls[0]?.init.redirect).toBe("error");
   });
 
   it("attaches api-key when configured, omits it otherwise", async () => {
@@ -225,6 +237,14 @@ describe("custom headers", () => {
     expect(new Headers(calls[0]?.init.headers).get("accept")).toBe(
       "application/vnd.forem.api-v1+json",
     );
+  });
+
+  it("overrides a client-level header whose name is cased differently", async () => {
+    // header names are case-insensitive on the wire but not to an object spread,
+    // so both entries used to survive the merge and Headers comma-joined them
+    const { client: c, calls } = client({ headers: { "X-Trace": "default" } }, json([]));
+    await c.request("GET", "/api/articles", { headers: { "x-trace": "override" } });
+    expect(new Headers(calls[0]?.init.headers).get("x-trace")).toBe("override");
   });
 });
 
@@ -355,8 +375,8 @@ describe("retry", () => {
     expect(delays).toEqual([1000]); // honored the 1-second Retry-After
   });
 
-  it("retries a 429 POST too — the request was never processed", async () => {
-    // pace: false isolates the retry wait — a second write inside a second would
+  it("retries a 429 POST too, the request was never processed", async () => {
+    // pace: false isolates the retry wait: a second write inside a second would
     // otherwise draw a pacing hold too, which the pacing suite covers on its own
     const { client: c, calls, delays } = retryClient({ pace: false }, res429("1"), json({}, 201));
     await expect(c.request("POST", "/api/articles", { body: {} })).resolves.toEqual({});
@@ -378,7 +398,7 @@ describe("retry", () => {
     } = retryClient({}, res429(), res429("Wed, 21 Oct 2026 07:28:00 GMT"), json([]));
     await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
     expect(calls).toHaveLength(3);
-    // Both fell back to the flat throttle wait — a fixed server window has
+    // Both fell back to the flat throttle wait: a fixed server window has
     // nothing for an exponential schedule to grow into.
     expect(delays).toEqual([5000, 5000]);
   });
@@ -452,7 +472,7 @@ describe("retry", () => {
     expect(calls).toHaveLength(2);
   });
 
-  it("does not retry 5xx for POST — double-publish risk", async () => {
+  it("does not retry 5xx for POST: double-publish risk", async () => {
     const { client: c, calls } = client({}, new Response("", { status: 502 }));
     await expect(c.request("POST", "/api/articles", { body: {} })).rejects.toBeInstanceOf(
       DevToApiError,
@@ -503,7 +523,7 @@ describe("transport metadata (U1)", () => {
   });
 
   it("reads fromCache false when there is no x-cache header at all", () => {
-    // a self-hosted Forem behind no CDN — degrades to today's behavior
+    // a self-hosted Forem behind no CDN, degrades to today's behavior
     expect(readTransportMeta(new Response("")).fromCache).toBe(false);
   });
 
@@ -520,7 +540,7 @@ describe("transport metadata (U1)", () => {
     );
     const err = (await c.request("GET", "/api/articles").catch((e: unknown) => e)) as DevToApiError;
     expect(err).toBeInstanceOf(DevToApiError);
-    expect(calls).toHaveLength(1); // no second attempt — the replay cannot be won
+    expect(calls).toHaveLength(1); // no second attempt: the replay cannot be won
     expect(err.fromCache).toBe(true);
     expect(err.age).toBe(104);
     expect(err.requestId).toBe("req-abc");
@@ -548,7 +568,7 @@ describe("transport metadata (U1)", () => {
     expect(calls).toHaveLength(1);
   });
 
-  it("still retries a cached 500 on an idempotent GET — R3 covers 429 only", async () => {
+  it("still retries a cached 500 on an idempotent GET: R3 covers 429 only", async () => {
     const { client: c, calls } = retryClient(
       {},
       new Response("", { status: 500, headers: { "x-cache": "HIT, MISS" } }),
@@ -630,7 +650,7 @@ describe("call deadline (U2)", () => {
   });
 
   it("rejects when headers arrive but the body never completes", async () => {
-    // the controller stays armed past fetch's resolution (KTD1) — tearing it down
+    // the controller stays armed past fetch's resolution (KTD1): tearing it down
     // when fetch settles would leave this stream unbounded
     const c = new DevToClient({ fetch: stallingBodyFetch, timeoutMs: 20 });
     await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToTimeoutError);
@@ -742,7 +762,7 @@ describe("retry patience (U3)", () => {
   it("fits a full throttle wait plus a following attempt in the stock deadline (AE6)", async () => {
     const { client: c, calls, delays } = retryClient({}, res429(), json([]));
     await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
-    expect(delays).toEqual([5000]); // full, unclamped — R5's 30s default has room
+    expect(delays).toEqual([5000]); // full, unclamped: R5's 30s default has room
     expect(calls).toHaveLength(2);
   });
 
@@ -757,7 +777,7 @@ describe("retry patience (U3)", () => {
       json([]),
     );
     await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
-    expect(calls).toHaveLength(2); // clamped, not refused — raising attempts still works
+    expect(calls).toHaveLength(2); // clamped, not refused: raising attempts still works
     expect(delays[0]).toBeGreaterThan(0);
     expect(delays[0]).toBeLessThanOrEqual(30_000);
   });
