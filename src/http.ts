@@ -1,6 +1,8 @@
 import { DevToApiError, type ErrorEnvelope } from "./errors.ts";
+import { VERSION } from "./version.ts";
 
 const ACCEPT_V1 = "application/vnd.forem.api-v1+json";
+const USER_AGENT = `devto-client/${VERSION}`;
 const IDEMPOTENT = new Set(["GET", "HEAD", "PUT", "DELETE", "OPTIONS"]);
 
 /** Retry policy for transient failures: 429 responses (any method) and 5xx on idempotent methods. */
@@ -149,6 +151,10 @@ export async function request<T>(
   }
 
   const headers = new Headers({ ...config.headers, ...opts.headers });
+  // weakest precedence, unlike accept and api-key below: a caller who names the
+  // library in their own user-agent replaces ours rather than collecting both.
+  // `has` rather than an object-spread default so `User-Agent` matches too.
+  if (!headers.has("user-agent")) headers.set("user-agent", USER_AGENT);
   headers.set("accept", ACCEPT_V1);
   if (config.apiKey !== undefined) headers.set("api-key", config.apiKey);
 

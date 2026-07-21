@@ -1,7 +1,9 @@
 import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
 import { DevToClient } from "../src/client.ts";
 import { DevToApiError } from "../src/errors.ts";
 import { abortReason, resolveConfig, sleep } from "../src/http.ts";
+import { VERSION } from "../src/version.ts";
 
 const json = (body: unknown, status = 200, headers: Record<string, string> = {}): Response =>
   new Response(JSON.stringify(body), {
@@ -198,6 +200,51 @@ describe("custom headers", () => {
     expect(new Headers(calls[0]?.init.headers).get("accept")).toBe(
       "application/vnd.forem.api-v1+json",
     );
+  });
+});
+
+describe("user-agent", () => {
+  it("sends devto-client/<version> by default", async () => {
+    const { client: c, calls } = client({}, json([]));
+    await c.request("GET", "/api/articles");
+    expect(new Headers(calls[0]?.init.headers).get("user-agent")).toBe(`devto-client/${VERSION}`);
+  });
+
+  it("lets a client-level user-agent replace the default rather than append to it", async () => {
+    const { client: c, calls } = client({ headers: { "user-agent": "my-app/1.0" } }, json([]));
+    await c.request("GET", "/api/articles");
+    expect(new Headers(calls[0]?.init.headers).get("user-agent")).toBe("my-app/1.0");
+  });
+
+  it("lets a per-request user-agent replace a client-level one", async () => {
+    const { client: c, calls } = client({ headers: { "user-agent": "my-app/1.0" } }, json([]));
+    await c.request("GET", "/api/articles", { headers: { "user-agent": "my-app/1.0 batch" } });
+    expect(new Headers(calls[0]?.init.headers).get("user-agent")).toBe("my-app/1.0 batch");
+  });
+
+  it("matches a differently-cased caller header instead of sending both (AE5)", async () => {
+    const { client: c, calls } = client({ headers: { "User-Agent": "my-app/1.0" } }, json([]));
+    await c.request("GET", "/api/articles");
+    expect(new Headers(calls[0]?.init.headers).get("user-agent")).toBe("my-app/1.0");
+  });
+
+  it("keeps accept and api-key winning over caller headers, unlike user-agent (AE5)", async () => {
+    const { client: c, calls } = client(
+      { apiKey: "secret", headers: { "user-agent": "my-app/1.0" } },
+      json([]),
+    );
+    await c.request("GET", "/api/articles/me", {
+      headers: { accept: "application/json", "api-key": "smuggled" },
+    });
+    const sent = new Headers(calls[0]?.init.headers);
+    expect(sent.get("user-agent")).toBe("my-app/1.0"); // caller wins
+    expect(sent.get("accept")).toBe("application/vnd.forem.api-v1+json"); // library wins
+    expect(sent.get("api-key")).toBe("secret"); // library wins
+  });
+
+  it("agrees with package.json, guarding release-please extra-files drift", () => {
+    const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
+    expect(VERSION).toBe(pkg.version);
   });
 });
 

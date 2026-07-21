@@ -24,10 +24,14 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
     steps:
+      # Manifest mode, not the config-less `release-type: node` this used to run.
+      # The config file is what carries `extra-files`, which is how src/version.ts
+      # gets bumped in lockstep with package.json.
       - uses: googleapis/release-please-action@v5
         id: release
         with:
-          release-type: node
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
 
   # Everything that runs third-party code lives here, in a job with no publish
   # identity. A release created by GITHUB_TOKEN starts no new workflow runs, so
