@@ -1357,7 +1357,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": Record<string, never>;
+            "application/json": components["schemas"]["Billboard"];
           };
         };
         /** @description unauthorized */
@@ -1467,7 +1467,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": Record<string, never>;
+            "application/json": components["schemas"]["Billboard"];
           };
         };
         /** @description unauthorized */
@@ -4715,6 +4715,7 @@ export interface components {
       collection_id?: number | null;
       subforem_id?: number | null;
       language?: string | null;
+      comments_count: number;
     };
     /** @description Representation of an Article with video */
     VideoArticle: {
@@ -4786,6 +4787,7 @@ export interface components {
       name?: string;
       bg_color_hex?: string | null;
       text_color_hex?: string | null;
+      short_summary?: string | null;
     };
     /** @description Representation of a page object */
     Page: {
@@ -4810,6 +4812,14 @@ export interface components {
        * @enum {string}
        */
       template: "contained" | "full_within_layout" | "nav_bar_included" | "json" | "css" | "txt";
+      id?: number;
+      landing_page?: boolean;
+      body_html?: string | null;
+      processed_html?: string | null;
+      subforem_id?: number | null;
+      page_template_id?: number | null;
+      template_data?: Record<string, never> | null;
+      redirect_to_url?: string | null;
     };
     /** @description Representation of a podcast episode returned in a list */
     PodcastEpisodeIndex: {
@@ -5050,6 +5060,11 @@ export interface components {
       type_of: "manual";
       /** @description The current number of users in the segment */
       user_count?: number;
+      /** Format: date-time */
+      created_at?: string;
+      /** Format: date-time */
+      updated_at?: string;
+      name?: string | null;
     };
     SegmentUserIds: {
       user_ids?: number[];
@@ -5349,6 +5364,7 @@ export interface components {
       created_at: string;
       /** Format: date-time */
       updated_at: string;
+      bonus_weight?: number | null;
     };
     /** @description Representation of a badge achievement */
     BadgeAchievement: {
@@ -5364,6 +5380,8 @@ export interface components {
       created_at: string;
       /** Format: date-time */
       updated_at: string;
+      rewarder_id?: number | null;
+      rewarding_context_message?: string | null;
     };
     /** @description Representation of a recommended articles list */
     RecommendedArticlesList: {
@@ -6230,7 +6248,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["Segment"];
         };
       };
       /** @description Unauthorized */
@@ -6574,6 +6592,9 @@ export interface operations {
             path?: string;
             /** @description Profile image (640x640) */
             profile_image?: string;
+            /** Format: date-time */
+            created_at?: string;
+            username?: string | null;
           }[];
         };
       };
@@ -6767,7 +6788,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["Organization"];
         };
       };
       /** @description Not Found */
@@ -6837,7 +6858,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["ProfileImage"];
         };
       };
       /** @description Resource Not Found */
@@ -7116,7 +7137,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["Trend"];
         };
       };
       /** @description Trend Not Found */

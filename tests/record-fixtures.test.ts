@@ -3,9 +3,11 @@ import { mkdtempSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  assertRecordedTierTarget,
   assertUserTierRecorded,
   buildRecorderConfig,
   parseArgs,
+  RECORDED_DIR,
   type ReadSpec,
   type Recorded,
   type Rf,
@@ -224,6 +226,22 @@ describe("resolveTarget", () => {
 
   it("reads the pacing override from FIXTURE_PAUSE_MS", () => {
     expect(resolveTarget({ DEVTO_API_KEY: "dk", FIXTURE_PAUSE_MS: "0" }).pauseMs).toBe(0);
+  });
+
+  it("refuses to record a non-dev.to host into the Recorded tier (R7)", () => {
+    // the sweep's captures carry a `source` stamp the reality check rejects; this
+    // recorder writes none, so a local Forem here would land unmarked
+    expect(() => assertRecordedTierTarget("http://localhost:3000", RECORDED_DIR)).toThrow(
+      /refusing to record/,
+    );
+    expect(() =>
+      assertRecordedTierTarget("http://localhost:3000", `${RECORDED_DIR}/../recorded`),
+    ).toThrow(/refusing to record/);
+    // dev.to into the recorded tier, and any host anywhere else, both stay allowed
+    expect(() => assertRecordedTierTarget("https://dev.to", RECORDED_DIR)).not.toThrow();
+    expect(() =>
+      assertRecordedTierTarget("http://localhost:3000", "docs/sweep-captures"),
+    ).not.toThrow();
   });
 });
 

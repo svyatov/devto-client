@@ -1718,5 +1718,242 @@
     "patch": {
       "type": "boolean"
     }
+  },
+  {
+    "target": "/paths/~1api~1segments~1{id}/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/Segment"
+      }
+    },
+    "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the response is Segment (executed against a local Forem at ae359ff41b2a: the show response carries exactly Segment's properties)",
+    "patch": {
+      "$ref": "#/components/schemas/Segment"
+    }
+  },
+  {
+    "target": "/paths/~1api~1organizations~1{id}/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/Organization"
+      }
+    },
+    "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the response is Organization (executed against a local Forem at ae359ff41b2a: the show response carries exactly Organization's 14 properties, matching app/views/api/v1/organizations/show.json.jbuilder)",
+    "patch": {
+      "$ref": "#/components/schemas/Organization"
+    }
+  },
+  {
+    "target": "/paths/~1api~1profile_images~1{username}/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/ProfileImage"
+      }
+    },
+    "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the response is ProfileImage (executed against a local Forem at ae359ff41b2a: the show response carries exactly ProfileImage's properties)",
+    "patch": {
+      "$ref": "#/components/schemas/ProfileImage"
+    }
+  },
+  {
+    "target": "/paths/~1api~1trends~1{id_or_slug}/get/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/Trend"
+      }
+    },
+    "reason": "spec defect: upstream declares {type: object, items: ...}: \"items\" is array-only, so on an object the $ref never resolves and the response types out as unknown. The response is Trend. Not observed: no trend exists on Forem seed data, so this rests on the structural defect plus the five sibling show operations corrected the same way against recorded dev.to fixtures.",
+    "patch": {
+      "$ref": "#/components/schemas/Trend"
+    }
+  },
+  {
+    "target": "/paths/~1api~1billboards/post/responses/201/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/Billboard"
+      }
+    },
+    "reason": "spec defect: upstream declares {type: object, items: ...}: \"items\" is array-only, so on an object the $ref never resolves and the response types out as unknown. The response is Billboard. Not observed: writes are deferred to a later sweep pass, so this rests on the structural defect plus the sibling GET /api/billboards/{id} correction.",
+    "patch": {
+      "$ref": "#/components/schemas/Billboard"
+    }
+  },
+  {
+    "target": "/paths/~1api~1billboards~1{id}/put/responses/200/content/application~1json/schema",
+    "expect": {
+      "type": "object",
+      "items": {
+        "$ref": "#/components/schemas/Billboard"
+      }
+    },
+    "reason": "spec defect: upstream declares {type: object, items: ...}: \"items\" is array-only, so on an object the $ref never resolves and the response types out as unknown. The response is Billboard. Not observed: writes are deferred to a later sweep pass, so this rests on the structural defect plus the sibling GET /api/billboards/{id} correction.",
+    "patch": {
+      "$ref": "#/components/schemas/Billboard"
+    }
+  },
+  {
+    "target": "/components/schemas/ArticleIndex/properties/comments_count",
+    "expect": null,
+    "reason": "missing field: emitted by the articles serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "integer"
+    }
+  },
+  {
+    "target": "/components/schemas/Tag/properties/short_summary",
+    "expect": null,
+    "reason": "missing field: emitted by the tags serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Badge/properties/bonus_weight",
+    "expect": null,
+    "reason": "missing field: Api::BadgesController renders the whole model, so every column ships; absent from the upstream schema (executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "integer",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/BadgeAchievement/properties/rewarder_id",
+    "expect": null,
+    "reason": "missing field: Api::BadgeAchievementsController renders the whole model, so every column ships; absent from the upstream schema (executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "integer",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/BadgeAchievement/properties/rewarding_context_message",
+    "expect": null,
+    "reason": "missing field: Api::BadgeAchievementsController renders the whole model, so every column ships; absent from the upstream schema (executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Segment/properties/created_at",
+    "expect": null,
+    "reason": "missing field: the segments controller renders the whole model; absent from the upstream schema (executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  {
+    "target": "/components/schemas/Segment/properties/updated_at",
+    "expect": null,
+    "reason": "missing field: the segments controller renders the whole model; absent from the upstream schema (executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  {
+    "target": "/components/schemas/Segment/properties/name",
+    "expect": null,
+    "reason": "missing field: the segments controller renders the whole model; absent from the upstream schema (executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Page/properties/id",
+    "expect": null,
+    "reason": "missing field: emitted by the pages serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "integer"
+    }
+  },
+  {
+    "target": "/components/schemas/Page/properties/landing_page",
+    "expect": null,
+    "reason": "missing field: emitted by the pages serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "boolean"
+    }
+  },
+  {
+    "target": "/components/schemas/Page/properties/body_html",
+    "expect": null,
+    "reason": "missing field: emitted by the pages serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Page/properties/processed_html",
+    "expect": null,
+    "reason": "missing field: emitted by the pages serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Page/properties/subforem_id",
+    "expect": null,
+    "reason": "missing field: emitted by the pages serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "integer",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Page/properties/page_template_id",
+    "expect": null,
+    "reason": "missing field: emitted by the pages serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "integer",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Page/properties/template_data",
+    "expect": null,
+    "reason": "missing field: emitted by the pages serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "object",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Page/properties/redirect_to_url",
+    "expect": null,
+    "reason": "missing field: emitted by the pages serializer, absent from the upstream schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  {
+    "target": "/paths/~1api~1followers~1users/get/responses/200/content/application~1json/schema/items/properties/created_at",
+    "expect": null,
+    "reason": "missing field: emitted by the follower serializer, absent from the upstream inline schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  {
+    "target": "/paths/~1api~1followers~1users/get/responses/200/content/application~1json/schema/items/properties/username",
+    "expect": null,
+    "reason": "missing field: emitted by the follower serializer, absent from the upstream inline schema (in recorded dev.to fixtures and executed against a local Forem at ae359ff41b2a)",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    }
   }
 ]

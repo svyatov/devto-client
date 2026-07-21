@@ -39,6 +39,7 @@ export const schemaNames = {
   FollowedTag: "FollowedTag",
   // content
   Page: "Page",
+  ProfileImage: "ProfileImage",
   PodcastEpisodeIndex: "PodcastEpisodeSummary",
   Badge: "Badge",
   BadgeAchievement: "BadgeAchievement",

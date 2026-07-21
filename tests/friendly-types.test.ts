@@ -48,13 +48,42 @@ describe("friendly-types", () => {
   });
 
   it("keeps CallResult for a spec-malformed object+items response (KTD3 branch-3 guard)", () => {
-    // get /api/segments/{id} is `{type: object, items: $ref Segment}`, following
-    // items.$ref would emit Promise<Segment> the generated type does not back.
-    expect(signatures).toContain(
+    // Asserted on a synthetic spec, not on a live defect: the local-Forem sweep
+    // proved every `{type: object, items: $ref}` in the spec was an upstream
+    // mistake and the Overlay now corrects all six, so the real surface no
+    // longer carries an example. The generator must still refuse to follow
+    // `items` on an object, because `items` is array-only and the emitted type
+    // would not back the claim.
+    const malformed = structuredClone(spec) as typeof spec;
+    const path = malformed.paths["/api/segments/{id}"] as {
+      get: { responses: { "200": { content: { "application/json": { schema: unknown } } } } };
+    };
+    path.get.responses["200"].content["application/json"].schema = {
+      type: "object",
+      items: { $ref: "#/components/schemas/Segment" },
+    };
+    const emitted = generate(malformed).signatures;
+    expect(emitted).toContain(
       'get: (id: number, opts?: CallOptions) => CallResult<"/api/segments/{id}", "get">;',
     );
-    // the malformed get must NOT resolve to a friendly Segment (siblings legitimately do)
-    expect(signatures).not.toContain("get: (id: number, opts?: CallOptions) => Promise<Segment>;");
+  });
+
+  it("resolves the six operations the local-Forem sweep corrected (R6)", () => {
+    // Upstream declared `{type: "object", items: {$ref}}` for these. `items` is
+    // array-only, so the $ref never resolved and each typed out as unknown. The
+    // Overlay now points them at the schema directly; these are the positive
+    // assertions the guard above deliberately stopped covering when it moved to
+    // a synthetic spec. A regression back to CallResult would be silent otherwise.
+    for (const sig of [
+      "get: (id: number, opts?: CallOptions) => Promise<Organization>;",
+      "get: (username: string, opts?: CallOptions) => Promise<ProfileImage>;",
+      "get: (id_or_slug: string, opts?: CallOptions) => Promise<Trend>;",
+      "get: (id: number, opts?: CallOptions) => Promise<Segment>;",
+      "create: (params?: BillboardCreateParams, opts?: CallOptions) => Promise<Billboard>;",
+      "update: (id: number, params?: BillboardUpdateParams, opts?: CallOptions) => Promise<Billboard>;",
+    ]) {
+      expect(signatures).toContain(sig);
+    }
   });
 
   it("emits Promise<void> for a no-content 2xx op (KTD3 void branch)", () => {

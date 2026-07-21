@@ -33,6 +33,7 @@ export type {
   PodcastEpisodeSummary,
   PollTextResponse,
   PollVote,
+  ProfileImage,
   ReactionResult,
   ReadingListItem,
   RecommendedArticlesList,

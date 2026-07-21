@@ -21,6 +21,7 @@ export type OrganizationSummary = components["schemas"]["OrganizationSummary"];
 export type Tag = components["schemas"]["Tag"];
 export type FollowedTag = components["schemas"]["FollowedTag"];
 export type Page = components["schemas"]["Page"];
+export type ProfileImage = components["schemas"]["ProfileImage"];
 export type PodcastEpisodeSummary = components["schemas"]["PodcastEpisodeIndex"];
 export type Badge = components["schemas"]["Badge"];
 export type BadgeAchievement = components["schemas"]["BadgeAchievement"];
