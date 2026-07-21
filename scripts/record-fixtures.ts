@@ -15,7 +15,14 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { parseArgs as parseNodeArgs } from "node:util";
 import { DevToApiError } from "../src/errors.ts";
-import { type ClientOptions, type RequestOptions, request, resolveConfig } from "../src/http.ts";
+import {
+  type ClientOptions,
+  type RequestOptions,
+  type ResolvedConfig,
+  request,
+  resolveConfig,
+} from "../src/http.ts";
+import { createPacer } from "../src/pacing.ts";
 import { deriveTemplate } from "./spec-templates.ts";
 
 export type Rf = <T>(method: string, path: string, opts?: RequestOptions) => Promise<T>;
@@ -280,16 +287,36 @@ export function selectReads(all: ReadSpec[], selectors: string[]): ReadSpec[] {
   return selected;
 }
 
+/**
+ * The recording client's transport settings, out here rather than inside the main
+ * guard so a test can read them. Pacing and throttle patience are the library's
+ * now — this script no longer hand-rolls either.
+ */
+export function buildRecorderConfig(env: NodeJS.ProcessEnv = process.env): ResolvedConfig {
+  const target = resolveTarget(env);
+  const options: ClientOptions = {
+    baseUrl: target.baseUrl,
+    // dev.to's 429s often arrive without Retry-After, so the flat throttle wait is
+    // what a run rides out. `attempts` no longer bounds how long that can take —
+    // timeoutMs does, so it has to be generous enough for the whole schedule.
+    retry: { attempts: 5, throttleDelayMs: 5000 },
+    timeoutMs: 120_000,
+    // a third of what Rack::Attack allows. The origin would permit 3 reads/s; the
+    // edge in front of dev.to boxes an IP that sustains anything near it, and a
+    // recording run is exactly the sustained crawl that provokes that.
+    pace: createPacer({ readsPerSecond: 1 }),
+  };
+  if (target.apiKey !== undefined) options.apiKey = target.apiKey;
+  if (target.allowInsecureHttp) options.allowInsecureHttp = true;
+  return resolveConfig(options);
+}
+
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const { only, outDir } = parseArgs(process.argv.slice(2));
+  // resolveTarget again for `pauseMs`, which the transport config has no home for
   const target = resolveTarget(process.env);
   const apiKey = target.apiKey;
-  // dev.to's 429s often arrive without Retry-After; ride out the throttle window
-  const retry = { attempts: 5, baseDelayMs: 5000, maxDelayMs: 60_000 };
-  const options: ClientOptions = { baseUrl: target.baseUrl, retry };
-  if (apiKey !== undefined) options.apiKey = apiKey;
-  if (target.allowInsecureHttp) options.allowInsecureHttp = true;
-  const config = resolveConfig(options);
+  const config = buildRecorderConfig(process.env);
   const rf: Rf = (method, path, opts) => request(config, method, path, opts);
 
   const runAll = only.length === 0;

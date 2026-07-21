@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   assertUserTierRecorded,
+  buildRecorderConfig,
   parseArgs,
   type ReadSpec,
   type Recorded,
@@ -314,5 +315,30 @@ describe("recordWriteCycle", () => {
     ]);
     // and each was persisted to disk as it landed (KTD4)
     expect(readdirSync(dir)).toHaveLength(4);
+  });
+});
+
+describe("buildRecorderConfig (U5)", () => {
+  const cfg = (): ReturnType<typeof buildRecorderConfig> =>
+    buildRecorderConfig({ DEVTO_API_KEY: "k" } as NodeJS.ProcessEnv);
+
+  it("carries an explicit pacer slower than the library default", async () => {
+    const waits: number[] = [];
+    const pace = cfg().pace;
+    expect(pace).not.toBeNull();
+    const deadlineAt = Date.now() + 120_000;
+    await pace?.acquire("read", { deadlineAt, signal: undefined });
+    const started = Date.now();
+    await pace?.acquire("read", { deadlineAt, signal: undefined });
+    waits.push(Date.now() - started);
+    // the default 3/s would hold this for ~334ms; the recorder's 1/s holds ~1s
+    expect(waits[0]).toBeGreaterThan(500);
+  }, 5000);
+
+  it("resolves a deadline that makes its own retry schedule reachable", () => {
+    const { retry, timeoutMs } = cfg();
+    expect(retry).not.toBeNull();
+    if (!retry) throw new Error("retry disabled");
+    expect(timeoutMs).toBeGreaterThan(retry.attempts * retry.throttleDelayMs);
   });
 });

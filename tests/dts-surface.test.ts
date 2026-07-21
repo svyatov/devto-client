@@ -18,6 +18,7 @@ let out: string;
 let index = "";
 let signatures = "";
 let schemas = "";
+let http = "";
 
 beforeAll(() => {
   out = mkdtempSync(join(tmpdir(), "devto-dts-"));
@@ -29,6 +30,7 @@ beforeAll(() => {
   index = readFileSync(join(out, "index.d.ts"), "utf8");
   signatures = readFileSync(join(out, "generated", "signatures.d.ts"), "utf8");
   schemas = readFileSync(join(out, "generated", "schemas.d.ts"), "utf8");
+  http = readFileSync(join(out, "http.d.ts"), "utf8");
 }, 120_000);
 
 afterAll(() => {
@@ -101,6 +103,54 @@ describe("dts-surface guard (R5)", () => {
       .filter((n) => !DENYLIST.has(n))
       .filter((n) => !new RegExp(`\\b${n}\\b`).test(flat));
     expect(missing).toEqual([]);
+  });
+
+  /**
+   * The block above pins only the generated friendly types. The transport option
+   * interfaces live in http.d.ts, which nothing read until the transport-hardening
+   * work — so removing a public option used to ship green and unverified.
+   */
+  describe("transport option surface", () => {
+    const members = (iface: string): string =>
+      http.match(new RegExp(`interface ${iface} \\{([\\s\\S]*?)\\n\\}`))?.[1] ??
+      (() => {
+        throw new Error(`no ${iface} in http.d.ts`);
+      })();
+
+    it("pins the ClientOptions members", () => {
+      const block = members("ClientOptions");
+      for (const member of [
+        "apiKey?",
+        "baseUrl?",
+        "allowInsecureHttp?",
+        "retry?",
+        "timeoutMs?",
+        "pace?",
+        "onResponse?",
+        "headers?",
+        "fetch?",
+        "sleep?",
+      ]) {
+        expect(block, member).toContain(member);
+      }
+    });
+
+    it("pins the RequestOptions members", () => {
+      const block = members("RequestOptions");
+      for (const member of ["query?", "body?", "signal?", "headers?", "timeoutMs?"]) {
+        expect(block, member).toContain(member);
+      }
+    });
+
+    it("pins the RetryOptions members and proves maxDelayMs is gone (R15)", () => {
+      const block = members("RetryOptions");
+      expect(block).toContain("attempts?");
+      expect(block).toContain("baseDelayMs?");
+      expect(block).toContain("throttleDelayMs?");
+      // the one assertion in tests/ allowed to name the removed option: it is
+      // what proves the removal reached the public surface, not just the source
+      expect(block).not.toContain("maxDelayMs");
+    });
   });
 
   it("keeps the DevTo re-export type-only so dist ships no runtime import of the empty module", () => {

@@ -1,18 +1,33 @@
-import { DevToApiError, type ErrorEnvelope } from "./errors.ts";
+import {
+  DevToApiError,
+  DevToTimeoutError,
+  type ErrorEnvelope,
+  type ResponseMeta,
+} from "./errors.ts";
+import { createPacer, type Pacer } from "./pacing.ts";
+import { abortReason, sleep } from "./timing.ts";
 import { VERSION } from "./version.ts";
 
 const ACCEPT_V1 = "application/vnd.forem.api-v1+json";
 const USER_AGENT = `devto-client/${VERSION}`;
 const IDEMPOTENT = new Set(["GET", "HEAD", "PUT", "DELETE", "OPTIONS"]);
+// Forem's write throttle counts PUT, POST and DELETE; PATCH rides along because
+// over-counting a write costs one slot and under-counting costs a 429.
+const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 /** Retry policy for transient failures: 429 responses (any method) and 5xx on idempotent methods. */
 export interface RetryOptions {
   /** Total attempts including the first request. Default 3. */
   attempts?: number;
-  /** Cap on any single wait; a Retry-After beyond it throws instead of sleeping. Default 30s. */
-  maxDelayMs?: number;
-  /** First backoff step for 5xx and unparseable Retry-After. Default 500ms. */
+  /** First backoff step for 5xx, doubling with jitter per attempt. Default 500ms. */
   baseDelayMs?: number;
+  /**
+   * Flat wait for a 429 that carries no usable `Retry-After`. Default 5s — five
+   * times Forem's one-second throttle window, which leaves the 30s default
+   * deadline room for the wait plus a following attempt. Flat rather than
+   * exponential because a fixed window has nothing to grow into.
+   */
+  throttleDelayMs?: number;
 }
 
 /** Options for constructing a {@link DevToClient}. */
@@ -25,6 +40,27 @@ export interface ClientOptions {
   allowInsecureHttp?: boolean;
   /** `false` disables retries entirely. */
   retry?: RetryOptions | false;
+  /**
+   * Deadline for a whole call — every attempt, every backoff wait, every pacing
+   * hold, and the response body read, together. Default 30s. One call is one HTTP
+   * request, so each page of an `All` iterator carries its own; bound a whole walk
+   * with your own `signal` instead. Expiry rejects with `DevToTimeoutError`.
+   */
+  timeoutMs?: number;
+  /**
+   * Self-pacing against dev.to's per-second budgets, on by default. Pass a pacer
+   * from `createPacer` to tune it, share one between clients to share a budget, or
+   * pass `false` to disable it — which is the right setting for an admin key,
+   * since those are throttle-exempt upstream and the client cannot detect them.
+   */
+  pace?: Pacer | false;
+  /**
+   * Called with transport metadata for every response, success or failure, before
+   * the body is read. This is where cache status reaches a successful call — a
+   * `fromCache` 200 means a CDN answered, which for an authenticated read may mean
+   * it answered with someone else's bytes. Throwing from here cannot affect the call.
+   */
+  onResponse?: (meta: ResponseMeta) => void;
   /**
    * Default headers merged into every request. Set a `user-agent` to identify
    * your app, for instance. Per-request `headers` override these; the versioned
@@ -49,12 +85,17 @@ export interface RequestOptions {
   signal?: AbortSignal;
   /** Merged into the request; the versioned Accept header always wins. */
   headers?: Record<string, string>;
+  /** Overrides the client's `timeoutMs` for this call. */
+  timeoutMs?: number;
 }
 
 export interface ResolvedConfig {
   apiKey: string | undefined;
   baseUrl: string;
   retry: Required<RetryOptions> | null;
+  timeoutMs: number;
+  pace: Pacer | null;
+  onResponse: ((meta: ResponseMeta) => void) | undefined;
   headers: Record<string, string> | undefined;
   fetch: typeof globalThis.fetch;
   sleep: (ms: number, signal: AbortSignal | undefined) => Promise<void>;
@@ -73,6 +114,7 @@ export function resolveConfig(options: ClientOptions): ResolvedConfig {
       "baseUrl must be https — the api-key would transit cleartext. Set allowInsecureHttp: true to override.",
     );
   }
+  const resolvedSleep = options.sleep ?? sleep;
   return {
     apiKey: options.apiKey,
     baseUrl,
@@ -81,32 +123,19 @@ export function resolveConfig(options: ClientOptions): ResolvedConfig {
         ? null
         : {
             attempts: options.retry?.attempts ?? 3,
-            maxDelayMs: options.retry?.maxDelayMs ?? 30_000,
             baseDelayMs: options.retry?.baseDelayMs ?? 500,
+            throttleDelayMs: options.retry?.throttleDelayMs ?? 5000,
           },
+    timeoutMs: options.timeoutMs ?? 30_000,
+    // a pacer we build here inherits the client's sleep so the test seam still
+    // covers pacing waits; one handed in keeps its own, since it may serve two
+    // clients that injected different sleeps (KTD4)
+    pace: options.pace === false ? null : (options.pace ?? createPacer({ sleep: resolvedSleep })),
+    onResponse: options.onResponse,
     headers: options.headers,
     fetch: options.fetch ?? globalThis.fetch,
-    sleep: options.sleep ?? sleep,
+    sleep: resolvedSleep,
   };
-}
-
-export function abortReason(signal: AbortSignal): Error {
-  return signal.reason instanceof Error ? signal.reason : new Error(String(signal.reason));
-}
-
-export function sleep(ms: number, signal: AbortSignal | undefined): Promise<void> {
-  if (!signal) return new Promise((resolve) => setTimeout(resolve, ms));
-  return new Promise((resolve, reject) => {
-    const onAbort = (): void => {
-      clearTimeout(timer);
-      reject(abortReason(signal));
-    };
-    const timer = setTimeout(() => {
-      signal.removeEventListener("abort", onAbort);
-      resolve();
-    }, ms);
-    signal.addEventListener("abort", onAbort, { once: true });
-  });
 }
 
 /** Integer-seconds Retry-After only; HTTP-dates and garbage fall back to the backoff schedule. */
@@ -114,12 +143,29 @@ function parseRetryAfter(header: string | null): number | null {
   return header !== null && /^\d+$/.test(header) ? Number(header) * 1000 : null;
 }
 
+/** Exponential with downward jitter. Unbounded — the call deadline is the ceiling. */
 function backoffDelay(attempt: number, retry: Required<RetryOptions>): number {
-  const exp = retry.baseDelayMs * 2 ** (attempt - 1);
-  return Math.min(exp * (0.5 + Math.random() * 0.5), retry.maxDelayMs);
+  return retry.baseDelayMs * 2 ** (attempt - 1) * (0.5 + Math.random() * 0.5);
 }
 
-async function toApiError(res: Response): Promise<DevToApiError> {
+/**
+ * Headers only. This cannot fold into {@link toApiError}: the retry decision needs
+ * the cache flag *before* the error is built, and building the error consumes the
+ * body — after which the headers are still readable but the response is spent.
+ */
+export function readTransportMeta(res: Response): ResponseMeta {
+  const age = res.headers.get("age");
+  return {
+    status: res.status,
+    // dev.to reports two tiers ("HIT, MISS", "MISS, HIT"); either one hitting
+    // means the bytes skipped the origin. No header at all means no CDN (KTD6).
+    fromCache: res.headers.get("x-cache")?.toUpperCase().includes("HIT") ?? false,
+    age: age !== null && /^\d+$/.test(age) ? Number(age) : undefined,
+    requestId: res.headers.get("x-request-id") ?? undefined,
+  };
+}
+
+async function toApiError(res: Response, meta: ResponseMeta): Promise<DevToApiError> {
   const rawBody = await res.text();
   let envelope: ErrorEnvelope | undefined;
   try {
@@ -134,7 +180,7 @@ async function toApiError(res: Response): Promise<DevToApiError> {
   } catch {
     // not JSON — rawBody carries it
   }
-  return new DevToApiError(res.status, envelope, rawBody);
+  return new DevToApiError(res.status, envelope, rawBody, meta);
 }
 
 export async function request<T>(
@@ -162,39 +208,109 @@ export async function request<T>(
   // fetch strips Authorization on cross-origin redirects but forwards custom
   // headers like api-key — refuse redirects outright rather than leak the key
   if (config.apiKey !== undefined) init.redirect = "error";
-  if (opts.signal) init.signal = opts.signal;
   if (opts.body !== undefined) {
     init.body = JSON.stringify(opts.body);
     if (!headers.has("content-type")) headers.set("content-type", "application/json");
   }
 
   const { retry } = config;
+  const timeoutMs = opts.timeoutMs ?? config.timeoutMs;
+  const deadlineAt = Date.now() + timeoutMs;
+  const expired = (): DevToTimeoutError =>
+    new DevToTimeoutError(`${method} ${url} exceeded its ${timeoutMs}ms deadline`);
+  // the escape hatch takes whatever method string a caller types, and both sets
+  // below hold canonical names, so classify off one normalized copy
+  const verb = method.toUpperCase();
+  const paceKind = WRITES.has(verb) ? "write" : "read";
+
   for (let attempt = 1; ; attempt++) {
-    let res: Response;
+    // pacing draws on the same budget as everything else, so a hold that would
+    // wake past the deadline fails the call instead of sleeping through it
+    await config.pace?.acquire(paceKind, { deadlineAt, signal: opts.signal });
+
+    const remaining = deadlineAt - Date.now();
+    if (remaining <= 0) throw expired();
+
+    // KTD1: one controller per attempt, armed until the body is consumed. Composing
+    // `AbortSignal.any([opts.signal, AbortSignal.timeout(...)])` instead would pile
+    // one composite per page onto a caller signal reused across a listAll walk —
+    // the documented Node leak. The finally below is what keeps that from happening.
+    const controller = new AbortController();
+    const deadline = expired();
+    const timer = setTimeout(() => controller.abort(deadline), remaining);
+    const onAbort = (): void => {
+      if (opts.signal) controller.abort(abortReason(opts.signal));
+    };
+    // a listener added to an already-aborted signal never fires, and the caller
+    // may have aborted while we were paced or backing off — check, then subscribe
+    if (opts.signal?.aborted) {
+      clearTimeout(timer);
+      throw abortReason(opts.signal);
+    }
+    opts.signal?.addEventListener("abort", onAbort, { once: true });
+
+    let wait: number;
     try {
-      res = await config.fetch(url.toString(), init);
-    } catch (cause) {
-      if (opts.signal?.aborted) throw abortReason(opts.signal);
-      throw new Error(`${method} ${url} failed`, { cause });
+      let res: Response;
+      try {
+        res = await config.fetch(url.toString(), { ...init, signal: controller.signal });
+      } catch (cause) {
+        if (opts.signal?.aborted) throw abortReason(opts.signal);
+        if (cause === deadline) throw deadline;
+        throw new Error(`${method} ${url} failed`, { cause });
+      }
+
+      const meta = readTransportMeta(res);
+      try {
+        config.onResponse?.(meta);
+      } catch {
+        // an observer's failure is the observer's problem, not the call's
+      }
+
+      if (res.ok) {
+        if (res.status === 204) return undefined as T;
+        const text = await res.text();
+        return (text === "" ? undefined : JSON.parse(text)) as T;
+      }
+
+      // a cached 429 replays the same stored bytes on every attempt — it cannot be
+      // won, and each try spends rate budget on the way (R3). 5xx is excluded: a
+      // short-TTL cached 500 can still recover on a later attempt.
+      const retriesLeft = retry !== null && attempt < retry.attempts;
+      if (retriesLeft && res.status === 429 && !meta.fromCache) {
+        const retryAfterMs = parseRetryAfter(res.headers.get("retry-after"));
+        if (retryAfterMs === null) {
+          wait = clampToBudget(retry.throttleDelayMs, deadlineAt);
+        } else if (Date.now() + retryAfterMs > deadlineAt) {
+          // the server named a time; obeying a shortened version of it is
+          // meaningless, so an overshoot fails now and says what it declined
+          throw new DevToTimeoutError(
+            `${method} ${url} was asked to wait ${retryAfterMs}ms, past its ${timeoutMs}ms deadline`,
+            retryAfterMs,
+          );
+        } else {
+          wait = retryAfterMs;
+        }
+      } else if (retriesLeft && res.status >= 500 && IDEMPOTENT.has(verb)) {
+        wait = clampToBudget(backoffDelay(attempt, retry), deadlineAt);
+      } else {
+        throw await toApiError(res, meta);
+      }
+    } finally {
+      clearTimeout(timer);
+      opts.signal?.removeEventListener("abort", onAbort);
     }
 
-    if (res.ok) {
-      if (res.status === 204) return undefined as T;
-      const text = await res.text();
-      return (text === "" ? undefined : JSON.parse(text)) as T;
-    }
-
-    const retriesLeft = retry !== null && attempt < retry.attempts;
-    if (retriesLeft && res.status === 429) {
-      const retryAfterMs = parseRetryAfter(res.headers.get("retry-after"));
-      if (retryAfterMs !== null && retryAfterMs > retry.maxDelayMs) throw await toApiError(res);
-      await config.sleep(retryAfterMs ?? backoffDelay(attempt, retry), opts.signal);
-      continue;
-    }
-    if (retriesLeft && res.status >= 500 && IDEMPOTENT.has(method)) {
-      await config.sleep(backoffDelay(attempt, retry), opts.signal);
-      continue;
-    }
-    throw await toApiError(res);
+    await config.sleep(wait, opts.signal);
   }
+}
+
+/**
+ * A wait we chose ourselves is trimmed to the budget rather than refused (R18):
+ * refusing it would make raising `attempts` silently useless now that no
+ * per-wait ceiling exists. The attempt after a fully-consumed budget fails on
+ * the deadline check, which is the honest outcome.
+ */
+function clampToBudget(waitMs: number, deadlineAt: number): number {
+  return Math.max(0, Math.min(waitMs, deadlineAt - Date.now()));
 }

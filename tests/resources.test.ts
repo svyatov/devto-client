@@ -22,7 +22,9 @@ function harness(...payloads: unknown[]) {
       headers: { "content-type": "application/json" },
     });
   }) as typeof globalThis.fetch;
-  return { client: new DevToClient({ apiKey: "k", fetch }), calls };
+  // pace: false — these assert routing, not transport, and the default write
+  // budget of 1/s would park the multi-write cases for a real second each
+  return { client: new DevToClient({ apiKey: "k", fetch, pace: false }), calls };
 }
 
 describe("namespace bindings — the Call rule", () => {
