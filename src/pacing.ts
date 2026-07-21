@@ -44,7 +44,7 @@ export interface Pacer {
  * each other instead of letting them all compute the same wait and fire together.
  *
  * ponytail: the guarantee is at most `capacity + rate` requests in any one-second
- * window, which is not the same shape as Forem's fixed-window counter — a burst
+ * window, which is not the same shape as Forem's fixed-window counter: a burst
  * straddling a window boundary can still draw a 429. Accepted per KTD3; the retry
  * path absorbs the ones that land. Tighten by lowering the rate, not by rewriting
  * this into a window counter, which would need the server's clock.
@@ -88,7 +88,7 @@ class Bucket {
  * give them separate ones and they hold independent budgets.
  *
  * Note that dev.to throttles per IP as well as per key, so two clients on one
- * machine share a server-side budget whether or not they share a pacer —
+ * machine share a server-side budget whether or not they share a pacer:
  * independent pacers under-protect rather than merely over-pace.
  */
 export function createPacer(options: PacerOptions = {}): Pacer {

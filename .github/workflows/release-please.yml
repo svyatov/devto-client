@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 # Deny by default. The repository default is write-all, so a job added here
-# without its own permissions block would inherit it — and this is the file the
+# without its own permissions block would inherit it, and this is the file the
 # npm trusted publisher is pinned to by filename.
 permissions: {}
 
@@ -65,7 +65,7 @@ jobs:
       # dist/ and runs publint and attw against it.
       - run: bun run prepublishOnly
       # publint and attw check the packaging, not that the thing imports. Without
-      # this, an empty or broken dist/ publishes green — and npm versions are
+      # this, an empty or broken dist/ publishes green, and npm versions are
       # immutable, so there is no taking it back.
       - run: node --input-type=module -e "import('./dist/index.js').then(m => { if (!m.DevToClient) throw new Error('built dist is missing DevToClient') })"
       - uses: actions/upload-artifact@v7
@@ -97,7 +97,7 @@ jobs:
       # every release. Bump it deliberately; any version >= 11.5.1 works.
       - run: npm install -g npm@12.0.1
       # Nothing else runs here. No project dependencies are installed, and
-      # --ignore-scripts keeps this package's own prepublishOnly from firing —
+      # --ignore-scripts keeps this package's own prepublishOnly from firing:
       # it already ran in verify, and re-running it would put the build back
       # inside the job holding the token.
       - run: npm publish --ignore-scripts

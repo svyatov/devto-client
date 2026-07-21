@@ -44,7 +44,7 @@ describe("assertUserTierRecorded", () => {
   });
 
   it("throws when a key was provided but every selected user read was skipped", () => {
-    // public reads recorded fine, but the whole user tier 401'd — stale-fixture trap
+    // public reads recorded fine, but the whole user tier 401'd: stale-fixture trap
     expect(() =>
       assertUserTierRecorded([rec("/api/tags")], [spec("/api/users/me"), spec("/api/readinglist")]),
     ).toThrow(/every user-scope read was skipped/);
@@ -218,7 +218,7 @@ describe("resolveTarget", () => {
       FOREM_API_KEY: "fk",
     });
     expect(remote.allowInsecureHttp).toBe(false);
-    // https enforcement lives in resolveConfig — a non-loopback http URL is rejected there
+    // https enforcement lives in resolveConfig: a non-loopback http URL is rejected there
     expect(() => resolveConfig({ baseUrl: remote.baseUrl })).toThrow(/must be https/);
   });
 
@@ -295,7 +295,7 @@ describe("recordWriteCycle", () => {
       "PUT /api/articles/42",
       "PUT /api/articles/42/unpublish",
       "POST /api/reactions/toggle",
-      "POST /api/reactions/toggle", // the reversal — no residue
+      "POST /api/reactions/toggle", // the reversal, no residue
     ]);
     const createBody = calls[0]?.[2] as { article: { published: boolean; title: string } };
     expect(createBody.article.published).toBe(false);

@@ -30,7 +30,7 @@ function recordingSleep() {
   return { sleep, waits };
 }
 
-/** Never settles until its signal aborts — lets a pacing hold be interrupted deterministically. */
+/** Never settles until its signal aborts: lets a pacing hold be interrupted deterministically. */
 const abortableSleep = (_ms: number, signal?: AbortSignal): Promise<void> =>
   new Promise((_resolve, reject) => {
     const fail = (): void => reject(signal ? abortReason(signal) : new Error("aborted"));

@@ -794,7 +794,7 @@
   {
     "target": "/paths/~1api~1admin~1users~1identities~1bulk/post/responses/200/content",
     "expect": null,
-    "reason": "partially unknown: bulk_create renders { results } but per-item shape is service-internal; items deliberately typed unknown — honest typing beats guessed typing",
+    "reason": "partially unknown: bulk_create renders { results } but per-item shape is service-internal; items deliberately typed unknown: honest typing beats guessed typing",
     "patch": {
       "application/json": {
         "schema": {
@@ -864,7 +864,7 @@
   {
     "target": "/paths/~1api~1feedback_messages~1{id}/patch/responses/200/content",
     "expect": null,
-    "reason": "unknown shape: renders the raw FeedbackMessage model as_json; admin-tier, unverifiable without privileges — typed unknown deliberately",
+    "reason": "unknown shape: renders the raw FeedbackMessage model as_json; admin-tier, unverifiable without privileges: typed unknown deliberately",
     "patch": {
       "application/json": {
         "schema": {}
@@ -874,7 +874,7 @@
   {
     "target": "/paths/~1api~1analytics~1dashboard/get/responses/200/content",
     "expect": null,
-    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account: typed unknown deliberately",
     "patch": {
       "application/json": {
         "schema": {}
@@ -884,7 +884,7 @@
   {
     "target": "/paths/~1api~1analytics~1follower_engagement/get/responses/200/content",
     "expect": null,
-    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account: typed unknown deliberately",
     "patch": {
       "application/json": {
         "schema": {}
@@ -894,7 +894,7 @@
   {
     "target": "/paths/~1api~1analytics~1heatmap/get/responses/200/content",
     "expect": null,
-    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account: typed unknown deliberately",
     "patch": {
       "application/json": {
         "schema": {}
@@ -904,7 +904,7 @@
   {
     "target": "/paths/~1api~1analytics~1historical/get/responses/200/content",
     "expect": null,
-    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account: typed unknown deliberately",
     "patch": {
       "application/json": {
         "schema": {}
@@ -914,7 +914,7 @@
   {
     "target": "/paths/~1api~1analytics~1past_day/get/responses/200/content",
     "expect": null,
-    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account: typed unknown deliberately",
     "patch": {
       "application/json": {
         "schema": {}
@@ -924,7 +924,7 @@
   {
     "target": "/paths/~1api~1analytics~1referrers/get/responses/200/content",
     "expect": null,
-    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account: typed unknown deliberately",
     "patch": {
       "application/json": {
         "schema": {}
@@ -934,7 +934,7 @@
   {
     "target": "/paths/~1api~1analytics~1top_contributors/get/responses/200/content",
     "expect": null,
-    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account: typed unknown deliberately",
     "patch": {
       "application/json": {
         "schema": {}
@@ -944,7 +944,7 @@
   {
     "target": "/paths/~1api~1analytics~1totals/get/responses/200/content",
     "expect": null,
-    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account — typed unknown deliberately",
+    "reason": "unknown shape: analytics responses are produced by service objects, undocumented upstream, and unverifiable without a qualifying account: typed unknown deliberately",
     "patch": {
       "application/json": {
         "schema": {}
@@ -1016,7 +1016,7 @@
   {
     "target": "/components/schemas/ArticleShow",
     "expect": null,
-    "reason": "missing schema: the article show shape — like ArticleIndex but with body_html/body_markdown, and with tag_list/tags types swapped (show: tag_list is a comma-joined string, tags an array; index is the reverse). Verified against recorded fixtures.",
+    "reason": "missing schema: the article show shape: like ArticleIndex but with body_html/body_markdown, and with tag_list/tags types swapped (show: tag_list is a comma-joined string, tags an array; index is the reverse). Verified against recorded fixtures.",
     "patch": {
       "type": "object",
       "properties": {
@@ -1167,7 +1167,7 @@
         "$ref": "#/components/schemas/ArticleIndex"
       }
     },
-    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the show response is ArticleShow (verified against recorded fixtures)",
+    "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the show response is ArticleShow (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/ArticleShow"
     }
@@ -1180,7 +1180,7 @@
         "$ref": "#/components/schemas/ArticleIndex"
       }
     },
-    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the show response is ArticleShow (verified against recorded fixtures)",
+    "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the show response is ArticleShow (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/ArticleShow"
     }
@@ -1193,7 +1193,7 @@
         "$ref": "#/components/schemas/Organization"
       }
     },
-    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the show response is Organization (verified against recorded fixtures)",
+    "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the show response is Organization (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/Organization"
     }
@@ -1206,7 +1206,7 @@
         "$ref": "#/components/schemas/ExtendedUser"
       }
     },
-    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the show response is ExtendedUser (verified against recorded fixtures)",
+    "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the show response is ExtendedUser (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/ExtendedUser"
     }
@@ -1358,7 +1358,7 @@
         "$ref": "#/components/schemas/MyUser"
       }
     },
-    "reason": "reality correction: upstream declares {type: object, items: ...} — 'items' is meaningless on an object, leaving the response untyped; the response is MyUser (verified against recorded fixtures)",
+    "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the response is MyUser (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/MyUser"
     }

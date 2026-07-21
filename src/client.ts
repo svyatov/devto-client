@@ -55,7 +55,7 @@ import { type VideosNamespace, videosTable } from "./resources/videos.ts";
 /**
  * Typed client for the dev.to (Forem) v1 API. Construct once and reuse; each
  * property is a resource namespace whose methods map to REST operations.
- * Public endpoints work keyless — pass an api-key via {@link ClientOptions.apiKey}
+ * Public endpoints work keyless. Pass an api-key via {@link ClientOptions.apiKey}
  * for authenticated, moderation, and admin routes.
  */
 export class DevToClient {
@@ -163,7 +163,7 @@ export class DevToClient {
     };
   }
 
-  /** Escape hatch and internal transport — namespace methods route through here. */
+  /** Escape hatch and internal transport: namespace methods route through here. */
   request<T>(method: string, path: string, opts?: RequestOptions): Promise<T> {
     return request<T>(this.config, method, path, opts);
   }

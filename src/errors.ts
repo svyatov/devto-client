@@ -10,14 +10,14 @@ export interface ResponseMeta {
   /** HTTP status of the response the metadata was read from. */
   status: number;
   /**
-   * The bytes came from a CDN cache rather than the origin — `x-cache` reports
+   * The bytes came from a CDN cache rather than the origin: `x-cache` reports
    * a HIT at either tier. A response with no `x-cache` at all (a self-hosted
    * Forem behind no CDN) reads false.
    */
   fromCache: boolean;
   /** The `age` header in seconds, when present and an integer. */
   age: number | undefined;
-  /** Upstream `x-request-id` — the handle to quote when reporting a bad response. */
+  /** Upstream `x-request-id`: the handle to quote when reporting a bad response. */
   requestId: string | undefined;
 }
 
@@ -33,7 +33,7 @@ export class DevToApiError extends Error {
   readonly rawBody: string;
   /** Upstream `x-request-id`, when the response carried one. */
   readonly requestId: string | undefined;
-  /** The response was served from a CDN cache — retrying replays the same bytes. */
+  /** The response was served from a CDN cache: retrying replays the same bytes. */
   readonly fromCache: boolean;
   /** Cache age in seconds, when the response reported one. */
   readonly age: number | undefined;
@@ -64,13 +64,13 @@ export class DevToApiError extends Error {
 /**
  * A call ran out of its `timeoutMs` deadline. Separate from {@link DevToApiError}
  * because nothing came back from the server, and separate from a caller-initiated
- * abort — which still rejects with the caller's own reason — so `instanceof` tells
+ * abort, which still rejects with the caller's own reason, so `instanceof` tells
  * the two apart.
  */
 export class DevToTimeoutError extends Error {
   override readonly name: string = "DevToTimeoutError";
   /**
-   * The wait the client refused to take because it landed past the deadline —
+   * The wait the client refused to take because it landed past the deadline:
    * a `Retry-After` or a pacing hold. Undefined when the deadline simply elapsed.
    */
   readonly declinedWaitMs: number | undefined;

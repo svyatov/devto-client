@@ -70,7 +70,7 @@ describe("generate-signatures", () => {
       return n;
     };
     // Friendly returns (Promise<Article>) drop the path/verb anchor, so locate
-    // each member inside its own namespace block — member names are unique there.
+    // each member inside its own namespace block, member names are unique there.
     const blockOf = (iface: string): string => {
       const m = signatures.match(new RegExp(`export interface ${iface} \\{([\\s\\S]*?)\\n\\}`));
       if (!m) throw new Error(`no interface ${iface}`);
@@ -99,7 +99,7 @@ describe("generate-signatures", () => {
     expect(checked).toBeGreaterThan(30);
   });
 
-  it("is deterministic — regenerating produces byte-identical output", () => {
+  it("is deterministic: regenerating produces byte-identical output", () => {
     const again = generate(spec);
     expect(again.signatures).toBe(signatures);
     expect(again.routing).toBe(routing);

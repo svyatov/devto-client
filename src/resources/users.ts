@@ -4,7 +4,7 @@ export const usersTable = {
   get: { path: "/api/users/{id}", verb: "get" },
   me: { path: "/api/users/me", verb: "get" },
   search: { path: "/api/users/search", verb: "get" },
-  // moderation roles — require appropriate privileges
+  // moderation roles: require appropriate privileges
   limit: { path: "/api/users/{id}/limited", verb: "put" },
   unlimit: { path: "/api/users/{id}/limited", verb: "delete" },
   markSpam: { path: "/api/users/{id}/spam", verb: "put" },

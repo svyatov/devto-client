@@ -7,8 +7,8 @@ export {
 } from "./errors.ts";
 // Friendly types (KTD5): `DevTo` is the namespace home for every alias (zero
 // collisions), plus a curated flat re-export of the names that don't clash with
-// a `lib.dom` global. The two that do — `Comment` and `RequestRedirect` (fetch's
-// redirect mode) — are reachable only as `DevTo.Comment` / `DevTo.RequestRedirect`.
+// a `lib.dom` global. The two that do, `Comment` and `RequestRedirect` (fetch's
+// redirect mode), are reachable only as `DevTo.Comment` / `DevTo.RequestRedirect`.
 export type * as DevTo from "./generated/schemas.ts";
 export type {
   AdminUser,

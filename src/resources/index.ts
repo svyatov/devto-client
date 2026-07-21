@@ -30,7 +30,7 @@ import { trendsTable } from "./trends.ts";
 import { usersTable } from "./users.ts";
 import { videosTable } from "./videos.ts";
 
-/** Every operation table — the surface-inventory test diffs this against the composed spec. */
+/** Every operation table: the surface-inventory test diffs this against the composed spec. */
 export const allTables: Record<string, OpTable> = {
   articles: articlesTable,
   comments: commentsTable,

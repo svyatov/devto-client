@@ -10,7 +10,7 @@ import { schemaNames } from "../scripts/schema-names.ts";
  * real declarations with `tsc --emitDeclarationOnly` and assert on the .d.ts the
  * editor actually reads: mapped ops show friendly `Promise<Friendly>` returns and
  * named param types, never the computed `CallResult<…>` / `CallQuery<…>`. The
- * assertion is scoped to mapped (schema-backed) ops — the ~31 inline/malformed
+ * assertion is scoped to mapped (schema-backed) ops: the ~31 inline/malformed
  * fallback ops legitimately keep `CallResult<pv>` (KTD3), so a global "no
  * CallResult anywhere" check would false-positive.
  */
@@ -72,7 +72,7 @@ describe("dts-surface guard (R5)", () => {
 
   it("shows no CallResult / CallQuery for the mapped article ops (regression guard)", () => {
     // Reverting any of these signatures to CallResult<pv> would put `CallResult<`
-    // back on its line and fail here — that is the guard biting.
+    // back on its line and fail here, that is the guard biting.
     const mapped = ["get", "getByPath", "list", "latest", "search", "create", "update", "me"];
     for (const op of mapped) {
       const line = articleLine(op);
@@ -81,7 +81,7 @@ describe("dts-surface guard (R5)", () => {
     }
   });
 
-  it("leaves fallback ops out of the guard — semanticSearch legitimately keeps CallResult (KTD3)", () => {
+  it("leaves fallback ops out of the guard: semanticSearch legitimately keeps CallResult (KTD3)", () => {
     // array-inline response → no named schema to alias; the fallback is correct,
     // and it is NOT in the mapped set above so it never trips the guard.
     expect(articleLine("semanticSearch")).toContain("=> CallResult<");
@@ -110,7 +110,7 @@ describe("dts-surface guard (R5)", () => {
   /**
    * The block above pins only the generated friendly types. The transport option
    * interfaces live in http.d.ts, which nothing read until the transport-hardening
-   * work — so removing a public option used to ship green and unverified.
+   * work, so removing a public option used to ship green and unverified.
    */
   describe("transport option surface", () => {
     const members = (iface: string): string =>

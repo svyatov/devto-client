@@ -1,12 +1,12 @@
 /**
- * Records real dev.to responses into tests/fixtures/recorded/ — R17's raw material.
+ * Records real dev.to responses into tests/fixtures/recorded/: R17's raw material.
  *
  * Keyless: public read endpoints. With DEVTO_API_KEY (dedicated low-privilege
- * account only): user-scope reads plus the reversible write cycle — draft
+ * account only): user-scope reads plus the reversible write cycle: draft
  * create (published: false) → update → unpublish, and a reaction toggle pair.
  * POST /api/follows is NOT recorded: v1 has no unfollow endpoint, so the write
  * cannot be reversed in the same run (KTD9); its fixture stays type-derived.
- * Each run leaves its unpublished draft behind — v1 has no article-delete
+ * Each run leaves its unpublished draft behind: v1 has no article-delete
  * endpoint; the run logs the draft id for manual cleanup.
  *
  * Run: DEVTO_API_KEY=... bun scripts/record-fixtures.ts
@@ -28,7 +28,7 @@ import { deriveTemplate } from "./spec-templates.ts";
 export type Rf = <T>(method: string, path: string, opts?: RequestOptions) => Promise<T>;
 
 export interface ReadSpec {
-  /** Spec path template, e.g. "/api/articles/{id}" — U7 keys response types on this. */
+  /** Spec path template, e.g. "/api/articles/{id}": U7 keys response types on this. */
   template: string;
   /** Concrete path to call. */
   path: string;
@@ -44,7 +44,7 @@ export interface Recorded {
   template: string;
   method: string;
   recordedAt: string;
-  /** The concrete request path this recording hit — R8's chain-of-custody stamp. */
+  /** The concrete request path this recording hit: R8's chain-of-custody stamp. */
   path: string;
   payload: unknown;
 }
@@ -93,7 +93,7 @@ export function scrub(value: unknown, scrubContent = false): unknown {
 /**
  * Records each read, persisting every fixture to `outDir` the moment it is
  * captured (KTD4) so a crash mid-crawl keeps completed work. 401/403/404 means
- * the key can't access it — skip, not fail.
+ * the key can't access it: skip, not fail.
  */
 export async function recordReads(
   rf: Rf,
@@ -136,7 +136,7 @@ export async function recordReads(
 /**
  * The reversible write cycle: draft create → update → unpublish, plus a
  * reaction toggle pair on an existing article. Every write is reversed in
- * the same run — the draft ends unpublished, the reaction ends removed.
+ * the same run: the draft ends unpublished, the reaction ends removed.
  */
 export async function recordWriteCycle(
   rf: Rf,
@@ -163,7 +163,7 @@ export async function recordWriteCycle(
     },
   });
   emit("/api/articles", "POST", "/api/articles", scrub(draft, true));
-  console.log(`created draft article ${draft.id} — v1 has no delete endpoint, remove it manually`);
+  console.log(`created draft article ${draft.id}: v1 has no delete endpoint, remove it manually`);
 
   const updated = await rf<unknown>("PUT", `/api/articles/${draft.id}`, {
     body: { article: { body_markdown: "Synthetic fixture content, updated. Safe to delete." } },
@@ -181,13 +181,13 @@ export async function recordWriteCycle(
   }
 
   // the reactions API is admin-gated upstream (ReactionPolicy#api?); regular
-  // keys get 401 — skip, leaving reactions in the type-derived tier
+  // keys get 401: skip, leaving reactions in the type-derived tier
   try {
     const toggleOn = await rf<unknown>("POST", "/api/reactions/toggle", {
       query: { category: "like", reactable_id: reactableArticleId, reactable_type: "Article" },
     });
     emit("/api/reactions/toggle", "POST", "/api/reactions/toggle", scrub(toggleOn));
-    // reverse: toggle back off — never rethrow (toggle isn't idempotent, and the
+    // reverse: toggle back off: never rethrow (toggle isn't idempotent, and the
     // like is live on someone else's article), but tell the operator loudly
     try {
       await rf<unknown>("POST", "/api/reactions/toggle", {
@@ -195,7 +195,7 @@ export async function recordWriteCycle(
       });
     } catch (err) {
       console.warn(
-        `REVERSAL FAILED: like on article ${reactableArticleId} is still applied — toggle it off manually (${String(err)})`,
+        `REVERSAL FAILED: like on article ${reactableArticleId} is still applied. Toggle it off manually (${String(err)})`,
       );
     }
   } catch (err) {
@@ -224,8 +224,8 @@ const LOOPBACK = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
 /**
  * KTD8: resolve the recording target from the environment. Defaults reproduce
  * today's behavior exactly (dev.to, DEVTO_API_KEY, 3s pacing). A non-default
- * base URL demands FOREM_API_KEY explicitly — the production dev.to key is
- * never silently sent to another host — and only loopback http is allowed.
+ * base URL demands FOREM_API_KEY explicitly (the production dev.to key is
+ * never silently sent to another host) and only loopback http is allowed.
  */
 export function resolveTarget(env: NodeJS.ProcessEnv): {
   apiKey: string | undefined;
@@ -240,7 +240,7 @@ export function resolveTarget(env: NodeJS.ProcessEnv): {
   } else {
     if (!env.FOREM_API_KEY) {
       throw new Error(
-        `FOREM_BASE_URL is set to ${baseUrl}; set FOREM_API_KEY explicitly — DEVTO_API_KEY is never sent to a non-default host`,
+        `FOREM_BASE_URL is set to ${baseUrl}; set FOREM_API_KEY explicitly: DEVTO_API_KEY is never sent to a non-default host`,
       );
     }
     apiKey = env.FOREM_API_KEY;
@@ -263,7 +263,7 @@ export function parseArgs(argv: string[]): { only: string[]; outDir: string } {
 
 /**
  * With a key present, a run that recorded zero user-scope fixtures means the key
- * silently 401'd (dev.to's misleading 401s) — fail loudly so the reality-check
+ * silently 401'd (dev.to's misleading 401s): fail loudly so the reality-check
  * can't pass on stale user fixtures instead of re-verifying the user tier.
  */
 export function assertUserTierRecorded(recorded: Recorded[], selectedUser: ReadSpec[]): void {
@@ -271,7 +271,7 @@ export function assertUserTierRecorded(recorded: Recorded[], selectedUser: ReadS
   const got = new Set(recorded.map((r) => r.template));
   if (!selectedUser.some((s) => got.has(s.template))) {
     throw new Error(
-      "a key was provided but every user-scope read was skipped (dev.to misleading 401s?) — user fixtures were NOT refreshed; failing so reality-check does not pass on stale fixtures",
+      "a key was provided but every user-scope read was skipped (dev.to misleading 401s?): user fixtures were NOT refreshed; failing so reality-check does not pass on stale fixtures",
     );
   }
 }
@@ -290,14 +290,14 @@ export function selectReads(all: ReadSpec[], selectors: string[]): ReadSpec[] {
 /**
  * The recording client's transport settings, out here rather than inside the main
  * guard so a test can read them. Pacing and throttle patience are the library's
- * now — this script no longer hand-rolls either.
+ * now. This script no longer hand-rolls either.
  */
 export function buildRecorderConfig(env: NodeJS.ProcessEnv = process.env): ResolvedConfig {
   const target = resolveTarget(env);
   const options: ClientOptions = {
     baseUrl: target.baseUrl,
     // dev.to's 429s often arrive without Retry-After, so the flat throttle wait is
-    // what a run rides out. `attempts` no longer bounds how long that can take —
+    // what a run rides out. `attempts` no longer bounds how long that can take.
     // timeoutMs does, so it has to be generous enough for the whole schedule.
     retry: { attempts: 5, throttleDelayMs: 5000 },
     timeoutMs: 120_000,
@@ -334,10 +334,10 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   >("GET", "/api/articles", { query: { per_page: 10 } });
   // prefer a user-owned article so path-derived {username} is a user, not an org
   const first = articles.find((a) => !a.organization) ?? articles[0];
-  if (!first) throw new Error("no articles returned — cannot derive sample ids");
+  if (!first) throw new Error("no articles returned: cannot derive sample ids");
   const [username = "", slug = ""] = first.path.replace(/^\//, "").split("/");
   // a numeric org username would make deriveTemplate pick {id} over {username} and
-  // crash assertLabel — prefer a non-numeric one, else skip the org reads this run
+  // crash assertLabel: prefer a non-numeric one, else skip the org reads this run
   const org = articles.find((a) => a.organization && !/^\d+$/.test(a.organization.username))
     ?.organization?.username;
 
@@ -399,7 +399,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
 
   const allReads = [...publicReads, ...userReads];
   const selectedReads = runAll ? allReads : selectReads(allReads, readSelectors);
-  // recordReads persists each fixture as it lands (KTD4) — no separate batch write
+  // recordReads persists each fixture as it lands (KTD4): no separate batch write
   const reads = await recordReads(rf, selectedReads, outDir, target.pauseMs);
   if (apiKey !== undefined) {
     const userTemplates = new Set(userReads.map((u) => u.template));
@@ -417,7 +417,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const files = [...reads.files, ...writes.map(fixtureFileName)];
 
   // KTD13: do public endpoints answer cross-origin? Probe with an Origin header.
-  // Only on a full run — a targeted re-record must not clobber the CORS snapshot.
+  // Only on a full run: a targeted re-record must not clobber the CORS snapshot.
   if (runAll) {
     const corsRes = await config.fetch(`${config.baseUrl}/api/articles?per_page=1`, {
       headers: { origin: "https://example.com", accept: "application/vnd.forem.api-v1+json" },

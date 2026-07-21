@@ -59,7 +59,7 @@ jobs:
             gh issue close "$NUM"
           fi
       # A crash in the compute step (upstream fetch returned HTML, malformed JSON,
-      # unreadable fixtures) leaves `findings` unset and skips the step above — the
+      # unreadable fixtures) leaves `findings` unset and skips the step above, the
       # same silent-skip the reality-check gate widening closes. File a distinct
       # issue so the drift alarm itself failing is visible, not just a red run.
       - name: Report a drift-computation failure

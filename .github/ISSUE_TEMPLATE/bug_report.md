@@ -7,7 +7,7 @@ labels: bug
 
 **What happened, and what you expected instead**
 
-**Reproduction** — the smallest snippet that shows it. Redact your API key.
+**Reproduction**: the smallest snippet that shows it. Redact your API key.
 
 ```ts
 
@@ -22,4 +22,4 @@ labels: bug
 
 Those last two matter more than they look. dev.to throttles keyless requests far harder than its documented limits, and some endpoints answer a valid key with a 401 that has nothing to do with the key, so an unauthenticated repro can look like a client bug when it isn't.
 
-**Anything else** — full error output, response body, whether it reproduces every time.
+**Anything else**: full error output, response body, whether it reproduces every time.

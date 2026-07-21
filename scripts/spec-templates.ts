@@ -1,6 +1,6 @@
 /**
  * Shared path→template matcher (KTD1/KTD2). Given a concrete request path and
- * method, returns the single spec path template it was recorded from — the
+ * method, returns the single spec path template it was recorded from: the
  * chain-of-custody primitive the recorder, drift script, and reality test all
  * assert against. Pure functions over the composed spec's `paths` keys.
  */
@@ -11,7 +11,7 @@ type SpecPaths = Record<string, Record<string, unknown>>;
 
 let cachedPaths: SpecPaths | undefined;
 // Compose in-memory from the two committed source files (like reality.test.ts),
-// not the gitignored spec/composed.json — no build step wires that up in CI or a
+// not the gitignored spec/composed.json: no build step wires that up in CI or a
 // fresh clone, and it would be a second, drift-prone way to derive the same spec.
 function defaultSpecPaths(): SpecPaths {
   cachedPaths ??= (
