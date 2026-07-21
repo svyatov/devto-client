@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.0.0](https://github.com/svyatov/devto-client/compare/v1.0.1...v2.0.0) (2026-07-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* ArticleSummary now requires comments_count. Reading an ArticleSummary is unaffected. Constructing one, as a test mock or an adapter does, now needs the field. It is typed required to match Article, MyArticle and ReadingListArticle, which already require it, and every recorded dev.to fixture carries it.
+* `maxDelayMs` is removed from RetryOptions. It gated an oversized Retry-After and clamped the jittered exponential; the deadline replaces the first outright and, together with the budget clamp, the second. Set `timeoutMs` instead.
+
+### Features
+
+* bound, pace, and instrument the transport layer ([#14](https://github.com/svyatov/devto-client/issues/14)) ([152efca](https://github.com/svyatov/devto-client/commit/152efcad327f44c004c12ea0dabdacd3ee564beb))
+* sweep the write half and record the tier each operation needs ([#19](https://github.com/svyatov/devto-client/issues/19)) ([1fa4799](https://github.com/svyatov/devto-client/commit/1fa479961ccead751bb4885d5475cafc5f1e49b4))
+* verify the spec against a running Forem and correct 24 entries ([#18](https://github.com/svyatov/devto-client/issues/18)) ([c20d7ef](https://github.com/svyatov/devto-client/commit/c20d7efdef1a821c7e3a4738a3d4a5bcec59fa37))
+
+
+### Bug Fixes
+
+* **http:** remove quadratic backtracking in baseUrl normalization ([#12](https://github.com/svyatov/devto-client/issues/12)) ([5c7bd8f](https://github.com/svyatov/devto-client/commit/5c7bd8fd6fe90d9cd7ba86e9a5e5adf425db189d))
+* **tests:** stop the reality check false-alarming on conditional article keys ([#10](https://github.com/svyatov/devto-client/issues/10)) ([45b4f4c](https://github.com/svyatov/devto-client/commit/45b4f4c09f41f2d3997f0c5e94bc4ba5079bc9fe))
+
 ## [1.0.1](https://github.com/svyatov/devto-client/compare/v1.0.0...v1.0.1) (2026-07-21)
 
 
