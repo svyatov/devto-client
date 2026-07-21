@@ -34,11 +34,10 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun test
-      - run: bun run build
-      # publish runs with --ignore-scripts, so prepublishOnly never fires there;
-      # its packaging gates run here instead.
-      - run: bunx publint
-      - run: bunx attw --pack . --profile esm-only
+      # publish runs with --ignore-scripts, so prepublishOnly never fires there.
+      # Running it here keeps one definition of the packaging gates: it builds
+      # dist/ and runs publint and attw against it.
+      - run: bun run prepublishOnly
       - uses: actions/upload-artifact@v7
         with:
           name: dist
@@ -63,6 +62,8 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
       - run: npm install -g npm@latest
-      # This job installs nothing, so no dependency lifecycle script can run
-      # under the publish identity. --ignore-scripts keeps it that way.
+      # No project dependencies are installed here, so nothing a devDependency
+      # ships can run beside the publish identity. --ignore-scripts covers the
+      # other direction: prepublishOnly already ran in verify, and re-running it
+      # would put the build back inside the job holding the OIDC token.
       - run: npm publish --ignore-scripts
