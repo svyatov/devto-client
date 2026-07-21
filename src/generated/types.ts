@@ -5047,6 +5047,42 @@ export interface components {
        * @enum {string}
        */
       type_of: "in_house" | "community" | "external";
+      browser_context?: string;
+      cached_tag_list?: string;
+      clicks_count?: number;
+      color?: string | null;
+      /** Format: date-time */
+      content_updated_at?: string;
+      /** Format: date-time */
+      counts_tabulated_at?: string | null;
+      /** Format: date-time */
+      created_at?: string;
+      custom_display_label?: string | null;
+      dismissal_sku?: string | null;
+      event_id?: number | null;
+      exclude_role_names?: string[];
+      exclude_survey_completions?: boolean;
+      exclude_survey_ids?: string;
+      impressions_count?: number;
+      include_subforem_ids?: number[];
+      minimized_body_markdown?: string | null;
+      minimized_processed_html?: string | null;
+      page_id?: number | null;
+      prefer_paired_with_billboard_id?: number | null;
+      preferred_article_ids?: number[];
+      priority?: boolean;
+      processed_html?: string;
+      render_mode?: string;
+      requires_cookies?: boolean;
+      seconds_visible?: number;
+      special_behavior?: string;
+      success_rate?: number;
+      tags_array?: string[];
+      target_role_names?: string[];
+      template?: string;
+      /** Format: date-time */
+      updated_at?: string;
+      weight?: number;
     };
     /** @description A manually managed audience segment */
     Segment: {
