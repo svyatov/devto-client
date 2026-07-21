@@ -172,6 +172,41 @@ describe("pacing", () => {
     expect(Date.now() - started).toBeLessThan(500); // the hold was 1000ms
   });
 
+  it("hands the slot back when an abort interrupts the hold", async () => {
+    // the token was never spent on a request, and a shared pacer that kept it
+    // would shrink its budget a little on every cancellation
+    const waits: number[] = [];
+    const sleep = (ms: number, signal?: AbortSignal): Promise<void> => {
+      waits.push(ms);
+      return signal?.aborted ? Promise.reject(abortReason(signal)) : Promise.resolve();
+    };
+    const pace = createPacer({ readsPerSecond: 1, sleep });
+    const far = { deadlineAt: Date.now() + 60_000, signal: undefined };
+
+    await pace.acquire("read", far); // the free starting token
+    const aborted = new AbortController();
+    aborted.abort(new Error("stop"));
+    await expect(
+      pace.acquire("read", { deadlineAt: far.deadlineAt, signal: aborted.signal }),
+    ).rejects.toThrow(/stop/);
+    await pace.acquire("read", far);
+
+    // one interval, not two: the refused hold gave its slot back
+    expect(waits.at(-1)).toBeLessThan(1500);
+  });
+
+  it("gives a sub-1/s bucket a whole token to start with", async () => {
+    // capacity used to equal the rate, so at 0.5/s the bucket never held one
+    // whole token and even the very first call had to wait for a refill
+    const { fetch } = countingFetch();
+    const { sleep, waits } = recordingSleep();
+    // the sleep goes to the pacer, not the client: an externally built pacer
+    // carries its own seam, so a client-level sleep would never see this wait
+    const c = new DevToClient({ fetch, pace: createPacer({ readsPerSecond: 0.5, sleep }) });
+    await c.request("GET", "/api/articles");
+    expect(waits).toEqual([]);
+  });
+
   it("paces every page of an All iterator without pagination.ts knowing (R10)", async () => {
     const pages: Record<string, unknown[]> = {
       "1": [{ id: 1 }],

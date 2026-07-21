@@ -14,6 +14,9 @@ const IDEMPOTENT = new Set(["GET", "HEAD", "PUT", "DELETE", "OPTIONS"]);
 // Forem's write throttle counts PUT, POST and DELETE; PATCH rides along because
 // over-counting a write costs one slot and under-counting costs a 429.
 const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+// setTimeout stores its delay in a 32-bit int; anything larger (or non-finite)
+// silently becomes 1ms, which would turn "wait a very long time" into "fail now"
+const MAX_TIMER_MS = 2_147_483_647;
 
 /** Retry policy for transient failures: 429 responses (any method) and 5xx on idempotent methods. */
 export interface RetryOptions {
@@ -237,7 +240,7 @@ export async function request<T>(
     // the documented Node leak. The finally below is what keeps that from happening.
     const controller = new AbortController();
     const deadline = expired();
-    const timer = setTimeout(() => controller.abort(deadline), remaining);
+    const timer = setTimeout(() => controller.abort(deadline), Math.min(remaining, MAX_TIMER_MS));
     const onAbort = (): void => {
       if (opts.signal) controller.abort(abortReason(opts.signal));
     };
@@ -262,7 +265,10 @@ export async function request<T>(
 
       const meta = readTransportMeta(res);
       try {
-        config.onResponse?.(meta);
+        // an async observer returns a promise the `catch` below cannot see, and an
+        // unhandled rejection takes the whole process down on Node's default
+        const settled: unknown = config.onResponse?.(meta);
+        if (settled instanceof Promise) void settled.catch(() => {});
       } catch {
         // an observer's failure is the observer's problem, not the call's
       }
@@ -296,6 +302,9 @@ export async function request<T>(
       } else {
         throw await toApiError(res, meta);
       }
+      // only the retry paths reach here. Release the socket before the wait: an
+      // unread body pins its connection, and the waits have no ceiling any more.
+      void res.body?.cancel().catch(() => {});
     } finally {
       clearTimeout(timer);
       opts.signal?.removeEventListener("abort", onAbort);

@@ -228,6 +228,8 @@ Public endpoints (articles, comments, tags, and friends) send `Access-Control-Al
 
 These are server configuration, not documented API contract, so treat them as guidance that can change without notice. As of mid-2026, Forem allows roughly 3 GET requests per second and 1 write per second, counted per IP address *and* per API key at the same figures, returning 429 with a `Retry-After` header (which proxies sometimes strip). Admin keys are exempt.
 
+Those are the origin's numbers. The CDN in front of dev.to enforces its own, stricter for sustained traffic: a long keyless crawl can start collecting 429s below 3 reads per second, and those arrive as plain "Retry later" text with no `Retry-After` at all. If you're walking a lot of pages rather than making occasional calls, pace well under the ceiling. One read per second is a reasonable starting point.
+
 The client paces itself against those budgets by default, so you don't have to. Reads and writes draw on separate token buckets sized to the per-second allowance, which means a script that stays inside the budget never waits at all. Three GETs in a row cost you nothing. The fourth waits about a third of a second, and every page of an `All` iterator draws on the same budget without you doing anything.
 
 ```ts
@@ -242,7 +244,7 @@ Each client holds its own budget unless you hand two of them the same pacer. Wor
 
 Turn it off with `pace: false`. The main reason to is an admin key, which is exempt upstream — the client can't detect one, and the only reliable probe would be `/api/users/me`, the endpoint that intermittently 401s on a perfectly good key. So pacing stays on for everyone and admins opt out by hand.
 
-One boundary to be aware of if you fire many calls concurrently. Every deadline clock starts when its call is created, so more than roughly `timeoutMs × rate` requests in flight at once — about 90 reads at the defaults — means the tail of the burst exhausts its deadline waiting for a slot and fails with `DevToTimeoutError`. That's deliberate: a request that can't start inside its own budget should say so rather than queue invisibly.
+One boundary to be aware of if you fire many calls concurrently. Every deadline clock starts when its call is created, so more than roughly `timeoutMs × rate` requests in flight at once (about 90 reads at the defaults) means the tail of the burst exhausts its deadline waiting for a slot and fails with `DevToTimeoutError`. That's deliberate: a request that can't start inside its own budget should say so rather than queue invisibly.
 
 The token bucket also isn't quite the same shape as the server's counter. Forem uses a fixed one-second window; a bucket guarantees at most `capacity + rate` requests in any one-second span, so a burst straddling a window boundary can still draw a 429. The retry path absorbs those. Lower the rate if you'd rather not see them at all.
 

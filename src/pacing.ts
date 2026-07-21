@@ -51,18 +51,26 @@ export interface Pacer {
  */
 class Bucket {
   private readonly rate: number;
+  /**
+   * Burst size, floored at one whole token. Below 1/s a capacity equal to the
+   * rate could never hold a token at all, so even the very first call would wait.
+   */
+  private readonly capacity: number;
   private tokens: number;
   private last = Date.now();
 
   constructor(rate: number) {
     this.rate = rate;
-    this.tokens = rate;
+    this.capacity = Math.max(1, rate);
+    this.tokens = this.capacity;
   }
 
   /** Reserves a slot and returns how long to wait before using it. */
   reserve(): number {
     const now = Date.now();
-    this.tokens = Math.min(this.rate, this.tokens + ((now - this.last) / 1000) * this.rate);
+    // floor the elapsed delta: a backward clock step must not subtract tokens
+    const elapsed = Math.max(0, now - this.last);
+    this.tokens = Math.min(this.capacity, this.tokens + (elapsed / 1000) * this.rate);
     this.last = now;
     const wait = this.tokens >= 1 ? 0 : Math.ceil(((1 - this.tokens) / this.rate) * 1000);
     this.tokens -= 1;
@@ -102,7 +110,14 @@ export function createPacer(options: PacerOptions = {}): Pacer {
           wait,
         );
       }
-      await sleep(wait, signal);
+      try {
+        await sleep(wait, signal);
+      } catch (err) {
+        // an aborted hold never spent its slot; keeping it would quietly shrink a
+        // shared budget every time a caller cancels
+        bucket.release();
+        throw err;
+      }
     },
   };
 }

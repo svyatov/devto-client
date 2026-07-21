@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from "bun:test";
 import { DevToClient } from "../src/client.ts";
-import { DevToApiError } from "../src/errors.ts";
+import { DevToApiError, DevToTimeoutError } from "../src/errors.ts";
 import type { components } from "../src/generated/types.ts";
 import { bindOps } from "../src/ops.ts";
 import { allTables } from "../src/resources/index.ts";
@@ -150,6 +150,19 @@ describe("namespace bindings — the Call rule", () => {
       client.articles.search({ q: "test" }, { signal: controller.signal }),
     ).rejects.toThrow(/stop/);
     expect(calls).toHaveLength(0);
+  });
+
+  it("the trailing options argument carries timeoutMs through to transport", async () => {
+    // the README promises a per-call budget on every namespace method; without the
+    // CallOptions field it typechecked and then silently used the client default
+    const fetch = ((_url: string, init?: RequestInit) =>
+      new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
+      })) as unknown as typeof globalThis.fetch;
+    const client = new DevToClient({ fetch, pace: false });
+    await expect(client.articles.list(undefined, { timeoutMs: 20 })).rejects.toBeInstanceOf(
+      DevToTimeoutError,
+    );
   });
 
   it("agent session undocumented extras are flagged in the table and callable", async () => {

@@ -88,7 +88,7 @@ type IterQueryOf<O> = [QueryOf<O>] extends [never] ? never : Omit<QueryOf<O>, "p
 export type OpAt<P extends keyof paths, V extends keyof paths[P]> = paths[P][V];
 
 /** Trailing per-call options — transport concerns kept out of the params object. */
-export type CallOptions = { signal?: AbortSignal };
+export type CallOptions = { signal?: AbortSignal; timeoutMs?: number };
 
 /**
  * Flatten an assembled intersection into a single field list so param aliases
@@ -176,7 +176,7 @@ function fillPath(template: string, params: Record<string, string | number>): st
  * Binds a table to the Call rule (KTD3/KTD4): positional path values fill the
  * template in URL order, one flat params object routes to body or query by the
  * op's kind (`opRouting`) — wrapped under `bodyKey` when the body is a single-key
- * wrapper — and a trailing `opts.signal` reaches transport. Ops with no query or
+ * wrapper — and a trailing `opts` (signal, timeoutMs) reaches transport. Ops with no query or
  * body take no params object, so their `opts` follows the positional args.
  */
 export function bindOps<N>(rf: RequestFn, table: OpTable): N {
@@ -202,6 +202,9 @@ export function bindOps<N>(rf: RequestFn, table: OpTable): N {
         else reqOpts.query = params as Record<string, string | number | boolean | undefined>;
       }
       if (opts?.signal) reqOpts.signal = opts.signal;
+      // `!== undefined`, not truthiness: 0 is a caller asking for an already-spent
+      // budget, which must reach transport and fail rather than silently mean "default"
+      if (opts?.timeoutMs !== undefined) reqOpts.timeoutMs = opts.timeoutMs;
       return rf(method, fillPath(entry.path, pathParams), reqOpts);
     };
 

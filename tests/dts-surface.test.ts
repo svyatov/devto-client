@@ -19,6 +19,7 @@ let index = "";
 let signatures = "";
 let schemas = "";
 let http = "";
+let ops = "";
 
 beforeAll(() => {
   out = mkdtempSync(join(tmpdir(), "devto-dts-"));
@@ -31,6 +32,7 @@ beforeAll(() => {
   signatures = readFileSync(join(out, "generated", "signatures.d.ts"), "utf8");
   schemas = readFileSync(join(out, "generated", "schemas.d.ts"), "utf8");
   http = readFileSync(join(out, "http.d.ts"), "utf8");
+  ops = readFileSync(join(out, "ops.d.ts"), "utf8");
 }, 120_000);
 
 afterAll(() => {
@@ -150,6 +152,17 @@ describe("dts-surface guard (R5)", () => {
       // the one assertion in tests/ allowed to name the removed option: it is
       // what proves the removal reached the public surface, not just the source
       expect(block).not.toContain("maxDelayMs");
+    });
+
+    it("pins CallOptions, the bag every namespace method actually takes", () => {
+      // RequestOptions is only reachable through client.request(); a transport
+      // option missing here is invisible to every ergonomic method, which is
+      // exactly how a documented per-call timeoutMs shipped as a no-op
+      const block = ops.match(/type CallOptions = \{([^}]*)\}/)?.[1];
+      expect(block).toBeDefined();
+      for (const member of ["signal?", "timeoutMs?"]) {
+        expect(block, member).toContain(member);
+      }
     });
   });
 

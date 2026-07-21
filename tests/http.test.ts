@@ -600,6 +600,27 @@ describe("transport metadata (U1)", () => {
     );
     await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 7 }]);
   });
+
+  it("survives an async observer that rejects", async () => {
+    // a rejected promise from the observer is invisible to a synchronous catch,
+    // and an unhandled rejection ends the process on Node's default
+    const rejections: unknown[] = [];
+    const onUnhandled = (e: unknown): void => {
+      rejections.push(e);
+    };
+    process.on("unhandledRejection", onUnhandled);
+    try {
+      const { client: c } = client(
+        { onResponse: async () => await Promise.reject(new Error("observer blew up")) },
+        json([{ id: 7 }]),
+      );
+      await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 7 }]);
+      await new Promise((r) => setTimeout(r, 10)); // let any rejection surface
+      expect(rejections).toEqual([]);
+    } finally {
+      process.off("unhandledRejection", onUnhandled);
+    }
+  });
 });
 
 describe("call deadline (U2)", () => {
@@ -613,6 +634,25 @@ describe("call deadline (U2)", () => {
     // when fetch settles would leave this stream unbounded
     const c = new DevToClient({ fetch: stallingBodyFetch, timeoutMs: 20 });
     await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToTimeoutError);
+  });
+
+  it("treats a timeout past the 32-bit timer ceiling as no deadline, not an instant one", async () => {
+    // setTimeout coerces an out-of-range or non-finite delay to 1ms, which would
+    // turn the most patient setting available into the least patient one
+    const slowFetch = ((_url: string, init?: RequestInit) =>
+      new Promise<Response>((resolve, reject) => {
+        const t = setTimeout(() => resolve(json([{ id: 1 }])), 30);
+        init?.signal?.addEventListener(
+          "abort",
+          () => {
+            clearTimeout(t);
+            reject(init.signal?.reason);
+          },
+          { once: true },
+        );
+      })) as unknown as typeof globalThis.fetch;
+    const c = new DevToClient({ fetch: slowFetch, timeoutMs: 3_000_000_000, pace: false });
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 1 }]);
   });
 
   it("surfaces the caller's reason when they abort a stalled body read", async () => {
