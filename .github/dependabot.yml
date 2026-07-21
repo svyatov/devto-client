@@ -10,12 +10,10 @@ updates:
     groups:
       dev-minor-and-patch:
         update-types: [minor, patch]
-  # Action bumps get a second look rather than a reflexive merge: the
-  # release-please workflow holds the publish identity.
+  # Deliberately ungrouped, unlike npm above: the release-please workflow holds
+  # the publish identity, so each action bump arrives as its own reviewable PR
+  # rather than batched into one diff line.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
-    groups:
-      actions-minor-and-patch:
-        update-types: [minor, patch]

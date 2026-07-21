@@ -4,6 +4,17 @@ on:
   push:
     branches: [main]
 
+# Deny by default. The repository default is write-all, so a job added here
+# without its own permissions block would inherit it — and this is the file the
+# npm trusted publisher is pinned to by filename.
+permissions: {}
+
+# Tag creation, the GitHub release, and the npm publish are all one-way. Two runs
+# racing them can publish a version whose bytes disagree with its tag.
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
@@ -32,16 +43,32 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      # attw packs the tarball with npm, and the smoke check below runs under
+      # node. Pin both to the package's minimum supported Node rather than
+      # whatever the runner image happens to ship.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22.12"
       - run: bun install --frozen-lockfile
+      # The same gates ci.yml runs on a PR. They are repeated here because no
+      # branch rule requires CI to be green before a merge, so this job is the
+      # only thing standing between main and an immutable npm version.
+      - run: bun run check
+      - run: bun run check:drift
       - run: bun test
       # publish runs with --ignore-scripts, so prepublishOnly never fires there.
       # Running it here keeps one definition of the packaging gates: it builds
       # dist/ and runs publint and attw against it.
       - run: bun run prepublishOnly
+      # publint and attw check the packaging, not that the thing imports. Without
+      # this, an empty or broken dist/ publishes green — and npm versions are
+      # immutable, so there is no taking it back.
+      - run: node --input-type=module -e "import('./dist/index.js').then(m => { if (!m.DevToClient) throw new Error('built dist is missing DevToClient') })"
       - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
+          if-no-files-found: error
 
   publish:
     needs: verify
@@ -61,9 +88,12 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - run: npm install -g npm@latest
-      # No project dependencies are installed here, so nothing a devDependency
-      # ships can run beside the publish identity. --ignore-scripts covers the
-      # other direction: prepublishOnly already ran in verify, and re-running it
-      # would put the build back inside the job holding the OIDC token.
+      # Pinned, not `npm@latest`: this is the one third-party package fetched in
+      # the job that can mint an OIDC token, and a floating tag resolves fresh on
+      # every release. Bump it deliberately; any version >= 11.5.1 works.
+      - run: npm install -g npm@12.0.1
+      # Nothing else runs here. No project dependencies are installed, and
+      # --ignore-scripts keeps this package's own prepublishOnly from firing —
+      # it already ran in verify, and re-running it would put the build back
+      # inside the job holding the token.
       - run: npm publish --ignore-scripts
