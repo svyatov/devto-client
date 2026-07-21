@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/devto-client)](https://www.npmjs.com/package/devto-client)
 [![CI](https://github.com/svyatov/devto-client/actions/workflows/ci.yml/badge.svg)](https://github.com/svyatov/devto-client/actions/workflows/ci.yml)
-[![coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/svyatov/devto-client/blob/main/vitest.config.ts)
+[![coverage](https://img.shields.io/codecov/c/github/svyatov/devto-client)](https://codecov.io/gh/svyatov/devto-client)
 [![types](https://img.shields.io/badge/types-included-blue)](https://www.npmjs.com/package/devto-client)
 [![node](https://img.shields.io/node/v/devto-client)](https://nodejs.org)
 
@@ -114,6 +114,29 @@ const forem = new DevToClient({ baseUrl: "https://community.example.com", apiKey
 ```
 
 Plain `http://` throws at construction unless you opt in with `allowInsecureHttp: true`, which exists for local development against a Forem instance on localhost.
+
+## Custom headers
+
+Every request already carries a versioned Accept header and, when you're authenticated, your api-key. Beyond those you can attach your own defaults. A `user-agent` that identifies your app in dev.to's logs is the usual reason:
+
+```ts
+const devto = new DevToClient({
+  apiKey: process.env.DEVTO_API_KEY,
+  headers: { "user-agent": "my-app/1.0 (+https://my-app.example)" },
+});
+```
+
+Client-level headers merge into every request, and a per-request header of the same name wins, so you can override a default for a single call:
+
+```ts
+await devto.request("GET", "/api/articles/latest", {
+  headers: { "user-agent": "my-app/1.0 batch-job" },
+});
+```
+
+Two headers you can't override, by design. The versioned Accept header always wins, because dropping it silently falls back to the deprecated v0 API. So does the `api-key`, which belongs in the `apiKey` option rather than here; a key smuggled through `headers` skips the guard that refuses redirects so it can't leak off dev.to.
+
+Browsers are the exception. They ignore a `user-agent` set from JavaScript and send their own, so this option only takes effect off the browser.
 
 ## Browser usage
 

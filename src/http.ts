@@ -23,8 +23,18 @@ export interface ClientOptions {
   allowInsecureHttp?: boolean;
   /** `false` disables retries entirely. */
   retry?: RetryOptions | false;
+  /**
+   * Default headers merged into every request. Set a `user-agent` to identify
+   * your app, for instance. Per-request `headers` override these; the versioned
+   * Accept header and the api-key always win. Pass your Forem key via `apiKey`,
+   * not here; a key set through `headers` skips the redirect-leak guard. Browsers
+   * ignore a custom `user-agent`, so the setting only takes effect off the browser.
+   */
+  headers?: Record<string, string>;
   /** Injectable for tests. Defaults to the global fetch. */
   fetch?: typeof globalThis.fetch;
+  /** Injectable for tests. Defaults to a timer-backed sleep a Retry-After can drive. */
+  sleep?: (ms: number, signal?: AbortSignal) => Promise<void>;
 }
 
 /** Per-request options for the low-level {@link DevToClient.request} escape hatch. */
@@ -43,7 +53,9 @@ export interface ResolvedConfig {
   apiKey: string | undefined;
   baseUrl: string;
   retry: Required<RetryOptions> | null;
+  headers: Record<string, string> | undefined;
   fetch: typeof globalThis.fetch;
+  sleep: (ms: number, signal: AbortSignal | undefined) => Promise<void>;
 }
 
 export function resolveConfig(options: ClientOptions): ResolvedConfig {
@@ -68,15 +80,17 @@ export function resolveConfig(options: ClientOptions): ResolvedConfig {
             maxDelayMs: options.retry?.maxDelayMs ?? 30_000,
             baseDelayMs: options.retry?.baseDelayMs ?? 500,
           },
+    headers: options.headers,
     fetch: options.fetch ?? globalThis.fetch,
+    sleep: options.sleep ?? sleep,
   };
 }
 
-function abortReason(signal: AbortSignal): Error {
+export function abortReason(signal: AbortSignal): Error {
   return signal.reason instanceof Error ? signal.reason : new Error(String(signal.reason));
 }
 
-function sleep(ms: number, signal: AbortSignal | undefined): Promise<void> {
+export function sleep(ms: number, signal: AbortSignal | undefined): Promise<void> {
   if (!signal) return new Promise((resolve) => setTimeout(resolve, ms));
   return new Promise((resolve, reject) => {
     const onAbort = (): void => {
@@ -132,7 +146,7 @@ export async function request<T>(
     if (value !== undefined) url.searchParams.set(key, String(value));
   }
 
-  const headers = new Headers(opts.headers);
+  const headers = new Headers({ ...config.headers, ...opts.headers });
   headers.set("accept", ACCEPT_V1);
   if (config.apiKey !== undefined) headers.set("api-key", config.apiKey);
 
@@ -166,11 +180,11 @@ export async function request<T>(
     if (retriesLeft && res.status === 429) {
       const retryAfterMs = parseRetryAfter(res.headers.get("retry-after"));
       if (retryAfterMs !== null && retryAfterMs > retry.maxDelayMs) throw await toApiError(res);
-      await sleep(retryAfterMs ?? backoffDelay(attempt, retry), opts.signal);
+      await config.sleep(retryAfterMs ?? backoffDelay(attempt, retry), opts.signal);
       continue;
     }
     if (retriesLeft && res.status >= 500 && IDEMPOTENT.has(method)) {
-      await sleep(backoffDelay(attempt, retry), opts.signal);
+      await config.sleep(backoffDelay(attempt, retry), opts.signal);
       continue;
     }
     throw await toApiError(res);

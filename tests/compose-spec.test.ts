@@ -1,5 +1,5 @@
+import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
 import { compose, type OverlayEntry } from "../scripts/compose-spec.ts";
 
 const base = () => ({
@@ -42,7 +42,7 @@ describe("compose", () => {
       }),
     ]);
     const composed = spec as ReturnType<typeof base>;
-    expect(composed.paths["/api/things"].get.responses["200"]).toEqual({
+    expect(composed.paths["/api/things"].get.responses["200"] as unknown).toEqual({
       description: "ok",
       content: {},
     });

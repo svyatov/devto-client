@@ -10,9 +10,10 @@ export async function* paginate<T>(
   options: { perPage?: number } = {},
 ): AsyncGenerator<T, void, undefined> {
   const perPage = options.perPage ?? 30;
-  for (let page = 1; ; page++) {
-    const items = await fetchPage(page, perPage);
-    if (items.length === 0) return;
+  let page = 1;
+  let items = await fetchPage(page, perPage);
+  while (items.length > 0) {
     yield* items;
+    items = await fetchPage(++page, perPage);
   }
 }

@@ -9,19 +9,35 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [22, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ matrix.node }}
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: npm run check
-      - run: npm run check:drift
-      - run: npm test
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: bun run check
+      - run: bun run check:drift
+      - run: bun test --coverage --coverage-reporter=lcov --coverage-reporter=text
+      - uses: codecov/codecov-action@v7
+        with:
+          files: ./coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+        # Codecov requires an upload token on the default branch even for public
+        # repos. Add it once: `gh secret set CODECOV_TOKEN` with the value from
+        # the repo's page on codecov.io.
+      # The package ships for Node consumers, but the suite runs under Bun. Pack
+      # the tarball and import it by name under the minimum supported Node, so a
+      # Node-only regression or a packaging mistake (a wrong `exports` map, a file
+      # missing from `files`) fails a PR here instead of surfacing at release.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22.12"
+      - run: |
+          npm pack
+          cd "$(mktemp -d)"
+          npm init -y >/dev/null 2>&1
+          npm install "$GITHUB_WORKSPACE"/devto-client-*.tgz >/dev/null 2>&1
+          node -e "import('devto-client').then(m => { if (!m.DevToClient) throw new Error('missing DevToClient export'); })"

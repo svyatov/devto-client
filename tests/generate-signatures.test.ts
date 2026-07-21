@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { generate, loadSpec, namespaceName } from "../scripts/generate-signatures.ts";
 import { escapeRegex } from "../scripts/spec-templates.ts";
 import { pathParamNames } from "../src/path-template.ts";

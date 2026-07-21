@@ -1,5 +1,5 @@
+import { describe, expect, it } from "bun:test";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
 import { compose, type OverlayEntry } from "../scripts/compose-spec.ts";
 import { deriveTemplate } from "../scripts/spec-templates.ts";
 import type { components } from "../src/generated/types.ts";

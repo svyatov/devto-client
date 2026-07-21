@@ -13,12 +13,11 @@ jobs:
   drift:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
+          bun-version: latest
+      - run: bun install --frozen-lockfile
       - name: Fetch the upstream spec
         run: curl -sf https://raw.githubusercontent.com/forem/forem/main/swagger/v1/api_v1.json -o /tmp/upstream.json
       # Structural diff (which templates/operations changed) plus a fixture
@@ -27,7 +26,7 @@ jobs:
       - id: drift
         name: Compute the shot list
         run: |
-          npm run --silent spec-drift -- /tmp/upstream.json spec/api_v1.json > /tmp/shotlist.md
+          bun run --silent spec-drift -- /tmp/upstream.json spec/api_v1.json > /tmp/shotlist.md
           if [ -s /tmp/shotlist.md ]; then
             echo "findings=true" >> "$GITHUB_OUTPUT"
           else
