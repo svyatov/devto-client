@@ -1,0 +1,29 @@
+name: Commit message
+
+# The PR title and body become the squash commit message, and release-please
+# reads that message off main to build the changelog. A body line it cannot
+# parse makes it drop the whole commit with every job still green, so the check
+# belongs here, before the merge, rather than after the entry has gone missing.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  parseable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      # via env, never interpolated into the script: a PR body is written by
+      # whoever opened the PR, and `${{ }}` inside `run` is a shell injection
+      - env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" | bun scripts/check-commit-message.ts
+      # ponytail: the PR body only. Every merged PR here is a squash, so the
+      # body is the message that reaches release-please. Loop over the branch's
+      # own commits too if this repo ever starts merge-committing.
