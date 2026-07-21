@@ -1,6 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
-import { compose, type OverlayEntry } from "../scripts/compose-spec.ts";
+import { compose, type OverlayEntry, validateProvenance } from "../scripts/compose-spec.ts";
+import { governedOps, isCorroborated, recordedPayload } from "../scripts/overlay-provenance.ts";
+import { opKey } from "../scripts/sweep-local.ts";
+import { specOperations } from "../scripts/sweep-targets.ts";
 
 const base = () => ({
   paths: {
@@ -22,6 +25,7 @@ const entry = (over: Partial<OverlayEntry>): OverlayEntry => ({
   expect: null,
   reason: "missing schema",
   patch: { type: "object" },
+  provenance: { instrument: "spec-structure", corroborated: false },
   ...over,
 });
 
@@ -110,6 +114,51 @@ describe("compose", () => {
   });
 });
 
+describe("provenance", () => {
+  const withProvenance = (provenance: unknown): OverlayEntry =>
+    ({ ...entry({}), provenance }) as OverlayEntry;
+
+  it("composes an entry carrying a well-formed field unchanged", () => {
+    const { spec } = compose(base(), [
+      withProvenance({ instrument: "local-forem", forem: "ae359ff41b2a", corroborated: false }),
+    ]);
+    expect((spec as ReturnType<typeof base>).components.schemas).toEqual({
+      Thing: { type: "object" },
+    });
+  });
+
+  it("composes an entry with no provenance at all, so the field is genuinely optional", () => {
+    const { provenance: _dropped, ...bare } = entry({});
+    expect(() => compose(base(), [bare])).not.toThrow();
+  });
+
+  // the array-guard prevention rule: a verification mechanism whose failure mode
+  // is silence needs a test proving it can come back dirty
+  it.each([
+    ["not an object", "must be an object", "local-forem"],
+    ["a bad instrument", "instrument must be one of", { instrument: "vibes", corroborated: false }],
+    [
+      "a non-boolean corroborated",
+      "corroborated must be a boolean",
+      { instrument: "devto-fixture", corroborated: "yes" },
+    ],
+    [
+      "a non-string forem",
+      "forem must be a string",
+      { instrument: "devto-fixture", corroborated: false, forem: 12 },
+    ],
+    [
+      "a local claim with no Forem commit",
+      "must name the Forem commit",
+      { instrument: "local-forem", corroborated: false },
+    ],
+  ])("fails composition on %s, naming the entry", (_label, message, provenance) => {
+    expect(() => compose(base(), [withProvenance(provenance)])).toThrow(
+      new RegExp(`/components/schemas/Thing: provenance.*${message.replaceAll(" ", "\\s")}`),
+    );
+  });
+});
+
 describe("composed real spec", () => {
   const snapshot = JSON.parse(readFileSync("spec/api_v1.json", "utf8"));
   const overlay = JSON.parse(readFileSync("spec/overlay.json", "utf8"));
@@ -136,5 +185,97 @@ describe("composed real spec", () => {
 
   it("reports no deletable entries against the current snapshot", () => {
     expect(compose(snapshot, overlay).deletable).toEqual([]);
+  });
+
+  // a hand-edited entry cannot drift past the shape check, since composition runs
+  // the same validator over every entry the real Overlay carries
+  it("every entry in the Overlay carries a valid provenance field or none", () => {
+    for (const e of overlay as OverlayEntry[]) {
+      expect(() => validateProvenance(e)).not.toThrow();
+    }
+  });
+
+  it("gives every entry claiming observation a provenance field", () => {
+    const claiming = (overlay as OverlayEntry[]).filter((e) =>
+      e.reason.startsWith("reality correction:"),
+    );
+    expect(claiming).toHaveLength(25);
+    expect(claiming.filter((e) => e.provenance === undefined)).toEqual([]);
+  });
+
+  it("derives corroboration from an actual shape comparison, not from fixture existence", () => {
+    for (const e of overlay as OverlayEntry[]) {
+      if (e.provenance === undefined) continue;
+      // a local observation admits no corroboration at all: dev.to cannot be asked
+      // what a Forem commit renders, so the comparison does not apply to these
+      if (e.provenance.instrument === "local-forem") {
+        expect({ target: e.target, corroborated: e.provenance.corroborated }).toEqual({
+          target: e.target,
+          corroborated: false,
+        });
+        continue;
+      }
+      expect({ target: e.target, corroborated: e.provenance.corroborated }).toEqual({
+        target: e.target,
+        corroborated: isCorroborated(e),
+      });
+    }
+  });
+
+  // AE2: the write half's only corroboration. Two of the 55 writes have a
+  // recorded dev.to response, and the run's local observations agree with both.
+  it("corroborates exactly the two writes that have a recorded dev.to fixture", () => {
+    const writes = specOperations().filter((o) => o.method !== "GET");
+    const corroborated = writes.filter((o) => recordedPayload(o) !== undefined).map(opKey);
+    expect(corroborated).toEqual(["POST /api/articles", "PUT /api/articles/{id}"]);
+  });
+
+  // the triage rule for uncorroborated observations: a local-only claim may add a
+  // key the spec omits, never remove or retype one it declares
+  it("applies no local-only correction that removes or retypes a declared key", () => {
+    for (const e of overlay as OverlayEntry[]) {
+      if (e.provenance?.instrument !== "local-forem") continue;
+      // `expect: null` asserts the node is absent today, so the entry can only add.
+      // The two path entries carry a real `expect` because they replace a schema
+      // upstream declared malformed, which types out as `unknown` either way.
+      const additive = e.expect === null;
+      const structuralRepair = e.target.startsWith("/paths/") && e.patch !== null;
+      expect({ target: e.target, ok: additive || structuralRepair }).toEqual({
+        target: e.target,
+        ok: true,
+      });
+      expect(e.patch).not.toBeNull();
+    }
+  });
+
+  it("claims corroboration for no entry whose operations have no recorded fixture", () => {
+    for (const e of overlay as OverlayEntry[]) {
+      if (e.provenance?.corroborated !== true) continue;
+      const withFixture = governedOps(e.target).filter((op) => recordedPayload(op) !== undefined);
+      expect({ target: e.target, fixtures: withFixture.length > 0 }).toEqual({
+        target: e.target,
+        fixtures: true,
+      });
+    }
+  });
+
+  // pinned so a later hand edit that shifts the evidence mix is visible in review
+  it("pins the count of entries carrying each instrument", () => {
+    const mix: Record<string, number> = {};
+    for (const e of overlay as OverlayEntry[]) {
+      if (e.provenance === undefined) continue;
+      const key = `${e.provenance.instrument}/${e.provenance.corroborated}`;
+      mix[key] = (mix[key] ?? 0) + 1;
+    }
+    expect(mix).toEqual({
+      "devto-fixture/true": 17,
+      "devto-fixture/false": 3,
+      "forem-source/false": 2,
+      "spec-structure/true": 1,
+      "spec-structure/false": 2,
+      // pass two's own corrections: 32 billboard fields plus the two billboard
+      // write responses whose "writes are deferred" caveat the run retired
+      "local-forem/false": 34,
+    });
   });
 });

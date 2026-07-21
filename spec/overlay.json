@@ -23,7 +23,11 @@
       "in": "query"
     },
     "reason": "reality correction: GET /api/comments declares page twice (pageParam $ref at index 0 plus this inline copy); openapi-typescript rejects duplicate params",
-    "patch": null
+    "patch": null,
+    "provenance": {
+      "instrument": "spec-structure",
+      "corroborated": true
+    }
   },
   {
     "target": "/paths/~1api~1articles/post/responses/201/content",
@@ -102,6 +106,10 @@
           }
         }
       }
+    },
+    "provenance": {
+      "instrument": "forem-source",
+      "corroborated": false
     }
   },
   {
@@ -958,7 +966,11 @@
       "format": "url"
     },
     "reason": "reality correction: _comment.json.jbuilder never emits image_url; recorded fixtures confirm no comment carries it",
-    "patch": null
+    "patch": null,
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
+    }
   },
   {
     "target": "/components/schemas/Comment/properties/body_html",
@@ -1170,6 +1182,10 @@
     "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the show response is ArticleShow (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/ArticleShow"
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1183,6 +1199,10 @@
     "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the show response is ArticleShow (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/ArticleShow"
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1196,6 +1216,10 @@
     "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the show response is Organization (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/Organization"
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1209,6 +1233,10 @@
     "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the show response is ExtendedUser (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/ExtendedUser"
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1264,6 +1292,10 @@
     "patch": {
       "type": "string",
       "nullable": true
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1275,6 +1307,10 @@
     "patch": {
       "type": "string",
       "nullable": true
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1286,6 +1322,10 @@
     "patch": {
       "type": "string",
       "nullable": true
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": false
     }
   },
   {
@@ -1304,6 +1344,10 @@
           "nullable": true
         }
       }
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1315,6 +1359,10 @@
     "patch": {
       "type": "string",
       "nullable": true
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1326,6 +1374,10 @@
     "patch": {
       "type": "string",
       "nullable": true
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1337,6 +1389,10 @@
     "patch": {
       "type": "string",
       "nullable": true
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1348,6 +1404,10 @@
     "patch": {
       "type": "string",
       "nullable": true
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1361,6 +1421,10 @@
     "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the response is MyUser (verified against recorded fixtures)",
     "patch": {
       "$ref": "#/components/schemas/MyUser"
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1372,6 +1436,10 @@
     "patch": {
       "type": "string",
       "nullable": true
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1490,6 +1558,10 @@
       "items": {
         "$ref": "#/components/schemas/MyArticle"
       }
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": false
     }
   },
   {
@@ -1506,6 +1578,10 @@
       "items": {
         "$ref": "#/components/schemas/MyArticle"
       }
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1522,6 +1598,10 @@
       "items": {
         "$ref": "#/components/schemas/MyArticle"
       }
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1538,6 +1618,10 @@
       "items": {
         "$ref": "#/components/schemas/MyArticle"
       }
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": false
     }
   },
   {
@@ -1581,6 +1665,10 @@
       "items": {
         "$ref": "#/components/schemas/ReadingListItem"
       }
+    },
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
     }
   },
   {
@@ -1730,6 +1818,10 @@
     "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the response is Segment (executed against a local Forem at ae359ff41b2a: the show response carries exactly Segment's properties)",
     "patch": {
       "$ref": "#/components/schemas/Segment"
+    },
+    "provenance": {
+      "instrument": "spec-structure",
+      "corroborated": false
     }
   },
   {
@@ -1743,6 +1835,10 @@
     "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the response is Organization (executed against a local Forem at ae359ff41b2a: the show response carries exactly Organization's 14 properties, matching app/views/api/v1/organizations/show.json.jbuilder)",
     "patch": {
       "$ref": "#/components/schemas/Organization"
+    },
+    "provenance": {
+      "instrument": "forem-source",
+      "corroborated": false
     }
   },
   {
@@ -1756,6 +1852,10 @@
     "reason": "reality correction: upstream declares {type: object, items: ...}: 'items' is meaningless on an object, leaving the response untyped; the response is ProfileImage (executed against a local Forem at ae359ff41b2a: the show response carries exactly ProfileImage's properties)",
     "patch": {
       "$ref": "#/components/schemas/ProfileImage"
+    },
+    "provenance": {
+      "instrument": "spec-structure",
+      "corroborated": false
     }
   },
   {
@@ -1779,9 +1879,14 @@
         "$ref": "#/components/schemas/Billboard"
       }
     },
-    "reason": "spec defect: upstream declares {type: object, items: ...}: \"items\" is array-only, so on an object the $ref never resolves and the response types out as unknown. The response is Billboard. Not observed: writes are deferred to a later sweep pass, so this rests on the structural defect plus the sibling GET /api/billboards/{id} correction.",
+    "reason": "spec defect: upstream declares {type: object, items: ...}: \"items\" is array-only, so on an object the $ref never resolves and the response types out as unknown. The response is Billboard. Observed: sweep pass two exercised the write against Forem ae359ff41b2a and the response was a Billboard.",
     "patch": {
       "$ref": "#/components/schemas/Billboard"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
     }
   },
   {
@@ -1792,9 +1897,14 @@
         "$ref": "#/components/schemas/Billboard"
       }
     },
-    "reason": "spec defect: upstream declares {type: object, items: ...}: \"items\" is array-only, so on an object the $ref never resolves and the response types out as unknown. The response is Billboard. Not observed: writes are deferred to a later sweep pass, so this rests on the structural defect plus the sibling GET /api/billboards/{id} correction.",
+    "reason": "spec defect: upstream declares {type: object, items: ...}: \"items\" is array-only, so on an object the $ref never resolves and the response types out as unknown. The response is Billboard. Observed: sweep pass two exercised the write against Forem ae359ff41b2a and the response was a Billboard.",
     "patch": {
       "$ref": "#/components/schemas/Billboard"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
     }
   },
   {
@@ -1954,6 +2064,450 @@
     "patch": {
       "type": "string",
       "nullable": true
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/browser_context",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits browser_context, absent from the upstream schema",
+    "patch": {
+      "type": "string"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/cached_tag_list",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits cached_tag_list, absent from the upstream schema",
+    "patch": {
+      "type": "string"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/clicks_count",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits clicks_count, absent from the upstream schema",
+    "patch": {
+      "type": "integer"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/color",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits color, absent from the upstream schema",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/content_updated_at",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits content_updated_at, absent from the upstream schema",
+    "patch": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/counts_tabulated_at",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits counts_tabulated_at, absent from the upstream schema",
+    "patch": {
+      "type": "string",
+      "format": "date-time",
+      "nullable": true
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/created_at",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits created_at, absent from the upstream schema",
+    "patch": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/custom_display_label",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits custom_display_label, absent from the upstream schema",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/dismissal_sku",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits dismissal_sku, absent from the upstream schema",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/event_id",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits event_id, absent from the upstream schema",
+    "patch": {
+      "type": "integer",
+      "nullable": true
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/exclude_role_names",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits exclude_role_names, absent from the upstream schema",
+    "patch": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/exclude_survey_completions",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits exclude_survey_completions, absent from the upstream schema",
+    "patch": {
+      "type": "boolean"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/exclude_survey_ids",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits exclude_survey_ids, absent from the upstream schema",
+    "patch": {
+      "type": "string"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/impressions_count",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits impressions_count, absent from the upstream schema",
+    "patch": {
+      "type": "integer"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/include_subforem_ids",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits include_subforem_ids, absent from the upstream schema",
+    "patch": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/minimized_body_markdown",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits minimized_body_markdown, absent from the upstream schema",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/minimized_processed_html",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits minimized_processed_html, absent from the upstream schema",
+    "patch": {
+      "type": "string",
+      "nullable": true
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/page_id",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits page_id, absent from the upstream schema",
+    "patch": {
+      "type": "integer",
+      "nullable": true
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/prefer_paired_with_billboard_id",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits prefer_paired_with_billboard_id, absent from the upstream schema",
+    "patch": {
+      "type": "integer",
+      "nullable": true
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/preferred_article_ids",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits preferred_article_ids, absent from the upstream schema",
+    "patch": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/priority",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits priority, absent from the upstream schema",
+    "patch": {
+      "type": "boolean"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/processed_html",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits processed_html, absent from the upstream schema",
+    "patch": {
+      "type": "string"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/render_mode",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits render_mode, absent from the upstream schema",
+    "patch": {
+      "type": "string"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/requires_cookies",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits requires_cookies, absent from the upstream schema",
+    "patch": {
+      "type": "boolean"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/seconds_visible",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits seconds_visible, absent from the upstream schema",
+    "patch": {
+      "type": "integer"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/special_behavior",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits special_behavior, absent from the upstream schema",
+    "patch": {
+      "type": "string"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/success_rate",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits success_rate, absent from the upstream schema",
+    "patch": {
+      "type": "number"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/tags_array",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits tags_array, absent from the upstream schema",
+    "patch": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/target_role_names",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits target_role_names, absent from the upstream schema",
+    "patch": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/template",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits template, absent from the upstream schema",
+    "patch": {
+      "type": "string"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/updated_at",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits updated_at, absent from the upstream schema",
+    "patch": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
+    }
+  },
+  {
+    "target": "/components/schemas/Billboard/properties/weight",
+    "expect": null,
+    "reason": "missing field: the billboard serializer emits weight, absent from the upstream schema",
+    "patch": {
+      "type": "number"
+    },
+    "provenance": {
+      "instrument": "local-forem",
+      "forem": "ae359ff41b2a",
+      "corroborated": false
     }
   }
 ]

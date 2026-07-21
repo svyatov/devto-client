@@ -73,6 +73,20 @@ export function successSchema(template: string, method: string): SchemaLookup {
   return { kind: "none" };
 }
 
+/**
+ * True when the operation's success body is an inline schema rather than a named
+ * component (R19). A shape the spec never named cannot drift-check against one,
+ * so these belong in their own group rather than mixed in with the rest.
+ */
+export function isInlineSchema(template: string, method: string): boolean {
+  const lookup = successSchema(template, method);
+  if (lookup.kind !== "schema") return false;
+  const { schema } = lookup;
+  if (schema.$ref !== undefined) return false;
+  if (schema.type === "array" && schema.items?.$ref !== undefined) return false;
+  return true;
+}
+
 export function isVacuous(payload: unknown): boolean {
   if (Array.isArray(payload)) return payload.length === 0;
   if (payload !== null && typeof payload === "object") {

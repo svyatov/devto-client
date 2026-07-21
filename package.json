@@ -41,6 +41,7 @@
     "compose": "bun scripts/compose-spec.ts",
     "record": "bun scripts/record-fixtures.ts",
     "sweep": "bun scripts/sweep-local.ts",
+    "forem:reset": "bun scripts/reset-forem.ts",
     "spec-drift": "bun scripts/spec-drift.ts",
     "generate": "bun run compose && bunx openapi-typescript@7.13.0 spec/composed.json -o src/generated/types.ts && bun scripts/generate-signatures.ts && biome check --write src/generated/types.ts src/generated/signatures.ts src/generated/schemas.ts src/generated/routing.ts",
     "check:drift": "bun scripts/generate-signatures.ts && biome check --write src/generated/signatures.ts src/generated/schemas.ts src/generated/routing.ts && git diff --exit-code -- src/generated/signatures.ts src/generated/schemas.ts src/generated/routing.ts",

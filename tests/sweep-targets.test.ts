@@ -1,10 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import { deriveTemplate } from "../scripts/spec-templates.ts";
+import { CAUSES } from "../scripts/sweep-local.ts";
 import {
   buildTargets,
   type Discovered,
+  paramPlacement,
   readTemplates,
   specOperations,
+  writeOperations,
 } from "../scripts/sweep-targets.ts";
 
 /** A record where every discoverable is present, so only genuine gaps block an entry. */
@@ -30,6 +33,24 @@ const FULL: Required<Discovered> = {
   requestRedirectId: 13,
   agentSessionId: 14,
   analyticsStart: "2026-01-01",
+  targetUserId: 15,
+  mergeUserId: 16,
+  runId: "test",
+  imageUrl: "https://example.com/image.png",
+  created: {
+    agentSession: 20,
+    article: 21,
+    badge: 22,
+    badgeAchievement: 23,
+    billboard: 24,
+    concept: 25,
+    organization: 26,
+    page: 27,
+    recommendedArticlesList: 28,
+    requestRedirect: 29,
+    segment: 30,
+    userIdentity: 31,
+  },
 };
 
 const key = (o: { template: string; method: string }): string => `${o.method} ${o.template}`;
@@ -76,16 +97,74 @@ describe("sweep targets table", () => {
   it("gives every skipped entry a cause and a non-empty reason", () => {
     for (const t of targets) {
       if (t.kind !== "skipped") continue;
-      expect(["blocked", "deferred"]).toContain(t.cause);
+      expect(CAUSES).toContain(t.cause);
       expect(t.reason.length).toBeGreaterThan(0);
     }
   });
 
-  it("defers all 55 write operations and targets all 75 reads on a full discovery record", () => {
-    const deferred = targets.filter((t) => t.kind === "skipped" && t.cause === "deferred");
-    expect(deferred.length).toBe(55);
-    expect(deferred.every((t) => t.method !== "GET")).toBe(true);
-    expect(targets.filter((t) => t.kind === "targeted").length).toBe(75);
+  // Pass one's completeness proof, rewritten to pass two's totals: 129 of the 130
+  // resolve to a concrete request, and the one holdout is the feedback-message
+  // update, whose identifier no operation in the spec lists or creates.
+  it("targets 129 of 130 operations and defers none on a full discovery record", () => {
+    expect(
+      targets.filter((t) => t.kind === "skipped" && t.cause === "prerequisite-failed"),
+    ).toEqual([]);
+    expect(targets.filter((t) => t.kind === "targeted").length).toBe(129);
+    const skipped = targets.filter((t) => t.kind === "skipped");
+    expect(skipped.map(key)).toEqual(["PATCH /api/feedback_messages/{id}"]);
+  });
+
+  it("defines a recipe for every non-GET operation in the spec, and none the spec lacks", () => {
+    const declared = specOperations()
+      .filter((o) => o.method !== "GET")
+      .map(key)
+      .sort();
+    expect(writeOperations().sort()).toEqual(declared);
+    expect(declared.length).toBe(55);
+  });
+
+  it("produces two distinct entries for a template carrying two verbs", () => {
+    const badge = targets.filter((t) => t.template === "/api/badges/{id}" && t.method !== "GET");
+    expect(badge.map((t) => t.method).sort()).toEqual(["DELETE", "PATCH"]);
+    expect(badge.every((t) => t.kind === "targeted")).toBe(true);
+    // and the two carry different requests, which a template-keyed table could not express
+    const patch = badge.find((t) => t.method === "PATCH");
+    const del = badge.find((t) => t.method === "DELETE");
+    expect(patch?.kind === "targeted" && patch.body).toBeDefined();
+    expect(del?.kind === "targeted" && del.body).toBeUndefined();
+  });
+
+  it("places every write's params where the generated routing table says, and never contradicts it", () => {
+    for (const t of targets) {
+      if (t.kind !== "targeted" || t.method === "GET") continue;
+      const placement = paramPlacement(t.template, t.method);
+      if (placement === "query") {
+        expect({ op: key(t), body: t.body }).toEqual({ op: key(t), body: undefined });
+      } else if (placement === "body") {
+        expect({ op: key(t), query: t.query }).toEqual({ op: key(t), query: undefined });
+      } else {
+        // the generator omits operations taking no params object: those recipes may
+        // declare their own placement, and none of them declares one here
+        expect({ op: key(t), query: t.query, body: t.body }).toEqual({
+          op: key(t),
+          query: undefined,
+          body: undefined,
+        });
+      }
+    }
+  });
+
+  it("names the missing prerequisite rather than throwing when a created identifier is absent", () => {
+    const { created: _dropped, ...noCreates } = FULL;
+    const built = buildTargets(noCreates);
+    const update = built.find((t) => key(t) === "PUT /api/articles/{id}");
+    expect(update?.kind).toBe("skipped");
+    if (update?.kind === "skipped") {
+      expect(update.cause).toBe("prerequisite-failed");
+      expect(update.reason).toBe("not created by this run: article");
+    }
+    // the creates themselves need nothing from the ledger and stay targeted
+    expect(built.find((t) => key(t) === "POST /api/articles")?.kind).toBe("targeted");
   });
 
   it("blocks exactly the operations needing an absent discoverable, leaving the rest targeted", () => {
@@ -94,12 +173,15 @@ describe("sweep targets table", () => {
     expect(blocked.map(key).sort()).toEqual([
       "GET /api/segments/{id}",
       "GET /api/segments/{id}/users",
+      "PATCH /api/feedback_messages/{id}", // blocked on every record; see the totals test
     ]);
     for (const t of blocked) {
-      if (t.kind === "skipped") expect(t.reason).toBe("discovery unavailable: segmentId");
+      if (t.kind === "skipped" && t.template.startsWith("/api/segments")) {
+        expect(t.reason).toBe("discovery unavailable: segmentId");
+      }
     }
-    // and the other 73 reads are untouched
-    expect(noSegment.filter((t) => t.kind === "targeted").length).toBe(73);
+    // and every other operation is untouched
+    expect(noSegment.filter((t) => t.kind === "targeted").length).toBe(127);
   });
 
   it("blocks the username-and-slug read when either half is missing", () => {

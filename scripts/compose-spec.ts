@@ -3,19 +3,72 @@
  * into spec/composed.json: the input for type generation.
  *
  * Overlay entry semantics:
- *   target  JSON pointer to the node to set or remove
- *   expect  subset-asserted against the current node; null asserts absence
- *   reason  why the entry exists (required, non-empty)
- *   patch   value to set at target; null removes the node
+ *   target      JSON pointer to the node to set or remove
+ *   expect      subset-asserted against the current node; null asserts absence
+ *   reason      why the entry exists (required, non-empty)
+ *   patch       value to set at target; null removes the node
+ *   provenance  how the claim was established (optional; see below)
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+
+/**
+ * What produced a claim. The `reason` prefix says what kind of defect an entry
+ * corrects; this says what saw it. Collapsing the two is what let one prefix
+ * cover both a dev.to fixture match and a single local observation.
+ */
+export const INSTRUMENTS = [
+  /** A recorded dev.to response under tests/fixtures/recorded/. */
+  "devto-fixture",
+  /** A response from the pinned local Forem, which nothing else can corroborate. */
+  "local-forem",
+  /** Forem's own source at the pin: a controller, serializer or policy. */
+  "forem-source",
+  /** The upstream spec read on its own terms, with no server involved. */
+  "spec-structure",
+] as const;
+export type Instrument = (typeof INSTRUMENTS)[number];
+
+export interface Provenance {
+  instrument: Instrument;
+  /** The Forem commit the claim was observed against, where one applies. */
+  forem?: string;
+  /** Whether a second server sent the same shape. Never true for a structural read. */
+  corroborated: boolean;
+}
 
 export interface OverlayEntry {
   target: string;
   expect: unknown;
   reason: string;
   patch: unknown;
+  /**
+   * Optional on purpose (KTD4): composition aborts the whole spec pipeline on any
+   * validation failure, so making this required would turn one typo into a red
+   * type-generation run and a repo-wide test failure.
+   */
+  provenance?: Provenance;
+}
+
+/** Reject a malformed provenance field loudly, naming the entry that carries it. */
+export function validateProvenance(entry: OverlayEntry): void {
+  const p: unknown = entry.provenance;
+  if (p === undefined) return;
+  const fail = (why: string): never => {
+    throw new Error(`overlay entry ${entry.target}: provenance ${why}`);
+  };
+  if (p === null || typeof p !== "object" || Array.isArray(p)) fail("must be an object");
+  const { instrument, forem, corroborated } = p as Partial<Provenance>;
+  if (typeof instrument !== "string" || !INSTRUMENTS.includes(instrument as Instrument)) {
+    fail(`instrument must be one of ${INSTRUMENTS.join(", ")}, got ${JSON.stringify(instrument)}`);
+  }
+  if (typeof corroborated !== "boolean") fail("corroborated must be a boolean");
+  if (forem !== undefined && typeof forem !== "string") fail("forem must be a string when present");
+  // R12: a local observation is only interpretable against the commit that
+  // produced it, and Forem moves. A local claim with no pin is unfalsifiable.
+  if (instrument === "local-forem" && forem === undefined) {
+    fail("must name the Forem commit when the instrument is local-forem");
+  }
 }
 
 type Node = Record<string, unknown> | unknown[];
@@ -59,6 +112,7 @@ export function compose(
     if (!entry.reason || entry.reason.trim() === "") {
       throw new Error(`overlay entry ${entry.target}: reason must be non-empty`);
     }
+    validateProvenance(entry);
     const segments = parsePointer(entry.target);
     const key = segments.at(-1);
     if (key === undefined) throw new Error(`overlay entry ${entry.target}: empty pointer`);
