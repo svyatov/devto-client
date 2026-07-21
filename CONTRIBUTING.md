@@ -2,6 +2,8 @@
 
 Thanks for looking under the hood. This client is a thin, typed mirror of the dev.to (Forem) v1 API, and most contributions come down to one thing: teaching it about an endpoint it doesn't cover yet. This guide walks you from a fresh clone to a green PR doing exactly that.
 
+Before you start, one thing worth knowing: taking part here means agreeing to the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Setup
 
 You'll need [Bun](https://bun.sh) — the toolchain runs on Bun, so you don't need a separate Node install to work on the client. Clone the repo and install with a clean, lockfile-exact install:

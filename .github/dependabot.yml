@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # The toolchain is Bun, but bun.lock sits alongside a standard package.json,
+  # so the npm ecosystem is the right declaration. Everything here is a
+  # devDependency; the published package has no runtime dependencies.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-minor-and-patch:
+        update-types: [minor, patch]
+  # Action bumps get a second look rather than a reflexive merge: the
+  # release-please workflow holds the publish identity.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions-minor-and-patch:
+        update-types: [minor, patch]
