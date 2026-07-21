@@ -53,6 +53,23 @@ export function governedOps(target: string): Op[] {
   return [];
 }
 
+/**
+ * A `devto-fixture` entry the shape comparison structurally cannot reach: it
+ * governs no operation, so no recorded fixture is ever compared against it and
+ * {@link isCorroborated} returns `false` through the `compared > 0` guard rather
+ * than through any disagreement. The instrument promises a fixture backs the
+ * claim; the mechanism cannot find one to check. Kept as a named state so this
+ * reads as "the comparison never ran," distinct from an unevidenced `false`.
+ *
+ * The case that bites in practice is nesting: the comparison is top-level-only (spec-keys'
+ * `declaredKeys`/`carriedKeys` never recurse), so a schema that appears only
+ * inside another schema governs nothing and cannot be corroborated even with a
+ * hand-verified fixture behind it.
+ */
+export function isUncorroborableFixture(entry: OverlayEntry): boolean {
+  return entry.provenance?.instrument === "devto-fixture" && governedOps(entry.target).length === 0;
+}
+
 const refName = (schema: Schema | undefined): string | undefined => schema?.$ref?.split("/").at(-1);
 
 /** Whether the operation's success body is this component, or an array of it. */
@@ -102,8 +119,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   for (const [i, entry] of overlay.entries()) {
     const ops = governedOps(entry.target);
     const withFixture = ops.filter((op) => recordedPayload(op) !== undefined);
-    console.log(
-      `${i}\t${isCorroborated(entry) ? "CORROBORATED" : "-"}\t${withFixture.length}/${ops.length} fixtures\t${entry.target}`,
-    );
+    const status = isCorroborated(entry)
+      ? "CORROBORATED"
+      : isUncorroborableFixture(entry)
+        ? "UNCORROBORABLE"
+        : "-";
+    console.log(`${i}\t${status}\t${withFixture.length}/${ops.length} fixtures\t${entry.target}`);
   }
 }

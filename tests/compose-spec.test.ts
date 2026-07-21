@@ -1,7 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { compose, type OverlayEntry, validateProvenance } from "../scripts/compose-spec.ts";
-import { governedOps, isCorroborated, recordedPayload } from "../scripts/overlay-provenance.ts";
+import {
+  governedOps,
+  isCorroborated,
+  isUncorroborableFixture,
+  recordedPayload,
+} from "../scripts/overlay-provenance.ts";
 import { opKey } from "../scripts/sweep-local.ts";
 import { specOperations } from "../scripts/sweep-targets.ts";
 
@@ -272,6 +277,17 @@ describe("composed real spec", () => {
         fixtures: true,
       });
     }
+  });
+
+  // #20: a devto-fixture entry that governs no operation is uncorroborable, not
+  // unevidenced - the shape comparison is top-level-only, so a nested-only schema
+  // has no operation to reach a fixture through. Pinned so a future nested-fixture
+  // entry surfaces here in review instead of melting silently into a plain `false`.
+  it("pins the devto-fixture entries the shape comparison cannot reach", () => {
+    const uncorroborable = (overlay as OverlayEntry[])
+      .filter(isUncorroborableFixture)
+      .map((e) => e.target);
+    expect(uncorroborable).toEqual(["/components/schemas/ReadingListArticle"]);
   });
 
   // pinned so a later hand edit that shifts the evidence mix is visible in review
