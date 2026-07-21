@@ -54,6 +54,12 @@ If the endpoint needs more than an ordinary key, flag that in the JSDoc rather t
 
 One last step: `tests/surface-inventory.test.ts` asserts a hard operation count, the "100% of the surface" gate. Bump both numbers in the count assertion (they're the upstream total plus the code-only extras). That test enforces three-way parity between the spec, the tables, and that count, so it fails loudly if you added a table entry without a matching spec operation, or vice versa. Green there means you're done.
 
+## How a release happens
+
+You don't have to do anything for a release, but it's worth knowing what your commit messages set in motion. release-please reads them off `main` and keeps a release PR open, adding your change to the pending changelog under `feat` or `fix`. Merging that PR is the whole release: it tags the version, cuts the GitHub release, and publishes to npm in the same workflow run.
+
+There is no npm token in this repository, and there never will be. The publish authenticates through OIDC trusted publishing, so npm verifies the workflow itself rather than a stored credential, and every published version carries a provenance attestation you can check on its npm page. That's also why the tests and the build run in a separate job from the publish: the job holding the publish identity installs nothing, so nothing a dependency ships can run next to it.
+
 ## Never edit the generated types
 
 `src/generated/types.ts` is output. `bun run generate` recreates it from the composed spec, and any hand edit you make is gone the next time anyone runs it. If a type is wrong, the fix belongs in `spec/overlay.json`, not in the generated file.
