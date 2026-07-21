@@ -59,7 +59,9 @@ export interface ResolvedConfig {
 }
 
 export function resolveConfig(options: ClientOptions): ResolvedConfig {
-  const baseUrl = (options.baseUrl ?? "https://dev.to").replace(/\/+$/, "");
+  // the lookbehind pins the match to the start of the trailing run; without it
+  // `\/+$` restarts at every slash and goes quadratic on `"https://x" + "/".repeat(1e5) + "y"`
+  const baseUrl = (options.baseUrl ?? "https://dev.to").replace(/(?<!\/)\/+$/, "");
   const parsed = new URL(baseUrl);
   if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
     throw new Error(`baseUrl must be http(s), got ${parsed.protocol}`);
