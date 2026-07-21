@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/svyatov/devto-client/compare/v1.0.1...v1.0.2) (2026-07-21)
+
+
+### Bug Fixes
+
+* **tests:** stop the reality check false-alarming on conditional article keys ([#10](https://github.com/svyatov/devto-client/issues/10)) ([45b4f4c](https://github.com/svyatov/devto-client/commit/45b4f4c09f41f2d3997f0c5e94bc4ba5079bc9fe))
+
 ## [1.0.1](https://github.com/svyatov/devto-client/compare/v1.0.0...v1.0.1) (2026-07-21)
 
 
