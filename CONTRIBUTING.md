@@ -58,6 +58,8 @@ One last step: `tests/surface-inventory.test.ts` asserts a hard operation count,
 
 You don't have to do anything for a release, but it's worth knowing what your commit messages set in motion. release-please reads them off `main` and keeps a release PR open, adding your change to the pending changelog under `feat` or `fix`. Merging that PR is the whole release: it tags the version, cuts the GitHub release, and publishes to npm in the same workflow run.
 
+One trap is worth knowing about, because it fails silently. Your PR title and body become the squash commit message, and release-please parses that message with conventional-commits-parser. A body line that starts with `word(` and nests a second paren inside it, which is to say most one-line code samples, is a syntax error to that parser. It throws, release-please catches it, and your commit vanishes from the changelog with every CI job still green. Commit 5c7bd8f lost its entry from two separate release PRs this way. Indenting the line by a single space is enough to fix it, and CI checks for the pattern so you'll hear about it before you merge.
+
 There is no npm token in this repository, and there never will be. The publish authenticates through OIDC trusted publishing, so npm verifies the workflow itself rather than a stored credential, and every published version carries a provenance attestation you can check on its npm page. That's also why the tests and the build run in a separate job from the publish: the job holding the publish identity installs no project dependencies and builds nothing, so nothing your `bun install` pulls in ever runs next to it.
 
 ## Never edit the generated types
