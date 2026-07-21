@@ -3,8 +3,8 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fixtureFileName } from "../scripts/record-fixtures.ts";
+import { assertResetTarget } from "../scripts/reset-forem.ts";
 import {
-  assertResetTarget,
   assertSweepSafe,
   CAPTURE_DIR,
   CAUSES,
@@ -12,6 +12,7 @@ import {
   CREATE_SEQUENCE,
   classifyPayload,
   discover,
+  extractId,
   type Finding,
   isUnavailable,
   type Ladder,
@@ -26,6 +27,7 @@ import {
   runSweep,
   sweep,
   verifyRungs,
+  withLedger,
 } from "../scripts/sweep-local.ts";
 import { buildTargets, type SweepTarget, specOperations } from "../scripts/sweep-targets.ts";
 import { DevToApiError } from "../src/errors.ts";
@@ -537,28 +539,74 @@ describe("the type-scoped grant probe", () => {
     fromLedger: true,
   };
   const ok = async (): Promise<unknown> => ({ id: 9 });
+  const refuse = async (): Promise<never> => {
+    throw new DevToApiError(401, { error: "unauthorized" }, "");
+  };
 
+  /** A ladder that turns `user` away and lets `admin` through, which is the shape the probe needs. */
   const probeWith = async (
     target: SweepTarget,
     scopedGrant: Ladder["scopedGrant"],
+    rungCall: (rung: Rung) => Promise<unknown> = async (rung) =>
+      rung === "user" ? refuse() : { id: 9 },
   ): Promise<Finding | undefined> => {
-    const base = ladderOf(async () => ({ id: 9 }), ["admin"]);
+    const base = ladderOf((rung) => rungCall(rung), ["user", "admin"]);
     const ladder: Ladder = scopedGrant ? { ...base, scopedGrant } : base;
     return (await sweep(ladder, [target], scratch, "sha")).findings[0];
   };
 
   it("records the grant path rather than a rung when the grant authorizes the operation", async () => {
     const f = await probeWith(billboard, { call: ok });
-    expect(f?.auth).toEqual({ via: "scoped-grant", resourceType: "Billboard", rung: "admin" });
+    expect(f?.auth).toEqual({ via: "scoped-grant", resourceType: "Billboard", rung: "user" });
   });
 
-  it("keeps the rung when the grant does not authorize the operation", async () => {
+  // the whole point of splicing the grant into the climb: the ladder used to run to
+  // completion and then replay the mutation, so every affected create landed twice
+  it("issues the operation once, not once per authorization path", async () => {
+    const paths: string[] = [];
+    await probeWith(billboard, { call: ok }, async (rung) => {
+      paths.push(`rung:${rung}`);
+      return rung === "user" ? refuse() : { id: 9 };
+    });
+    expect(paths).toEqual(["rung:user"]);
+  });
+
+  it("keeps climbing when the grant does not authorize the operation", async () => {
+    const f = await probeWith(billboard, { call: refuse });
+    expect(f?.auth).toEqual({ via: "rung", rung: "admin" });
+    expect(f?.grantNote).toBe("the Billboard grant did not authorize this operation");
+  });
+
+  // a replayed DELETE's 404 and a duplicate's 422 are not verdicts about the grant,
+  // and the old bare catch filed both as "the grant does not authorize"
+  it("calls an undecidable grant response undecidable rather than a refusal", async () => {
     const f = await probeWith(billboard, {
       call: async () => {
-        throw new DevToApiError(401, { error: "unauthorized" }, "");
+        throw new DevToApiError(422, { error: "duplicate" }, "");
       },
     });
-    expect(f?.auth).toEqual({ via: "rung", rung: "admin" });
+    expect(f?.grantNote).toBe("the Billboard grant probe was undecidable (payload-rejected)");
+  });
+
+  // the negative control: the grant account is a plain user carrying grants, so a
+  // success it shares with `user` says nothing about the grant
+  it("does not probe the grant when the user rung was never refused", async () => {
+    let attempts = 0;
+    const f = await probeWith(
+      billboard,
+      {
+        call: async () => {
+          attempts += 1;
+          return {};
+        },
+      },
+      async () => ({ id: 9 }),
+    );
+    expect(attempts).toBe(0);
+    expect(f?.auth).toEqual({ via: "rung", rung: "user" });
+    expect(f?.grantNote).toBe(
+      "the user rung never refused this operation, so the grant path was not probed",
+    );
   });
 
   it("skips the extra attempt entirely for an operation with no scoped-grant path", async () => {
@@ -693,6 +741,52 @@ describe("the ordered write sequence", () => {
   });
 });
 
+// the ledger is only as good as this: an id it fails to read leaves every
+// dependent update and delete reporting prerequisite-failed, which reads as a
+// gap in the server rather than as a gap in the parser
+describe("reading the id a create handed back", () => {
+  it.each([
+    ["a flat id", { id: 5 }, 5],
+    ["an id_code, which comments use instead", { id_code: "abc123" }, "abc123"],
+    ["id ahead of id_code when both are present", { id: 5, id_code: "abc123" }, 5],
+    ["a payload Forem wraps one level", { badge: { id: 7 } }, 7],
+    ["a wrapper whose inner id is a string", { page: { id: "slug-1" } }, "slug-1"],
+  ])("reads %s", (_label, payload, expected) => {
+    expect(extractId(payload)).toBe(expected);
+  });
+
+  it.each([
+    ["a payload with no id anywhere", { title: "x" }],
+    ["a nested object carrying no id", { badge: { name: "x" } }],
+    ["an array, which no create returns", [{ id: 1 }]],
+    ["null", null],
+    ["a bare string", "5"],
+  ])("returns undefined for %s", (_label, payload) => {
+    expect(extractId(payload)).toBeUndefined();
+  });
+});
+
+describe("the ledger's reach into read recipes", () => {
+  const badgeRead = (d: Parameters<typeof buildTargets>[0]): SweepTarget | undefined =>
+    buildTargets(d).find((t) => t.template === "/api/badges/{id}" && t.method === "GET");
+
+  // F2 used to stop at the writes: `made` marked its own targets and nothing marked
+  // the reads, so a read of a record this run created reported target-not-found
+  // where the honest answer was a refusal
+  it("marks a read whose identifier the ledger supplied", () => {
+    const filled = withLedger({}, { badge: { id: 77, rung: "admin" } });
+    expect(filled.ledgerFields).toContain("badgeId");
+    expect(badgeRead(filled)).toMatchObject({ path: "/api/badges/77", fromLedger: true });
+  });
+
+  it("leaves a discovered identifier unmarked, since no create proved that record exists", () => {
+    const filled = withLedger({ badgeId: 3 }, { badge: { id: 77, rung: "admin" } });
+    const target = badgeRead(filled);
+    expect(target).toMatchObject({ path: "/api/badges/3" });
+    expect(target && "fromLedger" in target ? target.fromLedger : undefined).toBeUndefined();
+  });
+});
+
 describe("the reset pre-flight", () => {
   const clean = { users: 10, articles: 5, rungsUnverified: [] as Rung[] };
 
@@ -714,8 +808,18 @@ describe("the reset pre-flight", () => {
 
   it("names the reset procedure rather than the missing field", () => {
     for (const p of preflight({ users: 0, articles: 0, rungsUnverified: ["admin"] })) {
-      expect(p).toContain("docs/local-forem.md");
+      expect(p).toContain("bun run forem:reset");
     }
+  });
+
+  // the user count is read off an admin-only listing, so with no admin key it is
+  // zero whatever the database holds, and blaming the baseline sends the operator
+  // to restore something that was never broken
+  it("blames the missing admin key, not the database, when the count it reads is admin-only", () => {
+    const problems = preflight({ ...clean, users: 0, rungsUnavailable: ["admin"] });
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain("FOREM_KEY_ADMIN");
+    expect(problems[0]).not.toContain("bun run forem:reset");
   });
 
   it("refuses a database whose identifier is not the expected local one", () => {
@@ -822,7 +926,7 @@ describe("discovery", () => {
     const d = await discover(async () => {
       throw new Error("connect ECONNREFUSED 127.0.0.1:3000");
     });
-    expect(d).toEqual({ analyticsStart: "2020-01-01" });
+    expect(d).toEqual({ analyticsStart: "2020-01-01", baseline: { users: 0, articles: 0 } });
   });
 });
 
@@ -933,6 +1037,34 @@ describe("the report", () => {
     expect(md).toContain("README says admin, observed user");
     expect(md).not.toContain("`PUT /api/articles/{id}` - README says");
     expect(md).toContain("## Escalation findings (1)");
+  });
+
+  // the README calls organizations public; nothing below a grant authorized this
+  // one, and dropping every grant-authorized finding from the table hid that
+  it("lists a grant-authorized write against a README entry claiming a rung it refused", () => {
+    const md = renderReport(
+      [
+        {
+          kind: "matched",
+          template: "/api/organizations",
+          method: "POST",
+          auth: { via: "scoped-grant", resourceType: "Organization", rung: "user" },
+        },
+        // billboards are documented admin, which the grant observation does not refute
+        {
+          kind: "matched",
+          template: "/api/billboards",
+          method: "POST",
+          auth: { via: "scoped-grant", resourceType: "Billboard", rung: "user" },
+        },
+      ],
+      "ae359ff41b2a",
+      "http://localhost:3000",
+    );
+    expect(md).toContain("## README tier reconciliation (1)");
+    expect(md).toContain(
+      "`POST /api/organizations` - README says anonymous, observed single_resource_admin on Organization",
+    );
   });
 
   it("groups the operations whose spec response is an inline unnamed schema", () => {

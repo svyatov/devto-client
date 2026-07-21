@@ -37,6 +37,8 @@ const FULL: Required<Discovered> = {
   mergeUserId: 16,
   runId: "test",
   imageUrl: "https://example.com/image.png",
+  // everything here was discovered, so nothing carries the ledger's 404 rule
+  ledgerFields: [],
   created: {
     agentSession: 20,
     article: 21,

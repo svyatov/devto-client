@@ -14,13 +14,14 @@
  * of the privilege ladder upward, stopping at the first success, so one run
  * answers both what the server returns and what credential it took to get it.
  *
- * Run: see the rung environment variables in docs/local-forem.md.
+ * Run: FOREM_BASE_URL=http://localhost:3000, one key per rung (`RUNG_ENV` below)
+ * and optionally `SCOPED_GRANT_ENV`, then `bun run sweep`.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { DevToApiError } from "../src/errors.ts";
-import { type ClientOptions, type ResolvedConfig, request, resolveConfig } from "../src/http.ts";
+import { type ResolvedConfig, request, resolveConfig } from "../src/http.ts";
 import { isLoopback, type Recorded, scrub, writeFixture } from "./record-fixtures.ts";
 import {
   extraKeys,
@@ -95,21 +96,38 @@ export const CAUSES: Cause[] = [
 ];
 
 /**
+ * The host guard every path into the oracle shares. `why` is appended to the
+ * "required" message so the failure names the step that wanted the variable.
+ */
+function loopbackBaseUrl(env: NodeJS.ProcessEnv, why: string): string {
+  const baseUrl = env.FOREM_BASE_URL;
+  if (baseUrl === undefined) throw new Error(`FOREM_BASE_URL is required${why}`);
+  if (!isLoopback(baseUrl)) throw new Error(`refusing to sweep a non-loopback host: ${baseUrl}`);
+  return baseUrl;
+}
+
+/** One client shape for every rung and grant: bounded retries, no pacer, plain http on loopback. */
+const loopbackConfig = (baseUrl: string, apiKey?: string): ResolvedConfig =>
+  resolveConfig({
+    baseUrl,
+    retry: { attempts: 3 },
+    timeoutMs: 30_000,
+    pace: false,
+    allowInsecureHttp: new URL(baseUrl).protocol === "http:",
+    ...(apiKey === undefined ? {} : { apiKey }),
+  });
+
+/**
  * KTD6's refusals, both before any config is constructed. `resolveTarget` alone
  * is not enough: it only decides `allowInsecureHttp`, and with FOREM_BASE_URL
  * unset it hands back https://dev.to paired with DEVTO_API_KEY. Combined with
  * the dropped pacer that would crawl the author's real account unpaced.
  */
 export function assertSweepSafe(env: NodeJS.ProcessEnv, outDir: string): void {
-  const baseUrl = env.FOREM_BASE_URL;
-  if (baseUrl === undefined) {
-    throw new Error(
-      "FOREM_BASE_URL is required: unset, the recorder's target resolution would point this unpaced sweep at https://dev.to with DEVTO_API_KEY",
-    );
-  }
-  if (!isLoopback(baseUrl)) {
-    throw new Error(`refusing to sweep a non-loopback host: ${baseUrl}`);
-  }
+  loopbackBaseUrl(
+    env,
+    ": unset, the recorder's target resolution would point this unpaced sweep at https://dev.to with DEVTO_API_KEY",
+  );
   // resolve first: a prefix test on the raw string accepts
   // `docs/sweep-captures/../../tests/fixtures/recorded`, which is the exact
   // contamination R7 forbids
@@ -157,28 +175,16 @@ export const isUnavailable = (r: RungClient): r is { rung: Rung; cause: string }
  * sweep at the wrong machine is a different class of mistake from a missing key.
  */
 export function resolveRung(rung: Rung, env: NodeJS.ProcessEnv): RungClient {
-  const baseUrl = env.FOREM_BASE_URL;
-  if (baseUrl === undefined) throw new Error("FOREM_BASE_URL is required to resolve a rung");
-  if (!isLoopback(baseUrl)) throw new Error(`refusing to sweep a non-loopback host: ${baseUrl}`);
-
-  const options: ClientOptions = {
-    baseUrl,
-    retry: { attempts: 3 },
-    timeoutMs: 30_000,
-    pace: false,
-    allowInsecureHttp: new URL(baseUrl).protocol === "http:",
-  };
-  if (rung !== "anonymous") {
-    // read straight from the rung's own variable: no fallback chain, so
-    // DEVTO_API_KEY can never reach a rung by accident the way resolveTarget's
-    // default-host branch would allow
-    const key = env[RUNG_ENV[rung]];
-    if (key === undefined || key === "") {
-      return { rung, cause: `tier unavailable: set ${RUNG_ENV[rung]} to a key for this rung` };
-    }
-    options.apiKey = key;
+  const baseUrl = loopbackBaseUrl(env, " to resolve a rung");
+  if (rung === "anonymous") return { rung, config: loopbackConfig(baseUrl) };
+  // read straight from the rung's own variable: no fallback chain, so
+  // DEVTO_API_KEY can never reach a rung by accident the way resolveTarget's
+  // default-host branch would allow
+  const key = env[RUNG_ENV[rung]];
+  if (key === undefined || key === "") {
+    return { rung, cause: `tier unavailable: set ${RUNG_ENV[rung]} to a key for this rung` };
   }
-  return { rung, config: resolveConfig(options) };
+  return { rung, config: loopbackConfig(baseUrl, key) };
 }
 
 export const resolveRungs = (env: NodeJS.ProcessEnv): RungClient[] =>
@@ -304,6 +310,13 @@ export interface ScopedGrant {
 
 export const SCOPED_GRANT_ENV = "FOREM_KEY_SCOPED_GRANT";
 
+/**
+ * Where the grant account sits on the ladder. It is a plain `user` carrying
+ * `single_resource_admin` grants, so anything an authenticated user can do it can
+ * do too - which is why its answer only means something once `user` has refused.
+ */
+export const GRANT_RUNG: Rung = "user";
+
 /** The rungs available to a run, plus how to issue a request as one of them. */
 export interface Ladder {
   rungs: RungClient[];
@@ -312,22 +325,77 @@ export interface Ladder {
 }
 
 export type LadderResult =
-  | { kind: "success"; rung: Rung; payload: unknown; attempted: Rung[] }
+  | {
+      kind: "success";
+      rung: Rung;
+      payload: unknown;
+      attempted: Rung[];
+      /** Set when the type-scoped grant, not the rung, is what authorized this (U7). */
+      grantType?: string;
+      /** Why the grant is not the answer, for an operation that has a grant path (U7). */
+      grantNote?: string;
+    }
   | { kind: "skip"; cause: Cause; reason: string };
 
 /**
  * Attempt one operation from the lowest rung upward, stopping at the first
  * success (R6). At most one mutation lands per operation: every attempt below the
  * successful one was refused before it touched state.
+ *
+ * The type-scoped grant is spliced into that climb rather than replayed after it
+ * (U7). Replaying issued every affected create twice, and the second record never
+ * reached the ledger the destroy phase reads, so it survived the run.
  */
 export async function climb(
   ladder: Ladder,
   target: { method: string; path: string; query?: Record<string, string | number>; body?: unknown },
   fromLedger: boolean,
+  /** The resource type whose `single_resource_admin` grant to try, if the operation has one. */
+  grantType?: string,
 ): Promise<LadderResult> {
   const missing: string[] = [];
   const attempted: Rung[] = [];
+  const grantCall = ladder.scopedGrant?.call;
+  let refusedAtGrantRung = false;
+  let grantTried = false;
+  let grantNote =
+    grantType === undefined
+      ? undefined
+      : grantCall === undefined
+        ? (ladder.scopedGrant?.cause ?? `${SCOPED_GRANT_ENV} is not set`)
+        : `the ${GRANT_RUNG} rung never refused this operation, so the grant path was not probed`;
+
+  /**
+   * The negative control finding 7 of the ladder needs: the grant only explains an
+   * outcome that `user` alone could not produce, so it is tried once, after `user`
+   * has refused and before anything above it.
+   */
+  const tryGrant = async (): Promise<LadderResult | undefined> => {
+    if (grantTried || !refusedAtGrantRung || grantType === undefined || grantCall === undefined) {
+      return undefined;
+    }
+    grantTried = true;
+    try {
+      const payload = await grantCall(target.method, target.path, requestOpts(target));
+      return { kind: "success", rung: GRANT_RUNG, payload, attempted, grantType };
+    } catch (err) {
+      const outcome = readError(err);
+      // a 404 on an already-deleted record or a 422 on a duplicate decides nothing
+      // about the grant, and reading either as "the grant does not authorize" is
+      // the misreport the replay used to produce
+      grantNote =
+        outcome.kind === "refused"
+          ? `the ${grantType} grant did not authorize this operation`
+          : `the ${grantType} grant probe was undecidable (${outcome.kind})`;
+      return undefined;
+    }
+  };
+
   for (const client of ladder.rungs) {
+    if (RUNGS.indexOf(client.rung) > RUNGS.indexOf(GRANT_RUNG)) {
+      const granted = await tryGrant();
+      if (granted) return granted;
+    }
     if (isUnavailable(client)) {
       missing.push(client.cause);
       continue;
@@ -346,9 +414,18 @@ export async function climb(
       outcome = readError(err);
     }
     if (outcome.kind === "success") {
-      return { kind: "success", rung: client.rung, payload: outcome.payload, attempted };
+      return {
+        kind: "success",
+        rung: client.rung,
+        payload: outcome.payload,
+        attempted,
+        ...(grantNote === undefined ? {} : { grantNote }),
+      };
     }
-    if (outcome.kind === "refused") continue;
+    if (outcome.kind === "refused") {
+      if (client.rung === GRANT_RUNG) refusedAtGrantRung = true;
+      continue;
+    }
     if (outcome.kind === "not-found") {
       // F2: Forem scopes several write lookups to the caller's own records and
       // renders the resulting miss as 404. On an identifier this run created the
@@ -362,6 +439,10 @@ export async function climb(
     }
     return { kind: "skip", cause: "blocked", reason: outcome.reason };
   }
+  // the ladder may have no rung above the grant account's own, so the loop can end
+  // without ever reaching the splice point
+  const granted = await tryGrant();
+  if (granted) return granted;
   if (attempted.length === 0) {
     return {
       kind: "skip",
@@ -403,51 +484,38 @@ export function authorize(
   return { auth };
 }
 
-export const RESET_DB = "Forem_development";
-export const RESET_HINT =
-  "restore the baseline snapshot as the reset procedure in docs/local-forem.md describes, then re-run";
+export const RESET_HINT = "run `bun run forem:reset` to restore the baseline, then re-run";
 
 /**
- * The HTTP half refuses a non-loopback host; this is the same guard for the half
- * that runs `pg_dump` and `pg_restore`. A stale `DATABASE_URL` pointing at another
- * local database would otherwise be overwritten without a word.
- */
-export function assertResetTarget(databaseUrl: string | undefined, expected = RESET_DB): void {
-  if (databaseUrl === undefined || databaseUrl === "") {
-    throw new Error(`DATABASE_URL is required to capture or restore the baseline (${expected})`);
-  }
-  const url = new URL(databaseUrl);
-  if (!isLoopback(databaseUrl)) {
-    throw new Error(`refusing to reset a non-loopback database host: ${url.hostname}`);
-  }
-  const name = url.pathname.replace(/^\//, "");
-  if (name !== expected) {
-    throw new Error(`refusing to capture or restore database "${name}": expected "${expected}"`);
-  }
-}
-
-/**
- * The partial-seed signature documented in docs/local-forem.md is organizations
- * and four users only, so the floor sits just above it. A restored instance below
+ * A partial seed leaves organizations and four users behind and nothing else, so
+ * the floor sits just above that signature. A restored instance below
  * this reads exactly like a thin seed, which is the confusion U8 exists to prevent.
  */
-export const BASELINE_FLOOR = { users: 5, articles: 1 };
+export type Baseline = { users: number; articles: number };
+export const BASELINE_FLOOR: Baseline = { users: 5, articles: 1 };
 
 /**
  * Everything that has to be true before a run's results mean anything. Returns
  * the problems rather than throwing, so the caller decides - but every message
  * names the reset procedure, not the field, because the field is a symptom.
  */
-export function preflight(observed: {
-  users: number;
-  articles: number;
-  /** Rungs whose key resolved but whose account did not answer as itself after the restore. */
-  rungsUnverified: Rung[];
-}): string[] {
+export function preflight(
+  observed: Baseline & {
+    /** Rungs whose key resolved but whose account did not answer as itself after the restore. */
+    rungsUnverified: Rung[];
+    /** Rungs with no key at all, so every read only they can serve came back empty. */
+    rungsUnavailable?: Rung[];
+  },
+): string[] {
   const problems: string[] = [];
   if (observed.users < BASELINE_FLOOR.users) {
+    // the count comes from `/api/admin/users`, and discovery swallows that 403.
+    // Without this branch a run with no admin key is told its database is thin,
+    // which sends the operator to restore a baseline that was never the problem.
     problems.push(
-      `baseline discovery found ${observed.users} users, below the floor of ${BASELINE_FLOOR.users}: ${RESET_HINT}`,
+      observed.rungsUnavailable?.includes("admin")
+        ? `baseline discovery found ${observed.users} users, but the admin listing it counts is unavailable: set ${RUNG_ENV.admin} and re-run`
+        : `baseline discovery found ${observed.users} users, below the floor of ${BASELINE_FLOOR.users}: ${RESET_HINT}`,
     );
   }
   if (observed.articles < BASELINE_FLOOR.articles) {
@@ -495,24 +563,14 @@ export async function verifyRungs(ladder: Ladder): Promise<Rung[]> {
 /** Issues each request as the rung asked for; the production half of a `Ladder`. */
 export function buildLadder(env: NodeJS.ProcessEnv): Ladder {
   const rungs = resolveRungs(env);
-  const baseUrl = env.FOREM_BASE_URL;
-  if (baseUrl === undefined) throw new Error("FOREM_BASE_URL is required to build a ladder");
+  const baseUrl = loopbackBaseUrl(env, " to build a ladder");
   const key = env[SCOPED_GRANT_ENV];
   const scopedGrant: ScopedGrant =
     key === undefined || key === ""
       ? { cause: `${SCOPED_GRANT_ENV} is not set; the type-scoped grant path was not probed` }
       : {
-          call: (method, path, opts) => {
-            const config = resolveConfig({
-              baseUrl,
-              apiKey: key,
-              retry: { attempts: 3 },
-              timeoutMs: 30_000,
-              pace: false,
-              allowInsecureHttp: new URL(baseUrl).protocol === "http:",
-            });
-            return request(config, method, path, opts ?? {});
-          },
+          call: (method, path, opts) =>
+            request(loopbackConfig(baseUrl, key), method, path, opts ?? {}),
         };
   return {
     rungs,
@@ -674,7 +732,10 @@ export async function sweep(
       continue;
     }
 
-    const climbed = await climb(ladder, target, target.fromLedger ?? false);
+    // U7: for the operations whose controller authorizes against the model class,
+    // the grant rides the climb as an extra attempt above `user`
+    const resourceType = scopedGrantType(template, method);
+    const climbed = await climb(ladder, target, target.fromLedger ?? false, resourceType);
     if (climbed.kind === "skip") {
       findings.push({
         kind: "unexercised",
@@ -690,28 +751,18 @@ export async function sweep(
     // instead would report `matched` for an undeclared key the 4th element carries
     const scrubbed = scrub(climbed.payload, target.scrubContent ?? false);
     payloads[opKey(target)] = climbed.payload;
-    const { auth, escalation } = authorize(template, method, climbed.rung);
     const finding = classifyPayload(template, method, scrubbed);
-    finding.auth = auth;
-    if (escalation !== undefined) finding.escalation = escalation;
-
-    // U7: one fixed extra attempt, and only for the operations whose controller
-    // authorizes against the model class. A grant that authorizes replaces the
-    // rung, because for these no rung is the real requirement.
-    const resourceType = scopedGrantType(template, method);
-    if (resourceType !== undefined) {
-      const grant = ladder.scopedGrant;
-      if (grant?.call === undefined) {
-        finding.grantNote = grant?.cause ?? `${SCOPED_GRANT_ENV} is not set`;
-      } else {
-        try {
-          await grant.call(method, path, requestOpts(target));
-          finding.auth = { via: "scoped-grant", resourceType, rung: climbed.rung };
-        } catch {
-          // the grant does not authorize this one; the ladder's answer stands
-        }
-      }
+    if (climbed.grantType !== undefined) {
+      // R21's exemption extends here: the grant is what authorized it, so the rung
+      // it stopped at is context, and reporting an escalation against it would name
+      // a privilege the operation never used
+      finding.auth = { via: "scoped-grant", resourceType: climbed.grantType, rung: climbed.rung };
+    } else {
+      const { auth, escalation } = authorize(template, method, climbed.rung);
+      finding.auth = auth;
+      if (escalation !== undefined) finding.escalation = escalation;
     }
+    if (climbed.grantNote !== undefined) finding.grantNote = climbed.grantNote;
     findings.push(finding);
     const capture: Capture = {
       template,
@@ -795,14 +846,20 @@ export function extractId(payload: unknown): string | number | undefined {
 export function withLedger(discovered: Discovered, ledger: Ledger): Discovered {
   const created: Partial<Record<Created, string | number>> = {};
   const filled: Discovered = { ...discovered };
+  // F2: which fields the ledger filled, not just that it filled some. A read whose
+  // id this run created is looking at a record that provably exists, so a 404 on it
+  // is a scoped refusal - and without this list every such read reported
+  // target-not-found for what was really the ladder being turned away.
+  const ledgerFields: (keyof Discovered)[] = [];
   for (const [resource, entry] of Object.entries(ledger) as [Created, LedgerEntry][]) {
     created[resource] = entry.id;
     const field = LEDGER_TO_DISCOVERY[resource];
     if (field !== undefined && filled[field] === undefined) {
       Object.assign(filled, { [field]: entry.id });
+      ledgerFields.push(field);
     }
   }
-  return { ...filled, created };
+  return { ...filled, created, ledgerFields };
 }
 
 /**
@@ -858,11 +915,16 @@ export async function runSweep(
     if (id !== undefined && auth !== undefined) ledger[resource] = { id, rung: auth.rung };
   }
 
-  // R3: the reads that had nothing to discover, re-run now that the creates exist
-  const reread = [...targetsNow().values()].filter(
-    (t) =>
-      t.method === "GET" && t.kind === "targeted" && found.get(opKey(t))?.kind === "unexercised",
-  );
+  // R3: the reads that had nothing to discover, re-run now that the creates exist.
+  // `vacuous` belongs here as much as `unexercised`: an index the seed left empty
+  // answered 200 with `[]` and classified as "verified nothing", not as unexercised,
+  // so keying on unexercised alone left every such read stuck at its first verdict.
+  const reread = [...targetsNow().values()].filter((t) => {
+    const kind = found.get(opKey(t))?.kind;
+    return (
+      t.method === "GET" && t.kind === "targeted" && (kind === "unexercised" || kind === "vacuous")
+    );
+  });
   await runBatch(reread);
 
   await runBatch([...targetsNow().values()].filter((t) => phaseOf(t) === "update"));
@@ -916,7 +978,7 @@ export function renderReport(findings: Finding[], sha: string, baseUrl: string):
     if (f.kind !== "disagreed") continue;
     const undeclared = f.extra.length > 0 ? `undeclared keys: \`${f.extra.join("`, `")}\`` : "";
     lines.push(
-      `- \`${f.method} ${f.template}\` - ${[undeclared, f.note].filter(Boolean).join("; ")}`,
+      `- \`${opKey(f)}\` - ${[undeclared, f.note].filter(Boolean).join("; ")}`,
       `  - disposition: **TODO** (spec error | local-deployment artifact)`,
     );
   }
@@ -928,26 +990,24 @@ export function renderReport(findings: Finding[], sha: string, baseUrl: string):
   for (const f of inconclusive) {
     if (f.kind !== "inconclusive") continue;
     const hits = f.missing.map((k) => `${k} ${f.hits[k] ?? 0}/${f.elements}`).join(", ");
-    lines.push(`- \`${f.method} ${f.template}\` - declared but never carried: ${hits}`);
+    lines.push(`- \`${opKey(f)}\` - declared but never carried: ${hits}`);
   }
   lines.push(``);
 
   const matched = findings.filter((f) => f.kind === "matched");
   lines.push(`## Matched (${matched.length})`, ``);
-  for (const f of matched) lines.push(`- \`${f.method} ${f.template}\``);
+  for (const f of matched) lines.push(`- \`${opKey(f)}\``);
   lines.push(``);
 
   const empty = findings.filter((f) => f.kind === "confirmed-empty");
   lines.push(`## Confirmed empty (${empty.length})`, ``);
   if (empty.length === 0) lines.push(`None.`, ``);
-  for (const f of empty)
-    lines.push(`- \`${f.method} ${f.template}\` - spec declares no body, server sent none`);
+  for (const f of empty) lines.push(`- \`${opKey(f)}\` - spec declares no body, server sent none`);
   lines.push(``);
 
   const vacuous = findings.filter((f) => f.kind === "vacuous");
   lines.push(`## Vacuous (${vacuous.length})`, ``);
-  for (const f of vacuous)
-    lines.push(`- \`${f.method} ${f.template}\` - empty payload, verified nothing`);
+  for (const f of vacuous) lines.push(`- \`${opKey(f)}\` - empty payload, verified nothing`);
   lines.push(``);
 
   lines.push(`## Unexercised (${counts.unexercised})`, ``);
@@ -956,7 +1016,7 @@ export function renderReport(findings: Finding[], sha: string, baseUrl: string):
     lines.push(`### ${cause} (${group.length})`, ``);
     for (const f of group) {
       if (f.kind !== "unexercised") continue;
-      lines.push(`- \`${f.method} ${f.template}\` - ${f.reason}`);
+      lines.push(`- \`${opKey(f)}\` - ${f.reason}`);
     }
     lines.push(``);
   }
@@ -975,7 +1035,7 @@ export function renderReport(findings: Finding[], sha: string, baseUrl: string):
   for (const f of writes) {
     const label = authLabel(f);
     const note = f.grantNote === undefined ? "" : ` (${f.grantNote})`;
-    lines.push(`- \`${f.method} ${f.template}\` - ${label}${note}`);
+    lines.push(`- \`${opKey(f)}\` - ${label}${note}`);
   }
   lines.push(``);
 
@@ -984,7 +1044,7 @@ export function renderReport(findings: Finding[], sha: string, baseUrl: string):
   if (escalations.length === 0) lines.push(`None.`, ``);
   for (const f of escalations) {
     lines.push(
-      `- \`${f.method} ${f.template}\` - ${f.escalation}`,
+      `- \`${opKey(f)}\` - ${f.escalation}`,
       `  - disposition: **TODO** (upstream defect | README error)`,
     );
   }
@@ -1001,7 +1061,7 @@ export function renderReport(findings: Finding[], sha: string, baseUrl: string):
   lines.push(`## Inline unnamed response schemas (${inline.length})`, ``);
   if (inline.length === 0) lines.push(`None.`, ``);
   for (const f of inline) {
-    lines.push(`- \`${f.method} ${f.template}\` - ${f.kind}; the spec never named this shape`);
+    lines.push(`- \`${opKey(f)}\` - ${f.kind}; the spec never named this shape`);
   }
   lines.push(``);
   return lines.join("\n");
@@ -1014,31 +1074,50 @@ export function authLabel(f: Finding): string {
   if (f.auth.via === "relationship") {
     return `${f.auth.relationship} relationship, not a rung (observed at ${f.auth.rung})`;
   }
-  return `single_resource_admin on ${f.auth.resourceType}, not a rung (ladder reached ${f.auth.rung})`;
+  return `single_resource_admin on ${f.auth.resourceType}, not a rung (${f.auth.rung} was refused without it)`;
 }
 
 /**
  * R11. The README's namespace table is the repo's only catalog of privilege and
  * has drifted before, so every disagreement is listed rather than quietly
- * corrected. Relationship- and grant-authorized operations are excluded: no rung
- * is their answer, so there is nothing to disagree with.
+ * corrected. Relationship-authorized operations are excluded: no rung is their
+ * answer, so there is nothing to disagree with.
+ *
+ * A grant-authorized operation is not excluded that far. The grant only wins after
+ * `user` refused, so a README entry claiming that rung or lower is refuted by the
+ * observation, and dropping the whole class is how `POST /api/organizations` -
+ * documented public, authorized by nothing below a grant - went unlisted.
  */
 export function reconcileWithReadme(
   findings: Finding[],
-): { op: string; documented: Rung; observed: Rung }[] {
-  const out: { op: string; documented: Rung; observed: Rung }[] = [];
+): { op: string; documented: Rung; observed: string }[] {
+  const out: { op: string; documented: Rung; observed: string }[] = [];
   for (const f of findings) {
-    if (f.method === "GET" || f.auth?.via !== "rung") continue;
+    if (f.method === "GET" || f.auth === undefined) continue;
     const documented = documentedRung(f.template);
-    if (documented !== undefined && documented !== f.auth.rung) {
-      out.push({ op: opKey(f), documented, observed: f.auth.rung });
+    if (documented === undefined) continue;
+    if (f.auth.via === "rung") {
+      if (documented !== f.auth.rung) out.push({ op: opKey(f), documented, observed: f.auth.rung });
+    } else if (
+      f.auth.via === "scoped-grant" &&
+      RUNGS.indexOf(documented) <= RUNGS.indexOf(GRANT_RUNG)
+    ) {
+      out.push({
+        op: opKey(f),
+        documented,
+        observed: `single_resource_admin on ${f.auth.resourceType}`,
+      });
     }
   }
   return out;
 }
 
-/** Best-effort discovery: every lookup that fails leaves its field unset, degrading those entries to blocked. */
-export async function discover(rf: Rf): Promise<Discovered> {
+/**
+ * Best-effort discovery: every lookup that fails leaves its field unset, degrading
+ * those entries to blocked. `baseline` hands back the two counts `preflight` needs
+ * from the listings discovery already read, so the run does not ask twice.
+ */
+export async function discover(rf: Rf): Promise<Discovered & { baseline: Baseline }> {
   const d: Discovered = {};
   const tryGet = async <T>(
     path: string,
@@ -1081,8 +1160,9 @@ export async function discover(rf: Rf): Promise<Discovered> {
     "/api/admin/users",
     { per_page: 30 },
   );
-  const users = Array.isArray(admin) ? admin : (admin?.users ?? []);
-  const disposable = (Array.isArray(users) ? users : []).filter(
+  const listedUsers = Array.isArray(admin) ? admin : admin?.users;
+  const users = Array.isArray(listedUsers) ? listedUsers : [];
+  const disposable = users.filter(
     (u) => !u.username?.startsWith(RUNG_ACCOUNT_PREFIX) && u.id !== me?.id,
   );
   if (disposable[0]) d.targetUserId = disposable[0].id;
@@ -1132,7 +1212,8 @@ export async function discover(rf: Rf): Promise<Discovered> {
   await set("organizationId", "/api/organizations");
   // a fixed window rather than a discovered one: analytics rejects a missing start
   d.analyticsStart = "2020-01-01";
-  return d;
+  // the article listing above is capped at 10, which is well above the floor of 1
+  return { ...d, baseline: { users: users.length, articles: articles?.length ?? 0 } };
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
@@ -1149,30 +1230,35 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   if (top === undefined) throw new Error("no rung resolved, not even anonymous");
   const discoverRf: Rf = (method, path, opts) => ladder.call(top.rung, method, path, opts);
 
-  const discovered = await discover(discoverRf);
+  const { baseline, ...discovered } = await discover(discoverRf);
   if (process.env.FOREM_IMAGE_URL) discovered.imageUrl = process.env.FOREM_IMAGE_URL;
+  // opt-in rather than a timestamp: the suffix rides in every created title and
+  // slug, so minting one per run would make two runs of the same instance produce
+  // different captures, and byte-identical output across runs is the property that
+  // makes a classification difference mean something
+  if (process.env.FOREM_RUN_ID) discovered.runId = process.env.FOREM_RUN_ID;
   // scrubbed like the captures are: discovery reads the operator's own email off
   // /api/users/me, and this line is the one place it would otherwise print verbatim
   console.log(`discovered: ${JSON.stringify(scrub(discovered))}`);
 
   // U8: a partly-restored database produces a run that reads thin rather than
   // broken, so it has to fail here rather than downstream in a wall of causes
-  const users = ((await discoverRf("GET", "/api/admin/users", { query: { per_page: 30 } }).catch(
-    () => ({ users: [] }),
-  )) as { users?: unknown[] }) ?? { users: [] };
-  const articles = (await discoverRf("GET", "/api/articles").catch(() => [])) as unknown[];
   const problems = preflight({
-    users: Array.isArray(users) ? users.length : (users.users?.length ?? 0),
-    articles: Array.isArray(articles) ? articles.length : 0,
+    ...baseline,
     rungsUnverified: await verifyRungs(ladder),
+    rungsUnavailable: ladder.rungs.filter(isUnavailable).map((r) => r.rung),
   });
   if (problems.length > 0) throw new Error(`pre-flight failed:\n- ${problems.join("\n- ")}`);
 
   // docs/ is gitignored, so a fresh clone has none. Without this the dry run the
   // docstring above advertises sweeps all 130 operations and then dies on ENOENT.
   mkdirSync("docs", { recursive: true });
+  // write then rename: the checkpoint fires mid-run, and a crash during the write
+  // itself would leave a truncated report where a whole one had been
   const write = (fs: Finding[]): void => {
-    writeFileSync("docs/local-forem-sweep.md", `${renderReport(fs, sha, baseUrl)}\n`);
+    const path = "docs/local-forem-sweep.md";
+    writeFileSync(`${path}.tmp`, `${renderReport(fs, sha, baseUrl)}\n`);
+    renameSync(`${path}.tmp`, path);
   };
   // checkpointed before the destructive phase: a late failure loses the last
   // phase's verdicts, never the whole run's

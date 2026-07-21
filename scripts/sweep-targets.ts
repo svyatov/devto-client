@@ -93,7 +93,17 @@ export interface Discovered {
   mergeUserId?: number;
   /** Identifiers this run created, keyed by resource (U6's ledger, values only). */
   created?: Partial<Record<Created, string | number>>;
-  /** Distinguishes one run's titles and slugs from the last; Forem rejects duplicates within a window. */
+  /**
+   * The fields above whose value came out of the ledger rather than off the server,
+   * so a read against one carries the same 404-is-a-refusal rule the writes get (F2).
+   */
+  ledgerFields?: (keyof Discovered)[];
+  /**
+   * Distinguishes one run's titles and slugs from the last; Forem rejects duplicates
+   * within a window. Set from `FOREM_RUN_ID`, and unset by default, because the
+   * suffix reaches every created title and a per-run one would make two runs of the
+   * same instance produce different captures.
+   */
   runId?: string;
   /** Overrides the image URL the badge and organization creates hand the server (FOREM_IMAGE_URL). */
   imageUrl?: string;
@@ -133,11 +143,22 @@ type Resolved = Request | Skip;
 
 const isSkip = (r: Resolved): r is Skip => "cause" in r;
 
-/** A request that needs a discovered value; absent, the operation is blocked naming the field. */
-const needs = <T>(value: T | undefined, field: string, build: (v: T) => Request): Resolved =>
-  value === undefined
-    ? { cause: "blocked", reason: `discovery unavailable: ${field}` }
-    : build(value);
+/**
+ * A request that needs a discovered value; absent, the operation is blocked naming
+ * the field. Takes the record and the field name rather than the value, so a field
+ * the ledger filled is marked the way `made` marks its own: the id provably exists,
+ * which is what turns a later 404 from a missing target into a scoped refusal (F2).
+ */
+const needs = <K extends keyof Discovered>(
+  d: Discovered,
+  field: K,
+  build: (v: NonNullable<Discovered[K]>) => Request,
+): Resolved => {
+  const value = d[field];
+  if (value === undefined) return { cause: "blocked", reason: `discovery unavailable: ${field}` };
+  const request = build(value as NonNullable<Discovered[K]>);
+  return d.ledgerFields?.includes(field) ? { ...request, fromLedger: true } : request;
+};
 
 /**
  * A request against something the run itself created. Absent, the prerequisite
@@ -165,8 +186,9 @@ const tag = (d: Discovered): string => d.runId ?? "sweep";
  * outbound HTTPS, and on a machine with partial IPv6 routing they failed on one
  * run and succeeded on the next.
  *
- * It needs the `skip_ssrf_protection` deviation documented in docs/local-forem.md,
- * because CarrierWave otherwise refuses any host resolving to a private address.
+ * It needs `CarrierWave.configure { |c| c.skip_ssrf_protection = true }` on the
+ * oracle, because ssrf_filter otherwise refuses any host resolving to a private
+ * address - including the instance's own loopback.
  */
 export const DEFAULT_IMAGE_URL = "http://localhost:3000/assets/1.png";
 
@@ -181,15 +203,15 @@ const image = (d: Discovered): string => d.imageUrl ?? DEFAULT_IMAGE_URL;
 const READS: Record<string, (d: Discovered) => Resolved> = {
   "/api/agent_sessions": () => ({ path: "/api/agent_sessions" }),
   "/api/agent_sessions/{id}": (d) =>
-    needs(d.agentSessionId, "agentSessionId", (id) => ({ path: `/api/agent_sessions/${id}` })),
+    needs(d, "agentSessionId", (id) => ({ path: `/api/agent_sessions/${id}` })),
   "/api/agent_sessions/{id}/raw_url": (d) =>
-    needs(d.agentSessionId, "agentSessionId", (id) => ({
+    needs(d, "agentSessionId", (id) => ({
       path: `/api/agent_sessions/${id}/raw_url`,
     })),
 
   "/api/analytics/totals": () => ({ path: "/api/analytics/totals" }),
   "/api/analytics/historical": (d) =>
-    needs(d.analyticsStart, "analyticsStart", (start) => ({
+    needs(d, "analyticsStart", (start) => ({
       path: "/api/analytics/historical",
       query: { start },
     })),
@@ -207,8 +229,7 @@ const READS: Record<string, (d: Discovered) => Resolved> = {
     query: { q: "a" },
   }),
   "/api/articles/latest": () => ({ path: "/api/articles/latest" }),
-  "/api/articles/{id}": (d) =>
-    needs(d.articleId, "articleId", (id) => ({ path: `/api/articles/${id}` })),
+  "/api/articles/{id}": (d) => needs(d, "articleId", (id) => ({ path: `/api/articles/${id}` })),
   "/api/articles/{username}/{slug}": (d) =>
     d.username === undefined || d.slug === undefined
       ? {
@@ -222,37 +243,34 @@ const READS: Record<string, (d: Discovered) => Resolved> = {
   "/api/articles/me/all": () => ({ path: "/api/articles/me/all" }),
 
   "/api/segments": () => ({ path: "/api/segments" }),
-  "/api/segments/{id}": (d) =>
-    needs(d.segmentId, "segmentId", (id) => ({ path: `/api/segments/${id}` })),
+  "/api/segments/{id}": (d) => needs(d, "segmentId", (id) => ({ path: `/api/segments/${id}` })),
   "/api/segments/{id}/users": (d) =>
-    needs(d.segmentId, "segmentId", (id) => ({ path: `/api/segments/${id}/users` })),
+    needs(d, "segmentId", (id) => ({ path: `/api/segments/${id}/users` })),
 
   "/api/badge_achievements": () => ({ path: "/api/badge_achievements" }),
   "/api/badge_achievements/{id}": (d) =>
-    needs(d.badgeAchievementId, "badgeAchievementId", (id) => ({
+    needs(d, "badgeAchievementId", (id) => ({
       path: `/api/badge_achievements/${id}`,
     })),
   "/api/badges": () => ({ path: "/api/badges" }),
-  "/api/badges/{id}": (d) => needs(d.badgeId, "badgeId", (id) => ({ path: `/api/badges/${id}` })),
+  "/api/badges/{id}": (d) => needs(d, "badgeId", (id) => ({ path: `/api/badges/${id}` })),
 
   "/api/billboards": () => ({ path: "/api/billboards" }),
   "/api/billboards/{id}": (d) =>
-    needs(d.billboardId, "billboardId", (id) => ({ path: `/api/billboards/${id}` })),
+    needs(d, "billboardId", (id) => ({ path: `/api/billboards/${id}` })),
 
   "/api/comments": (d) =>
-    needs(d.articleId, "articleId", (id) => ({ path: "/api/comments", query: { a_id: id } })),
-  "/api/comments/{id}": (d) =>
-    needs(d.commentId, "commentId", (id) => ({ path: `/api/comments/${id}` })),
+    needs(d, "articleId", (id) => ({ path: "/api/comments", query: { a_id: id } })),
+  "/api/comments/{id}": (d) => needs(d, "commentId", (id) => ({ path: `/api/comments/${id}` })),
 
   "/api/concepts": () => ({ path: "/api/concepts" }),
   "/api/concepts/search": () => ({ path: "/api/concepts/search", query: { q: "a" } }),
-  "/api/concepts/{id}": (d) =>
-    needs(d.conceptId, "conceptId", (id) => ({ path: `/api/concepts/${id}` })),
+  "/api/concepts/{id}": (d) => needs(d, "conceptId", (id) => ({ path: `/api/concepts/${id}` })),
   "/api/concepts/{id}/articles": (d) =>
-    needs(d.conceptId, "conceptId", (id) => ({ path: `/api/concepts/${id}/articles` })),
+    needs(d, "conceptId", (id) => ({ path: `/api/concepts/${id}/articles` })),
   "/api/admin/concepts": () => ({ path: "/api/admin/concepts" }),
   "/api/admin/concepts/{id}": (d) =>
-    needs(d.conceptId, "conceptId", (id) => ({ path: `/api/admin/concepts/${id}` })),
+    needs(d, "conceptId", (id) => ({ path: `/api/admin/concepts/${id}` })),
 
   "/api/follows/tags": () => ({ path: "/api/follows/tags" }),
   "/api/followers/users": () => ({ path: "/api/followers/users" }),
@@ -265,32 +283,32 @@ const READS: Record<string, (d: Discovered) => Resolved> = {
 
   "/api/organizations": () => ({ path: "/api/organizations" }),
   "/api/organizations/{id}": (d) =>
-    needs(d.organizationId, "organizationId", (id) => ({ path: `/api/organizations/${id}` })),
+    needs(d, "organizationId", (id) => ({ path: `/api/organizations/${id}` })),
   "/api/organizations/{username}": (d) =>
-    needs(d.organization, "organization", (u) => ({ path: `/api/organizations/${u}` })),
+    needs(d, "organization", (u) => ({ path: `/api/organizations/${u}` })),
   "/api/organizations/{organization_id_or_username}/users": (d) =>
-    needs(d.organization, "organization", (u) => ({ path: `/api/organizations/${u}/users` })),
+    needs(d, "organization", (u) => ({ path: `/api/organizations/${u}/users` })),
   "/api/organizations/{organization_id_or_username}/articles": (d) =>
-    needs(d.organization, "organization", (u) => ({ path: `/api/organizations/${u}/articles` })),
+    needs(d, "organization", (u) => ({ path: `/api/organizations/${u}/articles` })),
 
   // pages ships megabytes of body_html; the recorder trims it for the same reason
   "/api/pages": () => ({ path: "/api/pages", trim: 3 }),
-  "/api/pages/{id}": (d) => needs(d.pageId, "pageId", (id) => ({ path: `/api/pages/${id}` })),
+  "/api/pages/{id}": (d) => needs(d, "pageId", (id) => ({ path: `/api/pages/${id}` })),
 
   "/api/podcast_episodes": () => ({ path: "/api/podcast_episodes" }),
   "/api/profile_images/{username}": (d) =>
-    needs(d.username, "username", (u) => ({ path: `/api/profile_images/${u}` })),
+    needs(d, "username", (u) => ({ path: `/api/profile_images/${u}` })),
   "/api/readinglist": () => ({ path: "/api/readinglist" }),
 
   "/api/recommended_articles_lists": () => ({ path: "/api/recommended_articles_lists" }),
   "/api/recommended_articles_lists/{id}": (d) =>
-    needs(d.recommendedArticlesListId, "recommendedArticlesListId", (id) => ({
+    needs(d, "recommendedArticlesListId", (id) => ({
       path: `/api/recommended_articles_lists/${id}`,
     })),
 
   "/api/admin/request_redirects": () => ({ path: "/api/admin/request_redirects" }),
   "/api/admin/request_redirects/{id}": (d) =>
-    needs(d.requestRedirectId, "requestRedirectId", (id) => ({
+    needs(d, "requestRedirectId", (id) => ({
       path: `/api/admin/request_redirects/${id}`,
     })),
 
@@ -298,31 +316,29 @@ const READS: Record<string, (d: Discovered) => Resolved> = {
 
   "/api/surveys": () => ({ path: "/api/surveys" }),
   "/api/surveys/{id_or_slug}": (d) =>
-    needs(d.surveyId, "surveyId", (id) => ({ path: `/api/surveys/${id}` })),
+    needs(d, "surveyId", (id) => ({ path: `/api/surveys/${id}` })),
   "/api/surveys/{id_or_slug}/poll_votes": (d) =>
-    needs(d.surveyId, "surveyId", (id) => ({ path: `/api/surveys/${id}/poll_votes` })),
+    needs(d, "surveyId", (id) => ({ path: `/api/surveys/${id}/poll_votes` })),
   "/api/surveys/{id_or_slug}/poll_text_responses": (d) =>
-    needs(d.surveyId, "surveyId", (id) => ({ path: `/api/surveys/${id}/poll_text_responses` })),
+    needs(d, "surveyId", (id) => ({ path: `/api/surveys/${id}/poll_text_responses` })),
 
   "/api/tags": () => ({ path: "/api/tags" }),
 
   "/api/trends": () => ({ path: "/api/trends" }),
-  "/api/trends/{id_or_slug}": (d) =>
-    needs(d.trendId, "trendId", (id) => ({ path: `/api/trends/${id}` })),
+  "/api/trends/{id_or_slug}": (d) => needs(d, "trendId", (id) => ({ path: `/api/trends/${id}` })),
   "/api/trends/{trend_id_or_slug}/articles": (d) =>
-    needs(d.trendId, "trendId", (id) => ({ path: `/api/trends/${id}/articles` })),
+    needs(d, "trendId", (id) => ({ path: `/api/trends/${id}/articles` })),
 
   "/api/users/me": () => ({ path: "/api/users/me" }),
   "/api/users/search": (d) =>
-    needs(d.userEmail, "userEmail", (email) => ({ path: "/api/users/search", query: { email } })),
-  "/api/users/{id}": (d) => needs(d.userId, "userId", (id) => ({ path: `/api/users/${id}` })),
+    needs(d, "userEmail", (email) => ({ path: "/api/users/search", query: { email } })),
+  "/api/users/{id}": (d) => needs(d, "userId", (id) => ({ path: `/api/users/${id}` })),
   "/api/admin/users": () => ({ path: "/api/admin/users" }),
-  "/api/admin/users/{id}": (d) =>
-    needs(d.userId, "userId", (id) => ({ path: `/api/admin/users/${id}` })),
+  "/api/admin/users/{id}": (d) => needs(d, "userId", (id) => ({ path: `/api/admin/users/${id}` })),
   "/api/admin/users/{user_id}/notes": (d) =>
-    needs(d.userId, "userId", (id) => ({ path: `/api/admin/users/${id}/notes` })),
+    needs(d, "userId", (id) => ({ path: `/api/admin/users/${id}/notes` })),
   "/api/admin/users/{user_id}/identities": (d) =>
-    needs(d.userId, "userId", (id) => ({ path: `/api/admin/users/${id}/identities` })),
+    needs(d, "userId", (id) => ({ path: `/api/admin/users/${id}/identities` })),
 
   "/api/videos": () => ({ path: "/api/videos" }),
 };
@@ -409,7 +425,7 @@ const WRITES: Record<string, (d: Discovered) => Resolved> = {
     if (badgeId === undefined) {
       return { cause: "prerequisite-failed", reason: "not created by this run: badge" };
     }
-    return needs(d.targetUserId, "targetUserId", (userId) => ({
+    return needs(d, "targetUserId", (userId) => ({
       path: "/api/badge_achievements",
       params: { badge_achievement: { user_id: userId, badge_id: badgeId } },
     }));
@@ -466,7 +482,7 @@ const WRITES: Record<string, (d: Discovered) => Resolved> = {
   }),
 
   "POST /api/follows": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({
+    needs(d, "targetUserId", (id) => ({
       path: "/api/follows",
       params: { user_ids: [id] },
     })),
@@ -516,18 +532,18 @@ const WRITES: Record<string, (d: Discovered) => Resolved> = {
   "DELETE /api/pages/{id}": (d) => made(d, "page", (id) => ({ path: `/api/pages/${id}` })),
 
   "POST /api/reactions": (d) =>
-    needs(d.articleId, "articleId", (id) => ({
+    needs(d, "articleId", (id) => ({
       path: "/api/reactions",
       params: { category: "like", reactable_id: id, reactable_type: "Article" },
     })),
   "POST /api/reactions/toggle": (d) =>
-    needs(d.articleId, "articleId", (id) => ({
+    needs(d, "articleId", (id) => ({
       path: "/api/reactions/toggle",
       params: { category: "like", reactable_id: id, reactable_type: "Article" },
     })),
 
   "POST /api/recommended_articles_lists": (d) =>
-    needs(d.targetUserId, "targetUserId", (userId) => ({
+    needs(d, "targetUserId", (userId) => ({
       path: "/api/recommended_articles_lists",
       params: {
         name: `Sweep list ${tag(d)}`,
@@ -565,32 +581,32 @@ const WRITES: Record<string, (d: Discovered) => Resolved> = {
     params: { email: `sweep-invite-${tag(d)}@example.com`, name: `Sweep Invite ${tag(d)}` },
   }),
   "PATCH /api/admin/users/{id}": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({
+    needs(d, "targetUserId", (id) => ({
       path: `/api/admin/users/${id}`,
       params: { summary: `Updated by the sweep ${tag(d)}.` },
     })),
   "PUT /api/admin/users/{id}/email": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({
+    needs(d, "targetUserId", (id) => ({
       path: `/api/admin/users/${id}/email`,
       params: { email: `sweep-${tag(d)}-${id}@example.com` },
     })),
   "PUT /api/admin/users/{id}/status": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({
+    needs(d, "targetUserId", (id) => ({
       path: `/api/admin/users/${id}/status`,
       params: { status: "Good standing", note: `sweep ${tag(d)}` },
     })),
   "PUT /api/admin/users/{id}/notification_settings": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({
+    needs(d, "targetUserId", (id) => ({
       path: `/api/admin/users/${id}/notification_settings`,
       params: { notification_setting: { email_newsletter: false } },
     })),
   "POST /api/admin/users/{user_id}/notes": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({
+    needs(d, "targetUserId", (id) => ({
       path: `/api/admin/users/${id}/notes`,
       params: { content: `Sweep note ${tag(d)}`, reason: "sweep" },
     })),
   "POST /api/admin/users/{user_id}/identities": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({
+    needs(d, "targetUserId", (id) => ({
       path: `/api/admin/users/${id}/identities`,
       params: { provider: "github", uid: `sweep-${tag(d)}-${id}`, username: `sweep${id}` },
     })),
@@ -604,7 +620,7 @@ const WRITES: Record<string, (d: Discovered) => Resolved> = {
     }));
   },
   "POST /api/admin/users/identities/bulk": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({
+    needs(d, "targetUserId", (id) => ({
       path: "/api/admin/users/identities/bulk",
       params: { provider: "github", identities: [{ user_id: id, uid: `sweep-bulk-${tag(d)}` }] },
     })),
@@ -622,21 +638,21 @@ const WRITES: Record<string, (d: Discovered) => Resolved> = {
         },
 
   "PUT /api/users/{id}/suspend": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({ path: `/api/users/${id}/suspend` })),
+    needs(d, "targetUserId", (id) => ({ path: `/api/users/${id}/suspend` })),
   "PUT /api/users/{id}/limited": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({ path: `/api/users/${id}/limited` })),
+    needs(d, "targetUserId", (id) => ({ path: `/api/users/${id}/limited` })),
   "DELETE /api/users/{id}/limited": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({ path: `/api/users/${id}/limited` })),
+    needs(d, "targetUserId", (id) => ({ path: `/api/users/${id}/limited` })),
   "PUT /api/users/{id}/spam": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({ path: `/api/users/${id}/spam` })),
+    needs(d, "targetUserId", (id) => ({ path: `/api/users/${id}/spam` })),
   "DELETE /api/users/{id}/spam": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({ path: `/api/users/${id}/spam` })),
+    needs(d, "targetUserId", (id) => ({ path: `/api/users/${id}/spam` })),
   "PUT /api/users/{id}/trusted": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({ path: `/api/users/${id}/trusted` })),
+    needs(d, "targetUserId", (id) => ({ path: `/api/users/${id}/trusted` })),
   "DELETE /api/users/{id}/trusted": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({ path: `/api/users/${id}/trusted` })),
+    needs(d, "targetUserId", (id) => ({ path: `/api/users/${id}/trusted` })),
   "PUT /api/users/{id}/unpublish": (d) =>
-    needs(d.targetUserId, "targetUserId", (id) => ({ path: `/api/users/${id}/unpublish` })),
+    needs(d, "targetUserId", (id) => ({ path: `/api/users/${id}/unpublish` })),
 };
 
 /** GET templates the table knows how to request; exported so a test can hold it to the spec. */
