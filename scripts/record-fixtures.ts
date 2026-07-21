@@ -12,6 +12,7 @@
  * Run: DEVTO_API_KEY=... bun scripts/record-fixtures.ts
  */
 import { mkdirSync, writeFileSync } from "node:fs";
+import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs as parseNodeArgs } from "node:util";
 import { DevToApiError } from "../src/errors.ts";
@@ -206,7 +207,7 @@ export async function recordWriteCycle(
   return out;
 }
 
-const fixtureFileName = (rec: Recorded): string => {
+export const fixtureFileName = (rec: Pick<Recorded, "template" | "method">): string => {
   const slug = rec.template.replaceAll(/[/{}]+/g, "-").replaceAll(/^-|-$/g, "");
   return `${rec.method.toLowerCase()}_${slug}.json`;
 };
@@ -220,6 +221,13 @@ export function writeFixture(dir: string, rec: Recorded): string {
 
 const DEFAULT_BASE_URL = "https://dev.to";
 const LOOPBACK = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
+
+/**
+ * Whole-hostname loopback test. Exported so the local sweep shares this exact
+ * predicate rather than re-deriving one: a substring check would accept
+ * `localhost.example.com` and point a credentialed crawl at a stranger.
+ */
+export const isLoopback = (baseUrl: string): boolean => LOOPBACK.has(new URL(baseUrl).hostname);
 
 /**
  * KTD8: resolve the recording target from the environment. Defaults reproduce
@@ -245,10 +253,29 @@ export function resolveTarget(env: NodeJS.ProcessEnv): {
     }
     apiKey = env.FOREM_API_KEY;
   }
-  const parsed = new URL(baseUrl);
-  const allowInsecureHttp = parsed.protocol === "http:" && LOOPBACK.has(parsed.hostname);
+  const allowInsecureHttp = new URL(baseUrl).protocol === "http:" && isLoopback(baseUrl);
   const pauseMs = env.FIXTURE_PAUSE_MS !== undefined ? Number(env.FIXTURE_PAUSE_MS) : 3000;
   return { apiKey, baseUrl, allowInsecureHttp, pauseMs };
+}
+
+export const RECORDED_DIR = "tests/fixtures/recorded";
+
+/**
+ * R7 from the other side. The sweep guards its own writes, but this recorder also
+ * honors FOREM_BASE_URL, and its out-dir defaults to the Recorded tier: pointed at
+ * a local Forem it would write captures that carry no `source` stamp, so the
+ * reality check's stamp guard has nothing to catch them by. A Recorded fixture is
+ * a claim about dev.to specifically; recording another host into that directory
+ * is the one combination refused outright.
+ */
+export function assertRecordedTierTarget(baseUrl: string, outDir: string): void {
+  const rel = relative(resolve(RECORDED_DIR), resolve(outDir));
+  const insideRecordedTier = !rel.startsWith("..") && !isAbsolute(rel);
+  if (insideRecordedTier && baseUrl !== DEFAULT_BASE_URL) {
+    throw new Error(
+      `refusing to record ${baseUrl} into ${RECORDED_DIR}/: a recorded fixture is evidence about ${DEFAULT_BASE_URL}. Pass a different out dir.`,
+    );
+  }
 }
 
 /** Parse `--only <selector>` (repeatable) and an optional positional out dir. */
@@ -258,7 +285,7 @@ export function parseArgs(argv: string[]): { only: string[]; outDir: string } {
     options: { only: { type: "string", multiple: true } },
     allowPositionals: true,
   });
-  return { only: values.only ?? [], outDir: positionals.at(-1) ?? "tests/fixtures/recorded" };
+  return { only: values.only ?? [], outDir: positionals.at(-1) ?? RECORDED_DIR };
 }
 
 /**
@@ -315,6 +342,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const { only, outDir } = parseArgs(process.argv.slice(2));
   // resolveTarget again for `pauseMs`, which the transport config has no home for
   const target = resolveTarget(process.env);
+  assertRecordedTierTarget(target.baseUrl, outDir);
   const apiKey = target.apiKey;
   const config = buildRecorderConfig(process.env);
   const rf: Rf = (method, path, opts) => request(config, method, path, opts);

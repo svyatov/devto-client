@@ -1,6 +1,15 @@
 import { describe, expect, it } from "bun:test";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { compose, type OverlayEntry } from "../scripts/compose-spec.ts";
+import {
+  CONDITIONAL_KEYS,
+  carriedKeys,
+  composedSpec,
+  declaredKeys,
+  isVacuous,
+  missingKeys,
+  type Schema,
+  successSchema,
+} from "../scripts/spec-keys.ts";
 import { deriveTemplate } from "../scripts/spec-templates.ts";
 import type { components } from "../src/generated/types.ts";
 
@@ -18,101 +27,26 @@ interface Recorded {
   /** The concrete request path the recording hit (R8); the template is derived from it, not trusted. */
   path: string;
   payload: unknown;
-}
-
-type Schema = {
-  $ref?: string;
-  type?: string;
-  properties?: Record<string, Schema>;
-  items?: Schema;
-  allOf?: Schema[];
-};
-
-const spec = compose(
-  JSON.parse(readFileSync("spec/api_v1.json", "utf8")),
-  JSON.parse(readFileSync("spec/overlay.json", "utf8")) as OverlayEntry[],
-).spec as {
-  paths: Record<string, Record<string, unknown>>;
-  components: { schemas: Record<string, Schema> };
-};
-
-function deref(schema: Schema): Schema {
-  if (schema.$ref) {
-    const name = schema.$ref.split("/").at(-1) ?? "";
-    const target = spec.components.schemas[name];
-    if (!target) throw new Error(`unresolvable $ref: ${schema.$ref}`);
-    return deref(target);
-  }
-  return schema;
-}
-
-/** Property names the composed spec declares for a schema (allOf merged). */
-function declaredKeys(schema: Schema): string[] {
-  const resolved = deref(schema);
-  if (resolved.allOf) return resolved.allOf.flatMap((s) => declaredKeys(s));
-  return Object.keys(resolved.properties ?? {});
+  /** Only a local-Forem sweep capture carries this; the Recorded tier must never. */
+  source?: string;
 }
 
 /**
- * Success schema for an operation, distinguishing three cases the old code
- * conflated into `null`: the template vanished upstream (`removed`), the op
- * exists but declares no JSON body (`none`, a legitimate 204), or a real
- * schema (`schema`).
+ * R7's evidence boundary, enforced rather than trusted. A Recorded fixture asserts
+ * that *dev.to* sends a shape; a local Forem runs its own flags and subforems, so a
+ * local capture cannot carry that claim no matter how well-formed it looks. The
+ * sweep stamps every capture with `source`, and this is what makes copying one into
+ * the recorded directory fail (AE4) instead of silently passing every other check.
  */
-type SchemaLookup = { kind: "schema"; schema: Schema } | { kind: "none" } | { kind: "removed" };
-
-function successSchema(template: string, method: string): SchemaLookup {
-  if (!(template in spec.paths)) return { kind: "removed" };
-  const op = spec.paths[template]?.[method.toLowerCase()] as
-    | { responses?: Record<string, { content?: { "application/json"?: { schema?: Schema } } }> }
-    | undefined;
-  for (const code of ["200", "201"]) {
-    const schema = op?.responses?.[code]?.content?.["application/json"]?.schema;
-    if (schema) return { kind: "schema", schema };
+function assertNotLocalCapture(rec: { source?: string }, label: string): void {
+  if (rec.source !== undefined) {
+    throw new Error(
+      `${label} carries source "${rec.source}": local-Forem captures are an oracle, not fixtures, and must not live in ${FIXTURES_DIR}`,
+    );
   }
-  return { kind: "none" };
 }
 
-function isVacuous(payload: unknown): boolean {
-  if (Array.isArray(payload)) return payload.length === 0;
-  if (payload !== null && typeof payload === "object") {
-    return Object.keys(payload).length === 0;
-  }
-  return payload === null || payload === undefined;
-}
-
-/**
- * Keys the spec declares that the payload never carries. For arrays the keys
- * are unioned across elements: serializers omit conditional fields (e.g.
- * `organization` only when the article has one), so any element carrying the
- * key proves the server still sends it.
- */
-function missingKeys(payload: unknown, schema: Schema): string[] {
-  const resolved = deref(schema);
-  const seen = carriedKeys(payload);
-  if (resolved.type === "array" && resolved.items) {
-    if (!Array.isArray(payload)) return ["<payload is not an array>"];
-    return declaredKeys(resolved.items).filter((k) => !seen.has(k));
-  }
-  if (payload === null || typeof payload !== "object") return ["<payload is not an object>"];
-  return declaredKeys(resolved).filter((k) => !seen.has(k));
-}
-
-/** Keys any element of the payload actually carries; a bare object counts as one element. */
-function carriedKeys(payload: unknown): Set<string> {
-  const elements = Array.isArray(payload) ? payload : [payload];
-  return new Set(
-    elements.flatMap((el) => (el !== null && typeof el === "object" ? Object.keys(el) : [])),
-  );
-}
-
-/**
- * Keys the article serializer emits only when the data exists: org membership, a flare tag.
- * Not checked per endpoint: whether a given page of articles happens to contain one is a coin
- * flip, and that flakiness has filed a false drift alarm twice. The drift signal lives in the
- * "still sent somewhere" test below instead, which fails if the server drops a key everywhere.
- */
-const CONDITIONAL_KEYS = ["organization", "flare_tag"];
+const spec = composedSpec();
 
 const FIXTURES_DIR = process.env.FIXTURES_DIR ?? "tests/fixtures/recorded";
 const files = existsSync(FIXTURES_DIR)
@@ -152,6 +86,7 @@ describe("recorded fixtures vs composed spec", () => {
     const rec = JSON.parse(readFileSync(`${FIXTURES_DIR}/${file}`, "utf8")) as Recorded;
 
     it(`${rec.method} ${rec.template} is verified from its stored path`, () => {
+      assertNotLocalCapture(rec, file);
       assertStoredLabel(rec, spec.paths, file);
 
       const lookup = successSchema(rec.template, rec.method);
@@ -252,6 +187,14 @@ describe("mechanism meta-tests", () => {
         spec.paths,
       ),
     ).not.toThrow();
+  });
+
+  it("AE4: a local-Forem capture copied into the recorded tier is rejected on its source stamp", () => {
+    expect(() =>
+      assertNotLocalCapture({ source: "local-forem@ae359ff41b2a" }, "get-api-admin-users.json"),
+    ).toThrow(/local-Forem captures are an oracle, not fixtures/);
+    // a genuine dev.to recording carries no stamp
+    expect(() => assertNotLocalCapture({}, "get-api-tags.json")).not.toThrow();
   });
 
   it("a fixture with no stored path is rejected", () => {
