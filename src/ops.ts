@@ -31,14 +31,14 @@ type BodyKeySlot<P extends keyof paths, V extends keyof paths[P]> = [
 
 /**
  * An entry must name a real path and a verb that path actually documents (KTD10),
- * and — distributed per verb — carry the `bodyKey` its body shape demands (KTD4).
+ * and, distributed per verb, carry the `bodyKey` its body shape demands (KTD4).
  */
 export type OpEntry = {
   [P in keyof paths]: {
     [V in VerbsOf<P>]: {
       path: P;
       verb: V;
-      /** list endpoint driven by page/per_page — gets an iterator variant */
+      /** list endpoint driven by page/per_page, gets an iterator variant */
       paginated?: true;
       /** verified in Forem routes but absent from upstream docs (KTD11) */
       undocumented?: true;
@@ -78,7 +78,7 @@ type IterQueryOf<O> = [QueryOf<O>] extends [never] ? never : Omit<QueryOf<O>, "p
 
 // ---------------------------------------------------------------------------
 // Call rule (ergonomic surface). Positional required path params in URL order,
-// then one flat params object (query OR unwrapped body — never both, R8), then
+// then one flat params object (query OR unwrapped body, never both, R8), then
 // a trailing options bag. The helpers below type each slot; the generator
 // (`scripts/generate-signatures.ts`) supplies the parameter names and arity in
 // `src/generated/signatures.ts`.
@@ -87,12 +87,12 @@ type IterQueryOf<O> = [QueryOf<O>] extends [never] ? never : Omit<QueryOf<O>, "p
 /** The `paths`-indexed operation object for a (path, verb) pair. */
 export type OpAt<P extends keyof paths, V extends keyof paths[P]> = paths[P][V];
 
-/** Trailing per-call options — transport concerns kept out of the params object. */
-export type CallOptions = { signal?: AbortSignal };
+/** Trailing per-call options: transport concerns kept out of the params object. */
+export type CallOptions = { signal?: AbortSignal; timeoutMs?: number };
 
 /**
  * Flatten an assembled intersection into a single field list so param aliases
- * hover as a flat object, not `Omit<…> & {…}` (KTD4). Applied to params only —
+ * hover as a flat object, not `Omit<…> & {…}` (KTD4). Applied to params only:
  * entity aliases stay plain `type X = …` so they render as a clickable name.
  */
 export type Prettify<T> = { [K in keyof T]: T[K] } & {};
@@ -118,7 +118,7 @@ export type CallBodyInner<
   V extends keyof paths[P],
   K extends string,
 > = NonNullable<BodyOf<OpAt<P, V>>>[K & keyof NonNullable<BodyOf<OpAt<P, V>>>];
-/** Flat iterator query for an op — same rule, minus the iterator-driven `page`. */
+/** Flat iterator query for an op: same rule, minus the iterator-driven `page`. */
 export type IterQuery<P extends keyof paths, V extends keyof paths[P]> = IterQueryOf<OpAt<P, V>>;
 
 // -- Structural helpers feeding BodyKeySlot's wrapper-key detection (KTD4). --
@@ -126,7 +126,7 @@ export type IterQuery<P extends keyof paths, V extends keyof paths[P]> = IterQue
 type IsUnion<T, C = T> = T extends unknown ? ([C] extends [T] ? false : true) : never;
 type IsSingle<T> = [T] extends [never] ? false : IsUnion<T> extends true ? false : true;
 
-/** Keys of `T` whose (non-null) value is a plain object — not an array, not a primitive. */
+/** Keys of `T` whose (non-null) value is a plain object, not an array, not a primitive. */
 type ObjectKeys<T> = {
   [K in keyof T]-?: NonNullable<T[K]> extends readonly unknown[]
     ? never
@@ -175,8 +175,8 @@ function fillPath(template: string, params: Record<string, string | number>): st
 /**
  * Binds a table to the Call rule (KTD3/KTD4): positional path values fill the
  * template in URL order, one flat params object routes to body or query by the
- * op's kind (`opRouting`) — wrapped under `bodyKey` when the body is a single-key
- * wrapper — and a trailing `opts.signal` reaches transport. Ops with no query or
+ * op's kind (`opRouting`), wrapped under `bodyKey` when the body is a single-key
+ * wrapper, and a trailing `opts` (signal, timeoutMs) reaches transport. Ops with no query or
  * body take no params object, so their `opts` follows the positional args.
  */
 export function bindOps<N>(rf: RequestFn, table: OpTable): N {
@@ -202,6 +202,9 @@ export function bindOps<N>(rf: RequestFn, table: OpTable): N {
         else reqOpts.query = params as Record<string, string | number | boolean | undefined>;
       }
       if (opts?.signal) reqOpts.signal = opts.signal;
+      // `!== undefined`, not truthiness: 0 is a caller asking for an already-spent
+      // budget, which must reach transport and fail rather than silently mean "default"
+      if (opts?.timeoutMs !== undefined) reqOpts.timeoutMs = opts.timeoutMs;
       return rf(method, fillPath(entry.path, pathParams), reqOpts);
     };
 

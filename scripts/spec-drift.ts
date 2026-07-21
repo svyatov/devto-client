@@ -1,6 +1,6 @@
 /**
- * Offline drift-to-shot-list (KTD5/KTD6). Turns two signals — a structural diff
- * of the upstream spec against the pinned snapshot, and recorded-fixture age —
+ * Offline drift-to-shot-list (KTD5/KTD6). Turns two signals (a structural diff
+ * of the upstream spec against the pinned snapshot, and recorded-fixture age)
  * into a ready-to-paste list of targeted `bun run record` commands. Prints the
  * shot list to stdout (empty when nothing is stale or drifted); the workflow
  * captures it for the issue body.
@@ -77,18 +77,16 @@ export function buildShotList(
   const fixturesFor = (t: string): FixtureMeta[] => fixtures.filter((f) => f.template === t);
 
   for (const t of diff.added) {
-    lines.push(`- New upstream template \`${t}\` — nothing recorded yet.`);
+    lines.push(`- New upstream template \`${t}\`: nothing recorded yet.`);
   }
   for (const t of diff.removed) {
     const fx = fixturesFor(t);
-    lines.push(
-      `- Upstream removed \`${t}\`${fx.length ? " — recorded fixture now orphaned" : ""}.`,
-    );
+    lines.push(`- Upstream removed \`${t}\`${fx.length ? ": recorded fixture now orphaned" : ""}.`);
     for (const f of fx) commands.add(commandFor(f));
   }
   for (const t of diff.changed) {
     const fx = fixturesFor(t);
-    lines.push(`- Operation changed on \`${t}\`${fx.length ? " — re-record it" : ""}.`);
+    lines.push(`- Operation changed on \`${t}\`${fx.length ? ": re-record it" : ""}.`);
     for (const f of fx) commands.add(commandFor(f));
   }
   for (const s of stale) {

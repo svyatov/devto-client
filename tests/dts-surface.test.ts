@@ -10,7 +10,7 @@ import { schemaNames } from "../scripts/schema-names.ts";
  * real declarations with `tsc --emitDeclarationOnly` and assert on the .d.ts the
  * editor actually reads: mapped ops show friendly `Promise<Friendly>` returns and
  * named param types, never the computed `CallResult<…>` / `CallQuery<…>`. The
- * assertion is scoped to mapped (schema-backed) ops — the ~31 inline/malformed
+ * assertion is scoped to mapped (schema-backed) ops: the ~31 inline/malformed
  * fallback ops legitimately keep `CallResult<pv>` (KTD3), so a global "no
  * CallResult anywhere" check would false-positive.
  */
@@ -18,6 +18,8 @@ let out: string;
 let index = "";
 let signatures = "";
 let schemas = "";
+let http = "";
+let ops = "";
 
 beforeAll(() => {
   out = mkdtempSync(join(tmpdir(), "devto-dts-"));
@@ -29,6 +31,8 @@ beforeAll(() => {
   index = readFileSync(join(out, "index.d.ts"), "utf8");
   signatures = readFileSync(join(out, "generated", "signatures.d.ts"), "utf8");
   schemas = readFileSync(join(out, "generated", "schemas.d.ts"), "utf8");
+  http = readFileSync(join(out, "http.d.ts"), "utf8");
+  ops = readFileSync(join(out, "ops.d.ts"), "utf8");
 }, 120_000);
 
 afterAll(() => {
@@ -68,7 +72,7 @@ describe("dts-surface guard (R5)", () => {
 
   it("shows no CallResult / CallQuery for the mapped article ops (regression guard)", () => {
     // Reverting any of these signatures to CallResult<pv> would put `CallResult<`
-    // back on its line and fail here — that is the guard biting.
+    // back on its line and fail here, that is the guard biting.
     const mapped = ["get", "getByPath", "list", "latest", "search", "create", "update", "me"];
     for (const op of mapped) {
       const line = articleLine(op);
@@ -77,7 +81,7 @@ describe("dts-surface guard (R5)", () => {
     }
   });
 
-  it("leaves fallback ops out of the guard — semanticSearch legitimately keeps CallResult (KTD3)", () => {
+  it("leaves fallback ops out of the guard: semanticSearch legitimately keeps CallResult (KTD3)", () => {
     // array-inline response → no named schema to alias; the fallback is correct,
     // and it is NOT in the mapped set above so it never trips the guard.
     expect(articleLine("semanticSearch")).toContain("=> CallResult<");
@@ -101,6 +105,65 @@ describe("dts-surface guard (R5)", () => {
       .filter((n) => !DENYLIST.has(n))
       .filter((n) => !new RegExp(`\\b${n}\\b`).test(flat));
     expect(missing).toEqual([]);
+  });
+
+  /**
+   * The block above pins only the generated friendly types. The transport option
+   * interfaces live in http.d.ts, which nothing read until the transport-hardening
+   * work, so removing a public option used to ship green and unverified.
+   */
+  describe("transport option surface", () => {
+    const members = (iface: string): string =>
+      http.match(new RegExp(`interface ${iface} \\{([\\s\\S]*?)\\n\\}`))?.[1] ??
+      (() => {
+        throw new Error(`no ${iface} in http.d.ts`);
+      })();
+
+    it("pins the ClientOptions members", () => {
+      const block = members("ClientOptions");
+      for (const member of [
+        "apiKey?",
+        "baseUrl?",
+        "allowInsecureHttp?",
+        "retry?",
+        "timeoutMs?",
+        "pace?",
+        "onResponse?",
+        "headers?",
+        "fetch?",
+        "sleep?",
+      ]) {
+        expect(block, member).toContain(member);
+      }
+    });
+
+    it("pins the RequestOptions members", () => {
+      const block = members("RequestOptions");
+      for (const member of ["query?", "body?", "signal?", "headers?", "timeoutMs?"]) {
+        expect(block, member).toContain(member);
+      }
+    });
+
+    it("pins the RetryOptions members and proves maxDelayMs is gone (R15)", () => {
+      const block = members("RetryOptions");
+      expect(block).toContain("attempts?");
+      expect(block).toContain("baseDelayMs?");
+      expect(block).toContain("throttleDelayMs?");
+      // the one assertion in tests/ allowed to name the removed option: it is
+      // what proves the removal reached the public surface, not just the source
+      expect(block).not.toContain("maxDelayMs");
+    });
+
+    it("pins CallOptions, the bag every namespace method actually takes", () => {
+      // RequestOptions is only reachable through client.request(); a transport
+      // option missing here is invisible to every ergonomic method, which is
+      // exactly how a documented per-call timeoutMs shipped as a no-op
+      const block = ops.match(/type CallOptions = \{([^}]*)\}/)?.[1];
+      expect(block).toBeDefined();
+      for (const member of ["signal?", "timeoutMs?"]) {
+        expect(block, member).toContain(member);
+      }
+    });
   });
 
   it("keeps the DevTo re-export type-only so dist ships no runtime import of the empty module", () => {

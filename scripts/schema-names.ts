@@ -5,13 +5,13 @@
  * components["schemas"]["SchemaName"]` into `src/generated/schemas.ts` from it.
  *
  * Response-only by design (KTD2): body inputs and query params are handled
- * structurally by the `CallBody*` / `CallQuery` helpers and never appear here —
+ * structurally by the `CallBody*` / `CallQuery` helpers and never appear here,
  * which is why a distinct schema literally named `Article` (the create/update
  * body) has no entry and does not collide with `ArticleShow → Article`.
  *
  * Names are 1:1 aliases, never merged god-types (R4). Most schemas are already
  * domain nouns and keep their name; the exceptions are Rails action suffixes
- * that leak plumbing into the hover (`Show`/`Index`) — those get de-plumbing'd
+ * that leak plumbing into the hover (`Show`/`Index`). Those get de-plumbing'd
  * so a result reads as intent, not a controller action (R1):
  *   `ArticleShow → Article`, `ArticleIndex → ArticleSummary`,
  *   `AgentSessionShow → AgentSession`, `AgentSessionIndex → AgentSessionSummary`,

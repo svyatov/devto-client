@@ -24,7 +24,7 @@ describe("paginate", () => {
     await expect(collect(paginate(pages()))).resolves.toEqual([]);
   });
 
-  it("does not treat a short page as terminal — servers cap per_page", async () => {
+  it("does not treat a short page as terminal: servers cap per_page", async () => {
     // requested 100 per page; server caps at 2, so every page is "short"
     const fetchPage = pages([1, 2], [3], [4, 5]);
     await expect(collect(paginate(fetchPage, { perPage: 100 }))).resolves.toEqual([1, 2, 3, 4, 5]);

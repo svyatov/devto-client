@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { compose, type OverlayEntry } from "../scripts/compose-spec.ts";
 import { deriveTemplate } from "../scripts/spec-templates.ts";
 
-// Compose in-memory from the committed source files — spec/composed.json is
+// Compose in-memory from the committed source files: spec/composed.json is
 // gitignored and absent on a fresh checkout / in CI.
 const specPaths = (
   compose(
@@ -37,7 +37,7 @@ describe("deriveTemplate", () => {
 
   it("throws when a param-vs-param tie survives method and numeric fit", () => {
     // Two same-literal-count templates, both serving GET, both non-idish params
-    // against a numeric segment — nothing breaks the tie, so it must fail loudly.
+    // against a numeric segment, nothing breaks the tie, so it must fail loudly.
     const ambiguous = { "/api/x/{foo}": { get: {} }, "/api/x/{bar}": { get: {} } };
     expect(() => deriveTemplate("/api/x/123", "GET", ambiguous)).toThrow(/ambiguous/);
   });

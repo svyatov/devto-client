@@ -1,6 +1,6 @@
 /**
  * Composes spec/api_v1.json (pinned upstream snapshot) with spec/overlay.json
- * into spec/composed.json — the input for type generation.
+ * into spec/composed.json: the input for type generation.
  *
  * Overlay entry semantics:
  *   target  JSON pointer to the node to set or remove

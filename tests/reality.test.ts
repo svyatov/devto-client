@@ -6,7 +6,7 @@ import type { components } from "../src/generated/types.ts";
 
 /**
  * R17: recorded reality vs the composed spec. Each recorded fixture is
- * checked for key-completeness against the spec's declared property list —
+ * checked for key-completeness against the spec's declared property list:
  * the spec has no `required` lists, so generated properties are all optional
  * and type assignment alone cannot see a removed or renamed field.
  * Empty recordings are vacuous: reported, not counted as verified.
@@ -15,7 +15,7 @@ import type { components } from "../src/generated/types.ts";
 interface Recorded {
   template: string;
   method: string;
-  /** The concrete request path the recording hit — R8; the template is derived from it, not trusted. */
+  /** The concrete request path the recording hit (R8); the template is derived from it, not trusted. */
   path: string;
   payload: unknown;
 }
@@ -56,7 +56,7 @@ function declaredKeys(schema: Schema): string[] {
 /**
  * Success schema for an operation, distinguishing three cases the old code
  * conflated into `null`: the template vanished upstream (`removed`), the op
- * exists but declares no JSON body (`none` — a legitimate 204), or a real
+ * exists but declares no JSON body (`none`, a legitimate 204), or a real
  * schema (`schema`).
  */
 type SchemaLookup = { kind: "schema"; schema: Schema } | { kind: "none" } | { kind: "removed" };
@@ -83,7 +83,7 @@ function isVacuous(payload: unknown): boolean {
 
 /**
  * Keys the spec declares that the payload never carries. For arrays the keys
- * are unioned across elements — serializers omit conditional fields (e.g.
+ * are unioned across elements: serializers omit conditional fields (e.g.
  * `organization` only when the article has one), so any element carrying the
  * key proves the server still sends it.
  */
@@ -107,7 +107,7 @@ function carriedKeys(payload: unknown): Set<string> {
 }
 
 /**
- * Keys the article serializer emits only when the data exists — org membership, a flare tag.
+ * Keys the article serializer emits only when the data exists: org membership, a flare tag.
  * Not checked per endpoint: whether a given page of articles happens to contain one is a coin
  * flip, and that flakiness has filed a false drift alarm twice. The drift signal lives in the
  * "still sent somewhere" test below instead, which fails if the server drops a key everywhere.
@@ -130,7 +130,7 @@ function assertStoredLabel(
   label = `${rec.method} ${rec.template}`,
 ): void {
   if (typeof rec.path !== "string" || rec.path === "") {
-    throw new Error(`fixture ${label} has no recorded path — re-record it`);
+    throw new Error(`fixture ${label} has no recorded path, re-record it`);
   }
   const derived = deriveTemplate(rec.path, rec.method, specPaths);
   if (derived !== rec.template) {
@@ -160,7 +160,7 @@ describe("recorded fixtures vs composed spec", () => {
       }
       if (isVacuous(rec.payload)) {
         vacuous.push(`${rec.method} ${rec.template}`);
-        return; // vacuous — reported below, not counted as verified
+        return; // vacuous, reported below, not counted as verified
       }
       if (lookup.kind === "none") {
         // op exists but declares no JSON body: a legitimate 204
@@ -216,7 +216,7 @@ describe("mechanism meta-tests", () => {
   });
 
   it("a deliberately corrupted fixture fails the compile-time type test", () => {
-    // @ts-expect-error — type_of must be a string, not a number
+    // @ts-expect-error: type_of must be a string, not a number
     const corrupted: components["schemas"]["ArticleIndex"] = { type_of: 42 };
     void corrupted;
     expect(true).toBe(true);
@@ -238,7 +238,7 @@ describe("mechanism meta-tests", () => {
   });
 
   it("AE3: a mislabeled fixture (path derives to a different template) is rejected", () => {
-    // path /api/users/me labeled as /api/users/{id} — literal beats param (KTD2)
+    // path /api/users/me labeled as /api/users/{id}: literal beats param (KTD2)
     expect(() =>
       assertStoredLabel(
         { method: "GET", template: "/api/users/{id}", path: "/api/users/me" },

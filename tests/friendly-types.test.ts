@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { generate, loadSpec } from "../scripts/generate-signatures.ts";
-// U4 export surface: flat friendly names import directly (R3); every alias —
-// including the DOM-denylisted ones — is reachable through the `DevTo` namespace.
+// U4 export surface: flat friendly names import directly (R3); every alias,
+// including the DOM-denylisted ones, is reachable through the `DevTo` namespace.
 // The denylist's *absence* from the flat surface is asserted on the emitted
 // `.d.ts` in tests/dts-surface.test.ts (a string check, robust to import merging).
 import type { Article, DevTo, User } from "../src/index.ts";
@@ -14,7 +14,7 @@ import type { Article, DevTo, User } from "../src/index.ts";
 const spec = loadSpec();
 const { signatures, schemas } = generate(spec);
 
-/** Compile-time assertion helper — `Assert<false>` is a type error. */
+/** Compile-time assertion helper: `Assert<false>` is a type error. */
 type Assert<T extends true> = T;
 
 // U4 (R3/KTD5), enforced by tsc: flat names import directly; denylisted names
@@ -48,7 +48,7 @@ describe("friendly-types", () => {
   });
 
   it("keeps CallResult for a spec-malformed object+items response (KTD3 branch-3 guard)", () => {
-    // get /api/segments/{id} is `{type: object, items: $ref Segment}` — following
+    // get /api/segments/{id} is `{type: object, items: $ref Segment}`, following
     // items.$ref would emit Promise<Segment> the generated type does not back.
     expect(signatures).toContain(
       'get: (id: number, opts?: CallOptions) => CallResult<"/api/segments/{id}", "get">;',
@@ -141,7 +141,7 @@ describe("friendly-types", () => {
   });
 
   it("keeps CallResult for an op whose only 2xx is outside 200/201/204 (SuccessOf is never)", () => {
-    // a 202-only op: SuccessOf reads only 200|201|204, so the runtime type is never —
+    // a 202-only op: SuccessOf reads only 200|201|204, so the runtime type is never,
     // emitting a friendly Promise<Article> here would be the exact "present but wrong" lie
     const mutated = structuredClone(spec);
     const op = mutated.paths["/api/articles/{id}"]?.get;
@@ -156,7 +156,7 @@ describe("friendly-types", () => {
     );
   });
 
-  it("does not gate body-only schemas — `Article` (create/update body) needs no map entry (KTD2)", () => {
+  it("does not gate body-only schemas: `Article` (create/update body) needs no map entry (KTD2)", () => {
     // generation succeeds even though the body schema literally named `Article`
     // has no map key; only `ArticleShow → Article` is aliased.
     expect(() => generate(spec)).not.toThrow();
@@ -181,7 +181,7 @@ describe("friendly-types", () => {
   });
 
   it("emits no param alias for a method with no params slot (KTD4 edge)", () => {
-    // articles.get is positional-only — no empty `{}` param type
+    // articles.get is positional-only, no empty `{}` param type
     expect(schemas).not.toContain("ArticleGetParams");
   });
 
@@ -194,7 +194,7 @@ describe("friendly-types", () => {
     expect(dupes).toEqual([]);
   });
 
-  it("is deterministic — regenerating schemas is byte-identical", () => {
+  it("is deterministic: regenerating schemas is byte-identical", () => {
     const again = generate(spec);
     expect(again.schemas).toBe(schemas);
     expect(again.signatures).toBe(signatures);

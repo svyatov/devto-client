@@ -2,7 +2,7 @@ import { expect, it } from "bun:test";
 import { DevToClient } from "../src/index.ts";
 import type { NoQueryAndBody, NoQueryAndBodyOp, OpEntry } from "../src/ops.ts";
 
-/** Compile-time assertion helper — `Assert<false>` is a type error. */
+/** Compile-time assertion helper: `Assert<false>` is a type error. */
 type Assert<T extends true> = T;
 
 // ---------------------------------------------------------------------------
@@ -12,17 +12,17 @@ type Assert<T extends true> = T;
 // ---------------------------------------------------------------------------
 // AE2 (type half): the correct wrapper key compiles.
 ({ path: "/api/articles", verb: "post", bodyKey: "article" }) satisfies OpEntry;
-// @ts-expect-error — misspelled wrapper key
+// @ts-expect-error: misspelled wrapper key
 ({ path: "/api/articles", verb: "post", bodyKey: "artcle" }) satisfies OpEntry;
-// @ts-expect-error — a wrapper op must declare its bodyKey (completeness)
+// @ts-expect-error: a wrapper op must declare its bodyKey (completeness)
 ({ path: "/api/articles", verb: "post" }) satisfies OpEntry;
-// @ts-expect-error — a flat-body op must not declare a bodyKey
+// @ts-expect-error: a flat-body op must not declare a bodyKey
 ({ path: "/api/admin/users", verb: "post", bodyKey: "user" }) satisfies OpEntry;
 // a genuinely flat-body op carries no bodyKey
 ({ path: "/api/admin/users", verb: "post" }) satisfies OpEntry;
 
 // ---------------------------------------------------------------------------
-// R8: no operation may declare both a query object and a body — the routing
+// R8: no operation may declare both a query object and a body: the routing
 // rule (body-else-query) depends on it. The real surface holds; the guard
 // mechanism rejects a synthetic op that violates it.
 // ---------------------------------------------------------------------------
@@ -32,7 +32,7 @@ type SyntheticQueryAndBody = {
   requestBody: { content: { "application/json": { y: number } } };
   responses: { 200: { content: { "application/json": { ok: true } } } };
 };
-// @ts-expect-error — an op with both query and body fails the guard
+// @ts-expect-error: an op with both query and body fails the guard
 type _r8Rejects = Assert<NoQueryAndBody<SyntheticQueryAndBody>>;
 
 /**
@@ -69,7 +69,7 @@ it("enforces the Call rule at compile time (AE3, AE4, AE6)", () => {
     void client.articles.semanticSearchAll({ q: "cats" });
     void client.articles.listAll();
 
-    // AE6: positional path params — true names, arity enforced
+    // AE6: positional path params: true names, arity enforced
     // @ts-expect-error id path param is required
     void client.articles.get();
     void client.articles.get(1);

@@ -10,9 +10,9 @@
  * deterministic and Biome-formatted downstream.
  *
  * Three files are produced:
- *   src/generated/signatures.ts — the labeled namespace interfaces (types)
- *   src/generated/schemas.ts    — friendly entity aliases + per-method param types
- *   src/generated/routing.ts    — runtime params routing (query vs body) manifest
+ *   src/generated/signatures.ts: the labeled namespace interfaces (types)
+ *   src/generated/schemas.ts: friendly entity aliases + per-method param types
+ *   src/generated/routing.ts: runtime params routing (query vs body) manifest
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -168,7 +168,7 @@ const SUCCESS_CODES = ["200", "201", "204"] as const;
  * runtime's `SuccessOf` (ops.ts) unions the JSON bodies of 200 and 201 with
  * `undefined` when 204 (or a content-less 200/201) is present, so a friendly
  * `Promise<Friendly>` may only REPLACE the computed `CallResult<pv>` when it is
- * provably equal to that union — exactly one distinct response schema and no
+ * provably equal to that union: exactly one distinct response schema and no
  * `undefined` arm. Anything else falls back to `CallResult<pv>`, which is by
  * definition `Promise<SuccessOf>` and therefore can never disagree with the
  * runtime (closes the "friendly type present but not assignable" gap).
@@ -214,10 +214,11 @@ function resolveReturn(
   const friendlyFor = (schemaName: string): string => {
     const friendly = map[schemaName];
     // KTD2: the completeness gate is scoped to response schemas reached by
-    // branch 1/2 — a named response with no map entry fails generation.
+    // branch 1/2: a named response with no map entry fails generation.
     if (friendly === undefined) {
       throw new Error(
-        `response schema "${schemaName}" for ${where} has no friendly name — add it to scripts/schema-names.ts (KTD2)`,
+        `response schema "${schemaName}" for ${where} has no friendly name. ` +
+          "Add it to scripts/schema-names.ts (KTD2)",
       );
     }
     friendlyUsed.add(friendly);
@@ -358,7 +359,7 @@ export function generate(spec: Spec): { signatures: string; schemas: string; rou
 
   const routingBody =
     `${header}// Runtime params routing: which ops send their flat params as query vs body\n` +
-    "// (KTD4). Ops absent from this map take no params object — opts follows the\n" +
+    "// (KTD4). Ops absent from this map take no params object. Opts follows the\n" +
     "// positional path args directly.\n\n" +
     `export const opRouting: Record<string, "query" | "body"> = {\n${routing.sort().join("\n")}\n};\n`;
 

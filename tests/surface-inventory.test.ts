@@ -12,7 +12,7 @@ import { allTables } from "../src/resources/index.ts";
  * - /api/display_ads: transitional alias of billboards, not in the spec
  * - `suspended` role alias: alias of suspend, not in the spec
  * - GET /api/followers/organizations: route exists but the controller action
- *   does not (dead stub, R3) — deliberately neither overlaid nor implemented
+ *   does not (dead stub, R3): deliberately neither overlaid nor implemented
  */
 describe("surface inventory", () => {
   const spec = compose(

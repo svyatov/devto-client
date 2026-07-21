@@ -89,7 +89,7 @@ const draft = await devto.articles.create({
 console.log(`draft #${draft.id} created`);
 ```
 
-You pass the article fields flat. On the wire dev.to wants them wrapped in `{ "article": { ... } }`, and the client adds that wrapper for you — one less bit of transport trivia to remember. The key travels in the `api-key` header on every request. The client refuses `http://` base URLs so it can't leak in cleartext (see self-hosted instances below for the escape hatch).
+You pass the article fields flat. On the wire dev.to wants them wrapped in `{ "article": { ... } }`, and the client adds that wrapper for you, one less bit of transport trivia to remember. The key travels in the `api-key` header on every request. The client refuses `http://` base URLs so it can't leak in cleartext (see self-hosted instances below for the escape hatch).
 
 ## Pagination
 
@@ -123,18 +123,59 @@ try {
 
 You might expect every error body to be JSON. It isn't: rate-limit 429s arrive as plain text, and some hand-rolled 400s omit the `status` field. `DevToApiError` covers all three shapes.
 
+Three more fields tell you where the response came from:
+
+```ts
+console.log(err.requestId); // upstream x-request-id, the handle to quote in a bug report
+console.log(err.fromCache); // true when a CDN answered instead of the origin
+console.log(err.age); // how many seconds the cached copy had been sitting there
+```
+
+A `fromCache` 429 is the nasty one. dev.to's CDN doesn't vary on your credential, so a stored 429 generated for someone else can be replayed at you, and every retry reads the same stored bytes. The client stops retrying that one. It can't be won, and each attempt spends rate budget getting nowhere.
+
+Cache status matters just as much on calls that succeed, which is somewhere an error object can't reach. Pass an `onResponse` observer and you'll see it on every response:
+
+```ts
+const devto = new DevToClient({
+  onResponse: ({ status, fromCache, age, requestId }) => {
+    if (fromCache) console.warn(`${status} served from cache, ${age}s old (${requestId})`);
+  },
+});
+```
+
+The observer fires before the body is read, on successes and failures alike, and it can't affect the call. Throw from it and the request carries on regardless.
+
 ## Retries
 
-Rate-limited (429) requests retry automatically for all methods, honoring `Retry-After`, because a 429 means the server never processed the request. Transient 5xx responses retry only for idempotent methods; retrying a failed `POST /articles` could double-publish. Backoff is exponential with jitter, three attempts total by default.
+Rate-limited (429) requests retry automatically for all methods, honoring `Retry-After`, because a 429 means the server never processed the request. Transient 5xx responses retry only for idempotent methods; retrying a failed `POST /articles` could double-publish. Three attempts by default.
+
+The two failure modes get different patience, because they're different problems. A 5xx is a server having a bad time and you don't know for how long, so it backs off exponentially with jitter from `baseDelayMs`. A 429 without a usable `Retry-After` is a fixed one-second counter that has already tripped, and an exponential schedule has nothing to grow into, so it waits a flat `throttleDelayMs` instead.
 
 ```ts
 const devto = new DevToClient({
   apiKey: process.env.DEVTO_API_KEY,
-  retry: { attempts: 5, maxDelayMs: 10_000 }, // or retry: false to disable
+  timeoutMs: 60_000, // whole-call deadline, 30s by default
+  retry: { attempts: 5, baseDelayMs: 500, throttleDelayMs: 5_000 }, // or retry: false
 });
 ```
 
-A `Retry-After` above `maxDelayMs` throws immediately instead of parking your process; an arbitrary self-hosted instance could otherwise tell you to sleep for an hour. The trailing options argument on every method carries an `AbortSignal` that cancels mid-backoff, not just mid-request:
+`timeoutMs` is the one number that answers "how long can this block?". It covers everything: every attempt, every backoff wait, every pacing hold, and the response body read. When it runs out you get a `DevToTimeoutError`, which is a separate class from `DevToApiError` because nothing came back from the server to describe.
+
+```ts
+import { DevToTimeoutError } from "devto-client";
+
+try {
+  await devto.articles.get(123);
+} catch (err) {
+  if (err instanceof DevToTimeoutError) console.log(err.declinedWaitMs);
+}
+```
+
+That `declinedWaitMs` shows up when the client refused a wait rather than sat through one. If the server asks for 45 seconds and you have 80 left, you get the full 45 and a retry. If you have 10 left, the call fails right there and tells you what it turned down, because sleeping a shortened version of the server's answer accomplishes nothing. Waits the client picks itself are treated differently: those get trimmed to whatever budget remains rather than refused, so raising `attempts` keeps producing attempts you can actually reach.
+
+Worth knowing if you're upgrading: a call used to be able to hang forever. No timeout existed, so a socket that never answered blocked you indefinitely while the retry loop sat waiting for a response that would never arrive. Those calls reject now. That's the fix, but it does mean a new failure path in code that never had one.
+
+A deadline bounds one HTTP request, not one iteration. Each page of an `All` iterator carries its own, so a long `listAll` walk over a big tag never dies on a whole-walk timer. To bound the walk itself, pass your own signal:
 
 ```ts
 const controller = new AbortController();
@@ -142,15 +183,11 @@ const promise = devto.articles.get(123, { signal: controller.signal });
 controller.abort(); // rejects promptly, even if the client was waiting out a 429
 ```
 
-Signal lives in that trailing argument, not the params object, so aborting never collides with a real query or body field. For a method whose params are optional, pass `undefined` first: `devto.articles.list(undefined, { signal })`.
+An abort surfaces your own reason, so `instanceof DevToTimeoutError` tells a deadline apart from a cancellation you initiated. Signal lives in that trailing options argument, not the params object, so aborting never collides with a real query or body field. For a method whose params are optional, pass `undefined` first: `devto.articles.list(undefined, { signal })`. `timeoutMs` lives there too, if one call needs a different budget than the client's default.
 
-There's no `timeout` option, because the platform already has one:
+If you point `baseUrl` at a Forem instance you don't control, `timeoutMs` is what bounds your patience. There's no separate ceiling on a server-supplied `Retry-After` anymore, so a hostile instance can ask you to sleep for an hour and the deadline is the only thing that says no. Set it to something you're willing to wait.
 
-```ts
-const article = await devto.articles.get(123, { signal: AbortSignal.timeout(5_000) });
-```
-
-Watch the scope, though. That signal covers the whole call, backoff included, so it's a deadline for the entire operation rather than a per-attempt limit. A request that gets 429'd twice will burn most of its five seconds parked in `Retry-After` waits and then give up. If you want each attempt to get its own budget, set `retry: false` and drive the retries yourself.
+It bounds time, not bytes. Responses are buffered whole before parsing, so an instance that answers fast with a gigabyte still costs you a gigabyte of memory. Treat the deadline as one control among several rather than the whole boundary, and don't point the client at a host you wouldn't trust with a plain `fetch`.
 
 ## Self-hosted Forem instances
 
@@ -164,7 +201,7 @@ Plain `http://` throws at construction unless you opt in with `allowInsecureHttp
 
 ## Custom headers
 
-Every request already carries a versioned Accept header and, when you're authenticated, your api-key. Beyond those you can attach your own defaults. A `user-agent` that identifies your app in dev.to's logs is the usual reason:
+Every request already carries a versioned Accept header, a `user-agent` of `devto-client/<version>`, and, when you're authenticated, your api-key. Beyond those you can attach your own defaults. Replacing the `user-agent` so your app is the thing dev.to's logs name is the usual reason:
 
 ```ts
 const devto = new DevToClient({
@@ -181,7 +218,7 @@ await devto.request("GET", "/api/articles/latest", {
 });
 ```
 
-Two headers you can't override, by design. The versioned Accept header always wins, because dropping it silently falls back to the deprecated v0 API. So does the `api-key`, which belongs in the `apiKey` option rather than here; a key smuggled through `headers` skips the guard that refuses redirects so it can't leak off dev.to.
+Your `user-agent` replaces the library's rather than appending to it, which is the opposite of how the other two behave. The versioned Accept header always wins, because dropping it silently falls back to the deprecated v0 API. So does the `api-key`, which belongs in the `apiKey` option rather than here; a key smuggled through `headers` skips the guard that refuses redirects so it can't leak off dev.to.
 
 Browsers are the exception. They ignore a `user-agent` set from JavaScript and send their own, so this option only takes effect off the browser.
 
@@ -191,7 +228,27 @@ Public endpoints (articles, comments, tags, and friends) send `Access-Control-Al
 
 ## Rate limits
 
-These are server configuration, not documented API contract, so treat them as guidance that can change without notice. As of mid-2026, dev.to allows roughly 3 GET requests per second and 1 write per second per API key, returning 429 with a `Retry-After` header (which proxies sometimes strip). Admin keys are exempt. The default retry policy absorbs occasional 429s; a sustained crawl needs pacing on your side.
+These are server configuration, not documented API contract, so treat them as guidance that can change without notice. As of mid-2026, Forem allows roughly 3 GET requests per second and 1 write per second, counted per IP address *and* per API key at the same figures, returning 429 with a `Retry-After` header (which proxies sometimes strip). Admin keys are exempt.
+
+Those are the origin's numbers. The CDN in front of dev.to enforces its own, stricter for sustained traffic: a long keyless crawl can start collecting 429s below 3 reads per second, and those arrive as plain "Retry later" text with no `Retry-After` at all. If you're walking a lot of pages rather than making occasional calls, pace well under the ceiling. One read per second is a reasonable starting point.
+
+The client paces itself against those budgets by default, so you don't have to. Reads and writes draw on separate token buckets sized to the per-second allowance, which means a script that stays inside the budget never waits at all. Three GETs in a row cost you nothing. The fourth waits about a third of a second, and every page of an `All` iterator draws on the same budget without you doing anything.
+
+```ts
+import { createPacer, DevToClient } from "devto-client";
+
+const pace = createPacer({ readsPerSecond: 1 }); // slower than the ceiling, for a long crawl
+const devto = new DevToClient({ apiKey: process.env.DEVTO_API_KEY, pace });
+const archive = new DevToClient({ pace }); // same pacer, one shared budget
+```
+
+Each client holds its own budget unless you hand two of them the same pacer. Worth knowing: dev.to throttles per IP as well as per key, so two clients on one machine already share a server-side budget whether or not they share a pacer. Independent pacers under-protect you rather than merely over-pacing.
+
+Turn it off with `pace: false`. The main reason to is an admin key, which is exempt upstream. The client can't detect one, and the only reliable probe would be `/api/users/me`, the endpoint that intermittently 401s on a perfectly good key. So pacing stays on for everyone and admins opt out by hand.
+
+One boundary to be aware of if you fire many calls concurrently. Every deadline clock starts when its call is created, so more than roughly `timeoutMs × rate` requests in flight at once (about 90 reads at the defaults) means the tail of the burst exhausts its deadline waiting for a slot and fails with `DevToTimeoutError`. That's deliberate: a request that can't start inside its own budget should say so rather than queue invisibly.
+
+The token bucket also isn't quite the same shape as the server's counter. Forem uses a fixed one-second window; a bucket guarantees at most `capacity + rate` requests in any one-second span, so a burst straddling a window boundary can still draw a 429. The retry path absorbs those. Lower the rate if you'd rather not see them at all.
 
 ## Types you can import
 
@@ -223,7 +280,7 @@ function reply(comment: DevTo.Comment) {
 
 ## How the types are made
 
-Types generate from Forem's own rswag spec (`swagger/v1/api_v1.json`, pinned in [`spec/api_v1.json`](spec/api_v1.json)) composed with [`spec/overlay.json`](spec/overlay.json), a list of corrections where the upstream spec is missing schemas or disagrees with what the server actually sends. Each overlay entry records why it exists, which makes the spec-vs-reality gap machine-readable and each entry a candidate PR to Forem. A daily CI job diffs the pinned snapshot against upstream — structurally, so it names which path templates and operations changed — and flags any recorded fixture that has aged past its freshness window, filing an issue with the exact re-record command for each affected fixture. From there you re-record live responses from dev.to on demand, one endpoint at a time, instead of on a weekly schedule that dev.to's per-IP throttling made flaky; a manual reality-check run still type-checks fresh recordings against the spec, catching the server drifting under an unchanged spec.
+Types generate from Forem's own rswag spec (`swagger/v1/api_v1.json`, pinned in [`spec/api_v1.json`](spec/api_v1.json)) composed with [`spec/overlay.json`](spec/overlay.json), a list of corrections where the upstream spec is missing schemas or disagrees with what the server actually sends. Each overlay entry records why it exists, which makes the spec-vs-reality gap machine-readable and each entry a candidate PR to Forem. A daily CI job diffs the pinned snapshot against upstream (structurally, so it names which path templates and operations changed) and flags any recorded fixture that has aged past its freshness window, filing an issue with the exact re-record command for each affected fixture. From there you re-record live responses from dev.to on demand, one endpoint at a time, instead of on a weekly schedule that dev.to's per-IP throttling made flaky; a manual reality-check run still type-checks fresh recordings against the spec, catching the server drifting under an unchanged spec.
 
 ## Deviations from the upstream spec
 
@@ -263,7 +320,7 @@ const raw = await devto.request<unknown>("GET", "/api/articles/latest", {
 });
 ```
 
-`client.request(method, path, opts)` still layers on the versioned header, auth, retries, and error handling — it only hands you back control over the path and payload. It's the one place the `{ query, body, signal }` options object survives, precisely because a raw call has no spec to derive its shape from.
+`client.request(method, path, opts)` still layers on the versioned header, auth, retries, and error handling: it only hands you back control over the path and payload. It's the one place the `{ query, body, signal }` options object survives, precisely because a raw call has no spec to derive its shape from.
 
 ## Contributing
 

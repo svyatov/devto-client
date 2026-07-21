@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from "bun:test";
 import { DevToClient } from "../src/client.ts";
-import { DevToApiError } from "../src/errors.ts";
+import { DevToApiError, DevToTimeoutError } from "../src/errors.ts";
 import type { components } from "../src/generated/types.ts";
 import { bindOps } from "../src/ops.ts";
 import { allTables } from "../src/resources/index.ts";
@@ -22,10 +22,12 @@ function harness(...payloads: unknown[]) {
       headers: { "content-type": "application/json" },
     });
   }) as typeof globalThis.fetch;
-  return { client: new DevToClient({ apiKey: "k", fetch }), calls };
+  // pace: false: these assert routing, not transport, and the default write
+  // budget of 1/s would park the multi-write cases for a real second each
+  return { client: new DevToClient({ apiKey: "k", fetch, pace: false }), calls };
 }
 
-describe("namespace bindings — the Call rule", () => {
+describe("namespace bindings: the Call rule", () => {
   it("AE1: positional path params hit the right URLs (0-, 1-, 2-arity)", async () => {
     const { client, calls } = harness({}, {}, {});
     await client.articles.get(123);
@@ -134,7 +136,7 @@ describe("namespace bindings — the Call rule", () => {
   it("R7: missing positional path params reject before any request is made", async () => {
     const { client, calls } = harness();
     await expect(
-      // @ts-expect-error — id path param is required
+      // @ts-expect-error: id path param is required
       client.articles.get(),
     ).rejects.toThrow(/missing path param/);
     expect(calls).toHaveLength(0);
@@ -148,6 +150,19 @@ describe("namespace bindings — the Call rule", () => {
       client.articles.search({ q: "test" }, { signal: controller.signal }),
     ).rejects.toThrow(/stop/);
     expect(calls).toHaveLength(0);
+  });
+
+  it("the trailing options argument carries timeoutMs through to transport", async () => {
+    // the README promises a per-call budget on every namespace method; without the
+    // CallOptions field it typechecked and then silently used the client default
+    const fetch = ((_url: string, init?: RequestInit) =>
+      new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
+      })) as unknown as typeof globalThis.fetch;
+    const client = new DevToClient({ fetch, pace: false });
+    await expect(client.articles.list(undefined, { timeoutMs: 20 })).rejects.toBeInstanceOf(
+      DevToTimeoutError,
+    );
   });
 
   it("agent session undocumented extras are flagged in the table and callable", async () => {
@@ -216,7 +231,7 @@ describe("iterator variants", () => {
   it("an iterator over a path-parametrized paginated op keeps the positional id", async () => {
     const { client, calls } = harness([]);
     for await (const _ of client.concepts.articlesAll(7)) {
-      // no items — the empty page terminates immediately
+      // no items, the empty page terminates immediately
     }
     expect(calls[0]?.url).toContain("/api/concepts/7/articles");
     expect(calls[0]?.url).toContain("page=1");
@@ -271,7 +286,7 @@ describe("bindOps guards", () => {
 
   it("AE5: passes an AbortSignal through a no-query/no-body op (opts follows the path arg)", async () => {
     // billboards.unpublish has no query and no body, so opts sits at the
-    // pathNames.length + 0 index — the branch every other signal test skips.
+    // pathNames.length + 0 index: the branch every other signal test skips.
     const controller = new AbortController();
     controller.abort(new Error("stop"));
     const { client, calls } = harness();
@@ -300,11 +315,11 @@ describe("bindOps guards", () => {
 describe("type-level enforcement", () => {
   it("compile-time contracts hold", () => {
     const { client } = harness();
-    // @ts-expect-error — getByPath requires both username and slug
+    // @ts-expect-error: getByPath requires both username and slug
     void client.articles.getByPath("jess").catch(() => {});
-    // @ts-expect-error — an unknown inner field is rejected by the flattened body type
+    // @ts-expect-error: an unknown inner field is rejected by the flattened body type
     void client.articles.update(1, { not_a_field: true }).catch(() => {});
-    // @ts-expect-error — no such verb on this path: comments are read-only
+    // @ts-expect-error: no such verb on this path: comments are read-only
     void client.comments.create;
     expect(true).toBe(true);
   });

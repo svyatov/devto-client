@@ -1,7 +1,10 @@
 import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
 import { DevToClient } from "../src/client.ts";
-import { DevToApiError } from "../src/errors.ts";
-import { abortReason, resolveConfig, sleep } from "../src/http.ts";
+import { DevToApiError, DevToTimeoutError, type ResponseMeta } from "../src/errors.ts";
+import { readTransportMeta, resolveConfig } from "../src/http.ts";
+import { abortReason, sleep } from "../src/timing.ts";
+import { VERSION } from "../src/version.ts";
 
 const json = (body: unknown, status = 200, headers: Record<string, string> = {}): Response =>
   new Response(JSON.stringify(body), {
@@ -62,11 +65,35 @@ const abortableSleep = (_ms: number, signal?: AbortSignal): Promise<void> =>
     signal?.addEventListener("abort", fail, { once: true });
   });
 
-const res429 = (retryAfter?: string): Response =>
+const res429 = (retryAfter?: string, headers: Record<string, string> = {}): Response =>
   new Response("slow down", {
     status: 429,
-    headers: retryAfter === undefined ? {} : { "retry-after": retryAfter },
+    headers: retryAfter === undefined ? headers : { "retry-after": retryAfter, ...headers },
   });
+
+/** Yields to the event loop so an abort lands mid-flight rather than before the call starts. */
+const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 5));
+
+/** A fetch that resolves nothing, ever: the hang this whole deadline exists to end. */
+const stallingFetch = ((_url: string | URL | Request, init?: RequestInit) =>
+  new Promise<Response>((_resolve, reject) => {
+    init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
+  })) as typeof globalThis.fetch;
+
+/** Headers arrive; the body never does. Aborting the request signal must still kill it. */
+const stallingBodyFetch = ((_url: string | URL | Request, init?: RequestInit) =>
+  Promise.resolve(
+    new Response(
+      new ReadableStream({
+        start(controller) {
+          init?.signal?.addEventListener("abort", () => controller.error(init.signal?.reason), {
+            once: true,
+          });
+        },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    ),
+  )) as typeof globalThis.fetch;
 
 describe("construction", () => {
   it("rejects an http:// baseUrl", () => {
@@ -110,6 +137,18 @@ describe("request building", () => {
     const b = client({}, json([]));
     await b.client.request("GET", "/api/articles");
     expect(b.calls[0]?.init.redirect).toBeUndefined();
+  });
+
+  it("refuses redirects for an api-key supplied through headers, not just apiKey", async () => {
+    // the guard used to read `config.apiKey`, so this key travelled on a
+    // followable redirect straight to whatever host the server named
+    const a = client({ headers: { "api-key": "secret" } }, json([]));
+    await a.client.request("GET", "/api/articles/me");
+    expect(a.calls[0]?.init.redirect).toBe("error");
+
+    const b = client({}, json([]));
+    await b.client.request("GET", "/api/articles", { headers: { "API-Key": "secret" } });
+    expect(b.calls[0]?.init.redirect).toBe("error");
   });
 
   it("attaches api-key when configured, omits it otherwise", async () => {
@@ -199,6 +238,59 @@ describe("custom headers", () => {
       "application/vnd.forem.api-v1+json",
     );
   });
+
+  it("overrides a client-level header whose name is cased differently", async () => {
+    // header names are case-insensitive on the wire but not to an object spread,
+    // so both entries used to survive the merge and Headers comma-joined them
+    const { client: c, calls } = client({ headers: { "X-Trace": "default" } }, json([]));
+    await c.request("GET", "/api/articles", { headers: { "x-trace": "override" } });
+    expect(new Headers(calls[0]?.init.headers).get("x-trace")).toBe("override");
+  });
+});
+
+describe("user-agent", () => {
+  it("sends devto-client/<version> by default", async () => {
+    const { client: c, calls } = client({}, json([]));
+    await c.request("GET", "/api/articles");
+    expect(new Headers(calls[0]?.init.headers).get("user-agent")).toBe(`devto-client/${VERSION}`);
+  });
+
+  it("lets a client-level user-agent replace the default rather than append to it", async () => {
+    const { client: c, calls } = client({ headers: { "user-agent": "my-app/1.0" } }, json([]));
+    await c.request("GET", "/api/articles");
+    expect(new Headers(calls[0]?.init.headers).get("user-agent")).toBe("my-app/1.0");
+  });
+
+  it("lets a per-request user-agent replace a client-level one", async () => {
+    const { client: c, calls } = client({ headers: { "user-agent": "my-app/1.0" } }, json([]));
+    await c.request("GET", "/api/articles", { headers: { "user-agent": "my-app/1.0 batch" } });
+    expect(new Headers(calls[0]?.init.headers).get("user-agent")).toBe("my-app/1.0 batch");
+  });
+
+  it("matches a differently-cased caller header instead of sending both (AE5)", async () => {
+    const { client: c, calls } = client({ headers: { "User-Agent": "my-app/1.0" } }, json([]));
+    await c.request("GET", "/api/articles");
+    expect(new Headers(calls[0]?.init.headers).get("user-agent")).toBe("my-app/1.0");
+  });
+
+  it("keeps accept and api-key winning over caller headers, unlike user-agent (AE5)", async () => {
+    const { client: c, calls } = client(
+      { apiKey: "secret", headers: { "user-agent": "my-app/1.0" } },
+      json([]),
+    );
+    await c.request("GET", "/api/articles/me", {
+      headers: { accept: "application/json", "api-key": "smuggled" },
+    });
+    const sent = new Headers(calls[0]?.init.headers);
+    expect(sent.get("user-agent")).toBe("my-app/1.0"); // caller wins
+    expect(sent.get("accept")).toBe("application/vnd.forem.api-v1+json"); // library wins
+    expect(sent.get("api-key")).toBe("secret"); // library wins
+  });
+
+  it("agrees with package.json, guarding release-please extra-files drift", () => {
+    const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
+    expect(VERSION).toBe(pkg.version);
+  });
 });
 
 describe("errors", () => {
@@ -276,15 +368,17 @@ describe("sleep", () => {
 });
 
 describe("retry", () => {
-  it("waits for Retry-After then retries a 429 to success (AE2)", async () => {
+  it("waits for Retry-After then retries a 429 to success", async () => {
     const { client: c, calls, delays } = retryClient({}, res429("1"), json([{ id: 1 }]));
     await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 1 }]);
     expect(calls).toHaveLength(2);
     expect(delays).toEqual([1000]); // honored the 1-second Retry-After
   });
 
-  it("retries a 429 POST too — the request was never processed", async () => {
-    const { client: c, calls, delays } = retryClient({}, res429("1"), json({}, 201));
+  it("retries a 429 POST too, the request was never processed", async () => {
+    // pace: false isolates the retry wait: a second write inside a second would
+    // otherwise draw a pacing hold too, which the pacing suite covers on its own
+    const { client: c, calls, delays } = retryClient({ pace: false }, res429("1"), json({}, 201));
     await expect(c.request("POST", "/api/articles", { body: {} })).resolves.toEqual({});
     expect(calls).toHaveLength(2);
     expect(delays).toEqual([1000]);
@@ -296,13 +390,7 @@ describe("retry", () => {
     expect(calls).toHaveLength(1);
   });
 
-  it("surfaces the typed 429 instead of sleeping past the max-delay cap", async () => {
-    const { client: c, calls } = client({ retry: { maxDelayMs: 5000 } }, res429("3600"));
-    await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToApiError);
-    expect(calls).toHaveLength(1);
-  });
-
-  it("falls back to the backoff schedule on a 429 without a parseable Retry-After", async () => {
+  it("falls back to the throttle schedule on a 429 without a parseable Retry-After", async () => {
     const {
       client: c,
       calls,
@@ -310,18 +398,16 @@ describe("retry", () => {
     } = retryClient({}, res429(), res429("Wed, 21 Oct 2026 07:28:00 GMT"), json([]));
     await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
     expect(calls).toHaveLength(3);
-    // Both fell back to the exponential schedule: base 500 doubling, jitter in [0.5, 1).
-    expect(delays).toHaveLength(2);
-    expect(delays[0]).toBeGreaterThan(0);
-    expect(delays[0]).toBeLessThanOrEqual(500);
-    expect(delays[1]).toBeGreaterThan(delays[0] as number);
-    expect(delays[1]).toBeLessThanOrEqual(1000);
+    // Both fell back to the flat throttle wait: a fixed server window has
+    // nothing for an exponential schedule to grow into.
+    expect(delays).toEqual([5000, 5000]);
   });
 
   it("surfaces the abort reason out of the retry loop, skipping the retry", async () => {
     const controller = new AbortController();
     const { client: c, calls } = client({ sleep: abortableSleep }, res429("10"));
     const p = c.request("GET", "/api/articles", { signal: controller.signal });
+    await tick(); // let the first attempt land and the backoff start
     controller.abort(new Error("stop"));
     await expect(p).rejects.toThrow(/stop/);
     expect(calls).toHaveLength(1); // no second attempt after the abort
@@ -378,7 +464,15 @@ describe("retry", () => {
     expect(delays).toHaveLength(1); // one backoff before the retry
   });
 
-  it("does not retry 5xx for POST — double-publish risk", async () => {
+  it("classifies a lowercase method the same as an uppercase one", async () => {
+    // the escape hatch takes the method verbatim, and both the retry set and the
+    // pacing set hold canonical names
+    const { client: c, calls } = retryClient({}, new Response("", { status: 502 }), json([]));
+    await expect(c.request("get", "/api/articles")).resolves.toEqual([]);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("does not retry 5xx for POST: double-publish risk", async () => {
     const { client: c, calls } = client({}, new Response("", { status: 502 }));
     await expect(c.request("POST", "/api/articles", { body: {} })).rejects.toBeInstanceOf(
       DevToApiError,
@@ -406,5 +500,299 @@ describe("retry", () => {
     const { client: c, calls } = client({}, json({ error: "unauthorized", status: 401 }, 401));
     await expect(c.request("GET", "/api/articles/me")).rejects.toBeInstanceOf(DevToApiError);
     expect(calls).toHaveLength(1);
+  });
+});
+
+describe("transport metadata (U1)", () => {
+  it("reads x-cache, age and x-request-id off the headers", () => {
+    const meta = readTransportMeta(
+      new Response("", {
+        status: 429,
+        headers: { "x-cache": "HIT, MISS", age: "104", "x-request-id": "req-abc" },
+      }),
+    );
+    expect(meta).toEqual({ status: 429, fromCache: true, age: 104, requestId: "req-abc" });
+  });
+
+  it("treats a HIT at either tier as cache-served (KTD6)", () => {
+    const at = (xCache: string): boolean =>
+      readTransportMeta(new Response("", { headers: { "x-cache": xCache } })).fromCache;
+    expect(at("HIT, MISS")).toBe(true);
+    expect(at("MISS, HIT")).toBe(true);
+    expect(at("MISS, MISS")).toBe(false);
+  });
+
+  it("reads fromCache false when there is no x-cache header at all", () => {
+    // a self-hosted Forem behind no CDN, degrades to today's behavior
+    expect(readTransportMeta(new Response("")).fromCache).toBe(false);
+  });
+
+  it("yields undefined rather than NaN for a missing or non-numeric age", () => {
+    expect(readTransportMeta(new Response("")).age).toBeUndefined();
+    expect(readTransportMeta(new Response("", { headers: { age: "soon" } })).age).toBeUndefined();
+    expect(readTransportMeta(new Response("", { headers: { age: "0" } })).age).toBe(0);
+  });
+
+  it("throws a cached 429 on the first attempt, carrying all three fields (AE1)", async () => {
+    const { client: c, calls } = client(
+      {},
+      res429(undefined, { "x-cache": "HIT, MISS", age: "104", "x-request-id": "req-abc" }),
+    );
+    const err = (await c.request("GET", "/api/articles").catch((e: unknown) => e)) as DevToApiError;
+    expect(err).toBeInstanceOf(DevToApiError);
+    expect(calls).toHaveLength(1); // no second attempt: the replay cannot be won
+    expect(err.fromCache).toBe(true);
+    expect(err.age).toBe(104);
+    expect(err.requestId).toBe("req-abc");
+  });
+
+  it("retries an origin 429 exactly as it does today", async () => {
+    const { client: c, calls } = retryClient(
+      {},
+      res429("1", { "x-cache": "MISS, MISS" }),
+      json([{ id: 1 }]),
+    );
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 1 }]);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("retries a 429 with no x-cache header", async () => {
+    const { client: c, calls } = retryClient({}, res429("1"), json([]));
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("does not retry a MISS, HIT 429 either", async () => {
+    const { client: c, calls } = client({}, res429("1", { "x-cache": "MISS, HIT" }));
+    await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToApiError);
+    expect(calls).toHaveLength(1);
+  });
+
+  it("still retries a cached 500 on an idempotent GET: R3 covers 429 only", async () => {
+    const { client: c, calls } = retryClient(
+      {},
+      new Response("", { status: 500, headers: { "x-cache": "HIT, MISS" } }),
+      json([]),
+    );
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
+    expect(calls).toHaveLength(2); // a short-TTL cached 5xx can recover
+  });
+
+  it("reports a cached 200 to the observer and still returns the body (AE7)", async () => {
+    const seen: ResponseMeta[] = [];
+    const { client: c } = client(
+      { onResponse: (m) => seen.push(m) },
+      json([{ id: 1 }], 200, { "x-cache": "MISS, HIT", age: "33", "x-request-id": "req-xyz" }),
+    );
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 1 }]);
+    expect(seen).toEqual([{ status: 200, fromCache: true, age: 33, requestId: "req-xyz" }]);
+  });
+
+  it("fires the observer on failed calls too, before the error is thrown", async () => {
+    const order: string[] = [];
+    const { client: c } = client(
+      { retry: false, onResponse: (m) => order.push(`observed ${m.status}`) },
+      json({ error: "nope", status: 404 }, 404),
+    );
+    await c.request("GET", "/api/articles/1").catch(() => order.push("threw"));
+    expect(order).toEqual(["observed 404", "threw"]);
+  });
+
+  it("fires the observer once per attempt across a retry", async () => {
+    const seen: number[] = [];
+    const { client: c } = retryClient(
+      { onResponse: (m) => seen.push(m.status) },
+      res429("1"),
+      json([]),
+    );
+    await c.request("GET", "/api/articles");
+    expect(seen).toEqual([429, 200]);
+  });
+
+  it("survives a throwing observer without corrupting the result", async () => {
+    const { client: c } = client(
+      {
+        onResponse: () => {
+          throw new Error("observer blew up");
+        },
+      },
+      json([{ id: 7 }]),
+    );
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 7 }]);
+  });
+
+  it("survives an async observer that rejects", async () => {
+    // a rejected promise from the observer is invisible to a synchronous catch,
+    // and an unhandled rejection ends the process on Node's default
+    const rejections: unknown[] = [];
+    const onUnhandled = (e: unknown): void => {
+      rejections.push(e);
+    };
+    process.on("unhandledRejection", onUnhandled);
+    try {
+      const { client: c } = client(
+        { onResponse: async () => await Promise.reject(new Error("observer blew up")) },
+        json([{ id: 7 }]),
+      );
+      await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 7 }]);
+      await new Promise((r) => setTimeout(r, 10)); // let any rejection surface
+      expect(rejections).toEqual([]);
+    } finally {
+      process.off("unhandledRejection", onUnhandled);
+    }
+  });
+});
+
+describe("call deadline (U2)", () => {
+  it("rejects a never-settling fetch instead of hanging forever", async () => {
+    const c = new DevToClient({ fetch: stallingFetch, timeoutMs: 20 });
+    await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToTimeoutError);
+  });
+
+  it("rejects when headers arrive but the body never completes", async () => {
+    // the controller stays armed past fetch's resolution (KTD1): tearing it down
+    // when fetch settles would leave this stream unbounded
+    const c = new DevToClient({ fetch: stallingBodyFetch, timeoutMs: 20 });
+    await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToTimeoutError);
+  });
+
+  it("treats a timeout past the 32-bit timer ceiling as no deadline, not an instant one", async () => {
+    // setTimeout coerces an out-of-range or non-finite delay to 1ms, which would
+    // turn the most patient setting available into the least patient one
+    const slowFetch = ((_url: string, init?: RequestInit) =>
+      new Promise<Response>((resolve, reject) => {
+        const t = setTimeout(() => resolve(json([{ id: 1 }])), 30);
+        init?.signal?.addEventListener(
+          "abort",
+          () => {
+            clearTimeout(t);
+            reject(init.signal?.reason);
+          },
+          { once: true },
+        );
+      })) as unknown as typeof globalThis.fetch;
+    const c = new DevToClient({ fetch: slowFetch, timeoutMs: 3_000_000_000, pace: false });
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 1 }]);
+  });
+
+  it("surfaces the caller's reason when they abort a stalled body read", async () => {
+    const controller = new AbortController();
+    const c = new DevToClient({ fetch: stallingBodyFetch, timeoutMs: 10_000 });
+    const p = c.request("GET", "/api/articles", { signal: controller.signal });
+    await tick(); // let the request reach the stalled body before aborting
+    controller.abort(new Error("caller stopped it"));
+    await expect(p).rejects.toThrow(/caller stopped it/);
+  });
+
+  it("keeps a caller abort distinguishable from a deadline expiry", async () => {
+    const controller = new AbortController();
+    const c = new DevToClient({ fetch: stallingFetch, timeoutMs: 10_000 });
+    const p = c.request("GET", "/api/articles", { signal: controller.signal });
+    await tick(); // mid-flight, not before the request left
+    controller.abort(new Error("caller stopped it"));
+    const err = (await p.catch((e: unknown) => e)) as Error;
+    expect(err).not.toBeInstanceOf(DevToTimeoutError);
+    expect(err.message).toContain("caller stopped it");
+  });
+
+  it("lets a per-request timeoutMs override the client default", async () => {
+    const c = new DevToClient({ fetch: stallingFetch, timeoutMs: 10_000 });
+    await expect(c.request("GET", "/api/articles", { timeoutMs: 20 })).rejects.toBeInstanceOf(
+      DevToTimeoutError,
+    );
+  });
+
+  it("throws without a further fetch once the budget is spent", async () => {
+    // a real 60ms backoff against a 50ms deadline: the second attempt never happens
+    const slowSleep = (): Promise<void> => new Promise((r) => setTimeout(r, 60));
+    const { client: c, calls } = client({ timeoutMs: 50, sleep: slowSleep }, res429("0"), json([]));
+    await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToTimeoutError);
+    expect(calls).toHaveLength(1);
+  });
+
+  it("shares one budget across attempts rather than resetting per attempt", async () => {
+    const slowSleep = (): Promise<void> => new Promise((r) => setTimeout(r, 30));
+    const { client: c, calls } = client(
+      { timeoutMs: 50, retry: { attempts: 5 }, sleep: slowSleep },
+      new Response("", { status: 503 }),
+      new Response("", { status: 503 }),
+      new Response("", { status: 503 }),
+      new Response("", { status: 503 }),
+      new Response("", { status: 503 }),
+    );
+    await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToTimeoutError);
+    expect(calls.length).toBeLessThan(5); // the budget ran out before the attempts did
+  });
+
+  it("holds the redirect-leak guard on every attempt, not just the first", async () => {
+    // init is now rebuilt per attempt (KTD1), so asserting calls[0] no longer generalizes
+    const { client: c, calls } = retryClient({ apiKey: "secret" }, res429("1"), json([]));
+    await c.request("GET", "/api/articles/me");
+    expect(calls).toHaveLength(2);
+    for (const call of calls) expect(call.init.redirect).toBe("error");
+  });
+
+  it("leaves no armed timer behind a successful call", async () => {
+    const { fetch } = mockFetch(json([1]), json([2]));
+    const c = new DevToClient({ fetch, timeoutMs: 30 });
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([1]);
+    await new Promise((r) => setTimeout(r, 50)); // outlive the first call's deadline
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([2]);
+  });
+});
+
+describe("retry patience (U3)", () => {
+  it("sleeps a 45-second Retry-After when the budget allows it (AE2)", async () => {
+    const { client: c, calls, delays } = retryClient({ timeoutMs: 90_000 }, res429("45"), json([]));
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
+    expect(delays).toEqual([45_000]); // the removed per-wait ceiling used to throw here
+    expect(calls).toHaveLength(2);
+  });
+
+  it("fails fast on a Retry-After past the deadline, naming the declined wait (AE3)", async () => {
+    const { client: c, calls } = client({ timeoutMs: 10_000 }, res429("45"));
+    const err = (await c
+      .request("GET", "/api/articles")
+      .catch((e: unknown) => e)) as DevToTimeoutError;
+    expect(err).toBeInstanceOf(DevToTimeoutError);
+    expect(err.declinedWaitMs).toBe(45_000);
+    expect(calls).toHaveLength(1);
+  });
+
+  it("fits a full throttle wait plus a following attempt in the stock deadline (AE6)", async () => {
+    const { client: c, calls, delays } = retryClient({}, res429(), json([]));
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
+    expect(delays).toEqual([5000]); // full, unclamped: R5's 30s default has room
+    expect(calls).toHaveLength(2);
+  });
+
+  it("clamps an oversized self-generated wait to the budget and still retries (R18)", async () => {
+    const {
+      client: c,
+      calls,
+      delays,
+    } = retryClient(
+      { timeoutMs: 30_000, retry: { baseDelayMs: 100_000 } },
+      new Response("", { status: 502 }),
+      json([]),
+    );
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
+    expect(calls).toHaveLength(2); // clamped, not refused: raising attempts still works
+    expect(delays[0]).toBeGreaterThan(0);
+    expect(delays[0]).toBeLessThanOrEqual(30_000);
+  });
+
+  it("keeps 5xx on the baseDelayMs schedule, separate from the throttle wait", async () => {
+    const { client: c, delays } = retryClient(
+      {},
+      new Response("", { status: 502 }),
+      new Response("", { status: 502 }),
+      json([]),
+    );
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
+    expect(delays).toHaveLength(2);
+    expect(delays[0]).toBeLessThanOrEqual(500); // base 500, jitter in [0.5, 1)
+    expect(delays[1]).toBeLessThanOrEqual(1000);
+    expect(delays[1]).toBeGreaterThan(delays[0] as number);
   });
 });

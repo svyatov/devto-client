@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   assertUserTierRecorded,
+  buildRecorderConfig,
   parseArgs,
   type ReadSpec,
   type Recorded,
@@ -43,7 +44,7 @@ describe("assertUserTierRecorded", () => {
   });
 
   it("throws when a key was provided but every selected user read was skipped", () => {
-    // public reads recorded fine, but the whole user tier 401'd — stale-fixture trap
+    // public reads recorded fine, but the whole user tier 401'd: stale-fixture trap
     expect(() =>
       assertUserTierRecorded([rec("/api/tags")], [spec("/api/users/me"), spec("/api/readinglist")]),
     ).toThrow(/every user-scope read was skipped/);
@@ -217,7 +218,7 @@ describe("resolveTarget", () => {
       FOREM_API_KEY: "fk",
     });
     expect(remote.allowInsecureHttp).toBe(false);
-    // https enforcement lives in resolveConfig — a non-loopback http URL is rejected there
+    // https enforcement lives in resolveConfig: a non-loopback http URL is rejected there
     expect(() => resolveConfig({ baseUrl: remote.baseUrl })).toThrow(/must be https/);
   });
 
@@ -294,7 +295,7 @@ describe("recordWriteCycle", () => {
       "PUT /api/articles/42",
       "PUT /api/articles/42/unpublish",
       "POST /api/reactions/toggle",
-      "POST /api/reactions/toggle", // the reversal — no residue
+      "POST /api/reactions/toggle", // the reversal, no residue
     ]);
     const createBody = calls[0]?.[2] as { article: { published: boolean; title: string } };
     expect(createBody.article.published).toBe(false);
@@ -314,5 +315,30 @@ describe("recordWriteCycle", () => {
     ]);
     // and each was persisted to disk as it landed (KTD4)
     expect(readdirSync(dir)).toHaveLength(4);
+  });
+});
+
+describe("buildRecorderConfig (U5)", () => {
+  const cfg = (): ReturnType<typeof buildRecorderConfig> =>
+    buildRecorderConfig({ DEVTO_API_KEY: "k" } as NodeJS.ProcessEnv);
+
+  it("carries an explicit pacer slower than the library default", async () => {
+    const waits: number[] = [];
+    const pace = cfg().pace;
+    expect(pace).not.toBeNull();
+    const deadlineAt = Date.now() + 120_000;
+    await pace?.acquire("read", { deadlineAt, signal: undefined });
+    const started = Date.now();
+    await pace?.acquire("read", { deadlineAt, signal: undefined });
+    waits.push(Date.now() - started);
+    // the default 3/s would hold this for ~334ms; the recorder's 1/s holds ~1s
+    expect(waits[0]).toBeGreaterThan(500);
+  }, 5000);
+
+  it("resolves a deadline that makes its own retry schedule reachable", () => {
+    const { retry, timeoutMs } = cfg();
+    expect(retry).not.toBeNull();
+    if (!retry) throw new Error("retry disabled");
+    expect(timeoutMs).toBeGreaterThan(retry.attempts * retry.throttleDelayMs);
   });
 });
