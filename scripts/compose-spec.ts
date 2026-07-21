@@ -7,7 +7,7 @@
  *   expect      subset-asserted against the current node; null asserts absence
  *   reason      why the entry exists (required, non-empty)
  *   patch       value to set at target; null removes the node
- *   provenance  how the claim was established (optional; see below)
+ *   provenance  how the claim was established (every entry carries one; see below)
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -69,6 +69,11 @@ export function validateProvenance(entry: OverlayEntry): void {
   if (instrument === "local-forem" && forem === undefined) {
     fail("must name the Forem commit when the instrument is local-forem");
   }
+  // reading the spec on its own terms involves no server, so there is no second
+  // one to agree - the field's own doc comment says so, and now the check does too
+  if (instrument === "spec-structure" && corroborated) {
+    fail("cannot be corroborated when the instrument is spec-structure");
+  }
 }
 
 type Node = Record<string, unknown> | unknown[];
@@ -90,7 +95,8 @@ function subsetMatch(expected: unknown, actual: unknown): boolean {
   );
 }
 
-function parsePointer(pointer: string): string[] {
+/** JSON-pointer segments, unescaped (`~1` is `/`, `~0` is `~`). */
+export function parsePointer(pointer: string): string[] {
   return pointer
     .split("/")
     .slice(1)

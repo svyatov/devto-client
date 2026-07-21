@@ -10,7 +10,8 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { OverlayEntry } from "./compose-spec.ts";
+import { pathToFileURL } from "node:url";
+import { type OverlayEntry, parsePointer } from "./compose-spec.ts";
 import { fixtureFileName, RECORDED_DIR } from "./record-fixtures.ts";
 import {
   CONDITIONAL_KEYS,
@@ -24,17 +25,25 @@ import { specOperations } from "./sweep-targets.ts";
 
 type Op = { template: string; method: string };
 
-const unescapePointer = (segment: string): string =>
-  segment.replaceAll("~1", "/").replaceAll("~0", "~");
-
 /**
- * The operations an entry governs. A `/paths/...` pointer names exactly one. A
- * `/components/schemas/X/...` pointer names every operation whose success schema
- * resolves to `X`, since that is the set a fixture could disagree with.
+ * The operations an entry governs, meaning the ones whose *response* a recorded
+ * fixture could disagree with. A `/paths/.../responses/...` pointer names exactly
+ * one; a `/components/schemas/X/...` pointer names every operation whose success
+ * schema resolves to `X`.
+ *
+ * A `/paths/` pointer that stops short of `responses` - a request parameter, say -
+ * governs nothing here on purpose. Returning its operation would let a response
+ * comparison answer a question about the request and hand the entry a
+ * corroboration it never earned.
  */
 export function governedOps(target: string): Op[] {
-  const segments = target.split("/").slice(1).map(unescapePointer);
-  if (segments[0] === "paths" && segments[1] !== undefined && segments[2] !== undefined) {
+  const segments = parsePointer(target);
+  if (
+    segments[0] === "paths" &&
+    segments[1] !== undefined &&
+    segments[2] !== undefined &&
+    segments.includes("responses")
+  ) {
     return [{ template: segments[1], method: segments[2].toUpperCase() }];
   }
   if (segments[0] === "components" && segments[1] === "schemas" && segments[2] !== undefined) {
@@ -84,12 +93,13 @@ export function isCorroborated(entry: OverlayEntry): boolean {
   return compared > 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   // keep the composed spec warm before reading the overlay off disk
   composedSpec();
   const overlay = JSON.parse(readFileSync("spec/overlay.json", "utf8")) as OverlayEntry[];
+  // every entry, not just the ones whose reason opens with a set phrase: which
+  // claims have fixtures behind them is the question, and prose does not answer it
   for (const [i, entry] of overlay.entries()) {
-    if (!entry.reason.startsWith("reality correction:")) continue;
     const ops = governedOps(entry.target);
     const withFixture = ops.filter((op) => recordedPayload(op) !== undefined);
     console.log(

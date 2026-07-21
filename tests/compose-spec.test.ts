@@ -152,6 +152,11 @@ describe("provenance", () => {
       "must name the Forem commit",
       { instrument: "local-forem", corroborated: false },
     ],
+    [
+      "a structural read claiming corroboration",
+      "cannot be corroborated",
+      { instrument: "spec-structure", corroborated: true },
+    ],
   ])("fails composition on %s, naming the entry", (_label, message, provenance) => {
     expect(() => compose(base(), [withProvenance(provenance)])).toThrow(
       new RegExp(`/components/schemas/Thing: provenance.*${message.replaceAll(" ", "\\s")}`),
@@ -195,12 +200,12 @@ describe("composed real spec", () => {
     }
   });
 
-  it("gives every entry claiming observation a provenance field", () => {
-    const claiming = (overlay as OverlayEntry[]).filter((e) =>
-      e.reason.startsWith("reality correction:"),
-    );
-    expect(claiming).toHaveLength(25);
-    expect(claiming.filter((e) => e.provenance === undefined)).toEqual([]);
+  // every entry, not the ones whose reason opens with a particular phrase. Keying
+  // the requirement on prose let 28 entries claiming an observation in their own
+  // words - "verified in recorded fixtures", "executed against a local Forem" -
+  // carry no instrument at all, and no test noticed
+  it("gives every entry in the Overlay a provenance field", () => {
+    expect((overlay as OverlayEntry[]).filter((e) => e.provenance === undefined)).toEqual([]);
   });
 
   it("derives corroboration from an actual shape comparison, not from fixture existence", () => {
@@ -248,6 +253,16 @@ describe("composed real spec", () => {
     }
   });
 
+  // the entry this guards is a duplicate-parameter removal on GET /api/comments:
+  // the recorded response agrees with the response schema, which says nothing at
+  // all about how many times `page` is declared on the request
+  it("governs nothing from a path pointer that never reaches a response schema", () => {
+    expect(governedOps("/paths/~1api~1comments/get/parameters/4")).toEqual([]);
+    expect(governedOps("/paths/~1api~1comments/get/responses/200")).toEqual([
+      { template: "/api/comments", method: "GET" },
+    ]);
+  });
+
   it("claims corroboration for no entry whose operations have no recorded fixture", () => {
     for (const e of overlay as OverlayEntry[]) {
       if (e.provenance?.corroborated !== true) continue;
@@ -268,14 +283,20 @@ describe("composed real spec", () => {
       mix[key] = (mix[key] ?? 0) + 1;
     }
     expect(mix).toEqual({
-      "devto-fixture/true": 17,
-      "devto-fixture/false": 3,
-      "forem-source/false": 2,
-      "spec-structure/true": 1,
-      "spec-structure/false": 2,
-      // pass two's own corrections: 32 billboard fields plus the two billboard
-      // write responses whose "writes are deferred" caveat the run retired
-      "local-forem/false": 34,
+      "devto-fixture/true": 37,
+      "devto-fixture/false": 4,
+      // most of the Overlay is read off Forem's own controllers, serializers and
+      // jbuilder views; six of those shapes also have a dev.to fixture that agrees
+      "forem-source/false": 48,
+      "forem-source/true": 6,
+      // no spec-structure entry is corroborated, and none can be: reading the
+      // spec on its own terms involves no server for a second one to agree with
+      "spec-structure/false": 3,
+      // pass two's own corrections: 32 billboard fields, the two billboard write
+      // responses whose "writes are deferred" caveat the run retired, six columns
+      // only the local instance sent, and three show responses whose reasons name
+      // the pinned checkout they were executed against
+      "local-forem/false": 43,
     });
   });
 });
