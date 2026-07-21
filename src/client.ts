@@ -61,13 +61,13 @@ import { type VideosNamespace, videosTable } from "./resources/videos.ts";
 export class DevToClient {
   private readonly config: ResolvedConfig;
 
-  /** Articles: read, search, publish, and manage your own drafts via the `me` operations. */
+  /** Articles: read, search, publish, and manage your own drafts via the `me` operations. Updating needs to be the article's author; unpublishing needs super_moderator credentials. */
   readonly articles: ArticlesNamespace;
   /** Comment threads on articles and podcast episodes. */
   readonly comments: CommentsNamespace;
-  /** User profiles, plus moderation actions that require moderator credentials. */
+  /** User profiles, plus moderation actions that require super_moderator credentials. */
   readonly users: UsersNamespace;
-  /** Organizations, their members, and their articles. */
+  /** Organizations, their members, and their articles. Mutations require being an admin of that organization. */
   readonly organizations: OrganizationsNamespace;
   /** The users following you. Requires authentication. */
   readonly followers: FollowersNamespace;
@@ -109,11 +109,11 @@ export class DevToClient {
   readonly pages: PagesNamespace;
   /** Audience segments and their membership. Requires admin credentials. */
   readonly segments: SegmentsNamespace;
-  /** Recommended-articles lists. */
+  /** Recommended-articles lists. Mutations require admin credentials. */
   readonly recommendedArticlesLists: RecommendedArticlesListsNamespace;
   /** Analytics for your own content. */
   readonly analytics: AnalyticsNamespace;
-  /** Update the status of an abuse/feedback report. Requires moderator credentials. */
+  /** Update the status of an abuse/feedback report. Requires super_moderator credentials. */
   readonly feedbackMessages: FeedbackMessagesNamespace;
   /** Admin-only resources: user administration, concepts, and request redirects. Requires admin credentials. */
   readonly admin: {

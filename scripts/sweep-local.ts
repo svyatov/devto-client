@@ -140,8 +140,8 @@ export function assertSweepSafe(env: NodeJS.ProcessEnv, outDir: string): void {
 /**
  * The privilege ladder, lowest first. Read against the pinned Forem checkout, not
  * the README: Forem has no role named `moderator`. `ANY_ADMIN_ROLES` is `admin`
- * and `super_admin`; the endpoints the README calls moderator-gated resolve to
- * `elevated_user?` (`any_admin? || super_moderator?`); and `trusted` sits below
+ * and `super_admin`; the endpoints the README calls super_moderator-gated resolve
+ * to `elevated_user?` (`any_admin? || super_moderator?`); and `trusted` sits below
  * that with the narrower surface `moderation_routes?` grants. `tech_admin` is not
  * on the ladder at all - the seeded admin carries it, but it is not in
  * `ANY_ADMIN_ROLES` and grants none of what these endpoints check.
@@ -248,7 +248,7 @@ export const DOCUMENTED_RUNG: { prefix: string; rung: Rung }[] = [
   { prefix: "/api/organizations", rung: "anonymous" },
   { prefix: "/api/pages", rung: "admin" },
   { prefix: "/api/reactions", rung: "admin" },
-  { prefix: "/api/recommended_articles_lists", rung: "user" },
+  { prefix: "/api/recommended_articles_lists", rung: "admin" },
   { prefix: "/api/segments", rung: "admin" },
   { prefix: "/api/users", rung: "super_moderator" },
 ];

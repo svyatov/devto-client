@@ -43,8 +43,8 @@ Each property on the client is a resource namespace, and the tier column tells y
 | --- | --- | --- |
 | `devto.articles` | Read, search, publish, and manage your own drafts via the `me` operations | public / api-key |
 | `devto.comments` | Comment threads on articles and podcast episodes | public |
-| `devto.users` | User profiles, plus moderation actions | public / moderator |
-| `devto.organizations` | Organizations, their members, and their articles | public |
+| `devto.users` | User profiles, plus moderation actions | public / super_moderator |
+| `devto.organizations` | Organizations, their members, and their articles | public / org-admin |
 | `devto.followers` | The users following you | api-key |
 | `devto.follows` | Create a follow and list the tags you follow | api-key |
 | `devto.tags` | The instance's tags | public |
@@ -65,14 +65,18 @@ Each property on the client is a resource namespace, and the tier column tells y
 | `devto.billboards` | Billboards (display ads) | admin |
 | `devto.pages` | Static instance pages; mutations need admin | public / admin |
 | `devto.segments` | Audience segments and their membership | admin |
-| `devto.recommendedArticlesLists` | Recommended-articles lists | api-key |
+| `devto.recommendedArticlesLists` | Recommended-articles lists | admin |
 | `devto.analytics` | Analytics for your own content | api-key |
-| `devto.feedbackMessages` | Update the status of an abuse/feedback report | moderator |
+| `devto.feedbackMessages` | Update the status of an abuse/feedback report | super_moderator |
 | `devto.admin.users` | User administration | admin |
 | `devto.admin.concepts` | Concept administration | admin |
 | `devto.admin.requestRedirects` | Request redirects | admin |
 
-`reactions` looks like a regular user endpoint and isn't: Forem gates it on admin upstream, so an ordinary key gets a 401. The same goes for `articles.unpublish`, which wants a moderator. Anything missing from this table is still reachable through [the escape hatch](#the-escape-hatch) at the bottom.
+`reactions` looks like a regular user endpoint and isn't: Forem gates it on admin upstream, so an ordinary key gets a 401. The same goes for `articles.unpublish` and every moderation action under `users`, which want `super_moderator`. Anything missing from this table is still reachable through [the escape hatch](#the-escape-hatch) at the bottom.
+
+Those tier names are Forem's own roles, not categories invented here. `super_moderator` is the one to know: it's what `elevated_user?` accepts alongside admin, and there is no role called `moderator` at all, which is what this table used to claim. Two rows name a relationship rather than a rung, because the policy checks one: `articles.update` looks the article up in your own articles, and `organizations.update` accepts an admin of that organization. Being an admin also clears both.
+
+The tiers come from measurement, not from reading Forem's source. Every write is attempted against a local Forem from anonymous upward, stopping at the first rung that succeeds, so the answer is what the server did rather than what a policy looked like it would do. One caveat: that's a single server, and dev.to can't be asked which role an endpoint wants, so nothing corroborates these the way a recorded response corroborates a shape.
 
 ## Authentication
 
@@ -282,6 +286,10 @@ function reply(comment: DevTo.Comment) {
 
 Types generate from Forem's own rswag spec (`swagger/v1/api_v1.json`, pinned in [`spec/api_v1.json`](spec/api_v1.json)) composed with [`spec/overlay.json`](spec/overlay.json), a list of corrections where the upstream spec is missing schemas or disagrees with what the server actually sends. Each overlay entry records why it exists, which makes the spec-vs-reality gap machine-readable and each entry a candidate PR to Forem. A daily CI job diffs the pinned snapshot against upstream (structurally, so it names which path templates and operations changed) and flags any recorded fixture that has aged past its freshness window, filing an issue with the exact re-record command for each affected fixture. From there you re-record live responses from dev.to on demand, one endpoint at a time, instead of on a weekly schedule that dev.to's per-IP throttling made flaky; a manual reality-check run still type-checks fresh recordings against the spec, catching the server drifting under an unchanged spec.
 
+Recording against dev.to answers what the reads return and stops there, because learning what `POST /api/articles` returns means publishing junk to a real community. The writes are asked on a local Forem instead, in dependency order (create, read back, update, destroy) so each one has something real to operate on. All 130 operations get classified in a run and none are deferred; the 19 that stay unexercised each say what they lacked.
+
+Every overlay entry names the instrument that established it: the recorded dev.to fixture, the local Forem plus the commit it was seen against, Forem's source, or the structure of the spec itself. Whether a second server agreed is derived from the paired fixture rather than asserted. That distinction has teeth: an uncorroborated local observation may add a key the spec omits, and may never remove or retype one the spec declares. A field the local server invents can only widen your types, never quietly narrow them.
+
 ## Deviations from the upstream spec
 
 The call surface is ergonomic, but the core stays faithful to the server: response types mirror what dev.to actually sends, not what the docs claim, and every deviation is explicit. The full machine-readable list is [`spec/overlay.json`](spec/overlay.json); the highlights:
@@ -295,16 +303,18 @@ The call surface is ergonomic, but the core stays faithful to the server: respon
 | Excluded | `suspended` user-role alias | Alias of `suspend`. |
 | Excluded | `GET /api/followers/organizations` | The route exists but the controller action doesn't. Calling it 404s. |
 | Privilege-gated | `POST /api/reactions`, `POST /api/reactions/toggle` | Admin-gated upstream despite looking like regular user endpoints; ordinary keys get 401. |
-| Privilege-gated | `PUT /api/articles/{id}/unpublish` | Moderator-gated; ordinary keys get 401. |
+| Privilege-gated | `PUT /api/articles/{id}/unpublish`, the moderation actions under `/api/users/{id}` | Need `super_moderator`; ordinary keys get 401. |
+| Privilege-gated | `POST`/`PATCH /api/recommended_articles_lists` | Admin-gated. This table said api-key until a run climbed the ladder and found otherwise. |
 | Quirk | `GET /api/users/me` | Has been observed intermittently returning 401 on dev.to with a valid key that authenticates elsewhere. |
 | Corrected | duplicate `page` param on `GET /api/comments` | The spec declares it twice; the overlay removes the inline copy. |
 | Corrected | 11 responses declared as `{"type": "object", "items": {"$ref": ...}}` | `items` is array-only, so on an object the `$ref` never resolves and the response types out as unknown. Affects the `show` operations for articles, users, organizations, segments, profile images and trends, plus the two billboards writes. Eight are confirmed against a running Forem or a recorded fixture; the trends read and the two billboards writes rest on the structural defect alone, and say so in their overlay entry. |
 | Corrected | `comments_count` on `ArticleSummary` | The articles serializer emits it, the upstream schema omits it. Typed required, matching `Article`, `MyArticle` and `ReadingListArticle`, which already require it. Note this narrows the type for anyone constructing an `ArticleSummary` (a test mock, say) rather than just reading one. |
 | Corrected | `POST /api/reactions` responses | The controller returns 201 for newly created reactions; the spec only declares 200. |
-| Added schemas | 50 or so response schemas | The upstream spec declares many 2xx responses with no schema at all, including `POST /api/articles`. The overlay fills them from the verified controller/view sources, each entry citing where. |
-| Typed `unknown` | all `/api/analytics/*` responses, `PATCH /api/feedback_messages/{id}` | Shapes are produced by service objects, undocumented, and not verifiable without a qualifying account. Honest `unknown` beats a guessed interface. |
+| Added schemas | 45 entries: 30 schemaless responses, including `POST /api/articles`, plus the 15 components they refer to | The upstream spec declares many 2xx responses with no schema at all. The overlay fills them from the verified controller/view sources, each entry citing where. |
+| Added fields | 55 properties the server sends and the spec omits | `Billboard` accounts for 32 of them, taking it from 16 properties to 48. Every added field is optional and no required list changed, so both reading and constructing these compile as before. |
+| Typed `unknown` | all eight `/api/analytics/*` responses, `PATCH /api/feedback_messages/{id}` | Each is an inline unnamed schema in the upstream spec, so there's no component to correct without inventing one. The local sweep saw the real keys and declined to guess an interface around them. |
 
-Fixture-backed tests verify recorded reality for the public and user-scope tiers. Admin, moderation, and analytics responses can't be recorded with a low-privilege account, so their types derive from the composed spec and carry the unverified caveat above.
+Fixture-backed tests verify recorded reality for the public and user-scope tiers, where the evidence is a response dev.to actually sent. Admin and moderation responses can't be recorded with a low-privilege account, so they rest on the local sweep: observed, but on one server, and marked uncorroborated in the overlay. Read the tier column as a floor rather than a promise. Your own instance can be configured stricter, and dev.to's production config isn't the pinned checkout's.
 
 ## The documented verb, nothing else
 
