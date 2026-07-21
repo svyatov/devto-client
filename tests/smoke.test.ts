@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { expect, it } from "bun:test";
 import { DevToApiError, DevToClient } from "../src/index.ts";
 
 it("exports the package entry", () => {

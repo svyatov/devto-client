@@ -1,0 +1,7 @@
+[test]
+# Local `bun test` runs without coverage for speed; CI adds `--coverage`.
+# When coverage runs, keep the report to hand-written library code: generated
+# code is derived from the composed spec, scripts are dev tooling, and test
+# files aren't the subject. Codecov (patch status) is the gate, not a local floor.
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = ["**/scripts/**", "**/generated/**"]

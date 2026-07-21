@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { generate, loadSpec } from "../scripts/generate-signatures.ts";
 // U4 export surface: flat friendly names import directly (R3); every alias —
 // including the DOM-denylisted ones — is reachable through the `DevTo` namespace.

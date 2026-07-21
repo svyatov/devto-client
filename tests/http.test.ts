@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { DevToClient } from "../src/client.ts";
 import { DevToApiError } from "../src/errors.ts";
+import { abortReason, sleep } from "../src/http.ts";
 
 const json = (body: unknown, status = 200, headers: Record<string, string> = {}): Response =>
   new Response(JSON.stringify(body), {
@@ -11,14 +12,14 @@ const json = (body: unknown, status = 200, headers: Record<string, string> = {})
 /** Sequential fetch mock that records every call. */
 function mockFetch(...responses: (Response | Error)[]) {
   const calls: { url: string; init: RequestInit }[] = [];
-  const fetch = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+  const fetch = (async (url: string | URL | Request, init?: RequestInit) => {
     calls.push({ url: String(url), init: init ?? {} });
     const next = responses.shift();
     if (next === undefined) throw new Error("mockFetch: no responses left");
     if (next instanceof Error) throw next;
     return next;
-  });
-  return { fetch: fetch as unknown as typeof globalThis.fetch, calls };
+  }) as typeof globalThis.fetch;
+  return { fetch, calls };
 }
 
 const client = (
@@ -29,9 +30,43 @@ const client = (
   return { client: new DevToClient({ fetch, ...opts }), calls };
 };
 
-afterEach(() => {
-  vi.useRealTimers();
-});
+/**
+ * Like {@link client}, but injects an instant sleep that records the backoff
+ * delays the retry loop asks for. The loop advances without real waits, and
+ * `delays` lets a test assert the computed schedule directly instead of driving
+ * fake timers. The real timer-backed sleep is covered by its own unit tests below.
+ */
+const retryClient = (
+  opts: ConstructorParameters<typeof DevToClient>[0] = {},
+  ...responses: (Response | Error)[]
+) => {
+  const { fetch, calls } = mockFetch(...responses);
+  const delays: number[] = [];
+  const sleep = (ms: number): Promise<void> => {
+    delays.push(ms);
+    return Promise.resolve();
+  };
+  return { client: new DevToClient({ fetch, sleep, ...opts }), calls, delays };
+};
+
+/**
+ * A sleep that only settles when its signal aborts, rejecting with the same
+ * reason the real sleep would. Lets the abort-during-backoff tests drive the
+ * retry loop deterministically without real timers; the real timer-backed
+ * sleep's own abort handling is covered by the "sleep" unit tests below.
+ */
+const abortableSleep = (_ms: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((_resolve, reject) => {
+    const fail = (): void => reject(signal ? abortReason(signal) : new Error("aborted"));
+    if (signal?.aborted) return fail();
+    signal?.addEventListener("abort", fail, { once: true });
+  });
+
+const res429 = (retryAfter?: string): Response =>
+  new Response("slow down", {
+    status: 429,
+    headers: retryAfter === undefined ? {} : { "retry-after": retryAfter },
+  });
 
 describe("construction", () => {
   it("rejects an http:// baseUrl", () => {
@@ -132,6 +167,28 @@ describe("request building", () => {
   });
 });
 
+describe("custom headers", () => {
+  it("merges client-level default headers into every request", async () => {
+    const { client: c, calls } = client({ headers: { "user-agent": "my-app/1.0" } }, json([]));
+    await c.request("GET", "/api/articles");
+    expect(new Headers(calls[0]?.init.headers).get("user-agent")).toBe("my-app/1.0");
+  });
+
+  it("lets a per-request header override a client-level default", async () => {
+    const { client: c, calls } = client({ headers: { "x-trace": "default" } }, json([]));
+    await c.request("GET", "/api/articles", { headers: { "x-trace": "override" } });
+    expect(new Headers(calls[0]?.init.headers).get("x-trace")).toBe("override");
+  });
+
+  it("never lets a client-level header displace the versioned Accept", async () => {
+    const { client: c, calls } = client({ headers: { accept: "application/json" } }, json([]));
+    await c.request("GET", "/api/articles");
+    expect(new Headers(calls[0]?.init.headers).get("accept")).toBe(
+      "application/vnd.forem.api-v1+json",
+    );
+  });
+});
+
 describe("errors", () => {
   it("maps a JSON {error, status} body onto DevToApiError", async () => {
     const { client: c } = client({ retry: false }, json({ error: "not found", status: 404 }, 404));
@@ -181,83 +238,81 @@ describe("errors", () => {
   });
 });
 
+describe("sleep", () => {
+  it("resolves after the delay without a signal", async () => {
+    await expect(sleep(1, undefined)).resolves.toBeUndefined();
+  });
+
+  it("resolves after the delay with a signal that never aborts", async () => {
+    const controller = new AbortController();
+    await expect(sleep(1, controller.signal)).resolves.toBeUndefined();
+  });
+
+  it("rejects with an Error abort reason when the signal aborts first", async () => {
+    const controller = new AbortController();
+    const p = sleep(10_000, controller.signal);
+    controller.abort(new Error("boom"));
+    await expect(p).rejects.toThrow(/boom/);
+  });
+
+  it("normalizes a non-Error abort reason into an Error", async () => {
+    const controller = new AbortController();
+    const p = sleep(10_000, controller.signal);
+    controller.abort("because");
+    await expect(p).rejects.toThrow(/because/);
+  });
+});
+
 describe("retry", () => {
   it("waits for Retry-After then retries a 429 to success (AE2)", async () => {
-    vi.useFakeTimers();
-    const { client: c, calls } = client(
-      {},
-      new Response("slow down", { status: 429, headers: { "retry-after": "1" } }),
-      json([{ id: 1 }]),
-    );
-    const p = c.request("GET", "/api/articles");
-    await vi.advanceTimersByTimeAsync(0);
-    expect(calls).toHaveLength(1);
-    await vi.advanceTimersByTimeAsync(1000);
-    await expect(p).resolves.toEqual([{ id: 1 }]);
+    const { client: c, calls, delays } = retryClient({}, res429("1"), json([{ id: 1 }]));
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 1 }]);
     expect(calls).toHaveLength(2);
+    expect(delays).toEqual([1000]); // honored the 1-second Retry-After
   });
 
   it("retries a 429 POST too — the request was never processed", async () => {
-    vi.useFakeTimers();
-    const { client: c, calls } = client(
-      {},
-      new Response("slow down", { status: 429, headers: { "retry-after": "1" } }),
-      json({}, 201),
-    );
-    const p = c.request("POST", "/api/articles", { body: {} });
-    await vi.advanceTimersByTimeAsync(1000);
-    await expect(p).resolves.toEqual({});
+    const { client: c, calls, delays } = retryClient({}, res429("1"), json({}, 201));
+    await expect(c.request("POST", "/api/articles", { body: {} })).resolves.toEqual({});
     expect(calls).toHaveLength(2);
+    expect(delays).toEqual([1000]);
   });
 
   it("surfaces the typed 429 immediately when retries are disabled", async () => {
-    const { client: c, calls } = client(
-      { retry: false },
-      new Response("slow down", { status: 429, headers: { "retry-after": "1" } }),
-    );
+    const { client: c, calls } = client({ retry: false }, res429("1"));
     await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToApiError);
     expect(calls).toHaveLength(1);
   });
 
   it("surfaces the typed 429 instead of sleeping past the max-delay cap", async () => {
-    const { client: c, calls } = client(
-      { retry: { maxDelayMs: 5000 } },
-      new Response("", { status: 429, headers: { "retry-after": "3600" } }),
-    );
+    const { client: c, calls } = client({ retry: { maxDelayMs: 5000 } }, res429("3600"));
     await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToApiError);
     expect(calls).toHaveLength(1);
   });
 
   it("falls back to the backoff schedule on a 429 without a parseable Retry-After", async () => {
-    vi.useFakeTimers();
-    const { client: c, calls } = client(
-      {},
-      new Response("", { status: 429 }),
-      new Response("", {
-        status: 429,
-        headers: { "retry-after": "Wed, 21 Oct 2026 07:28:00 GMT" },
-      }),
-      json([]),
-    );
-    const p = c.request("GET", "/api/articles");
-    await vi.advanceTimersByTimeAsync(60_000);
-    await expect(p).resolves.toEqual([]);
+    const {
+      client: c,
+      calls,
+      delays,
+    } = retryClient({}, res429(), res429("Wed, 21 Oct 2026 07:28:00 GMT"), json([]));
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
     expect(calls).toHaveLength(3);
+    // Both fell back to the exponential schedule: base 500 doubling, jitter in [0.5, 1).
+    expect(delays).toHaveLength(2);
+    expect(delays[0]).toBeGreaterThan(0);
+    expect(delays[0]).toBeLessThanOrEqual(500);
+    expect(delays[1]).toBeGreaterThan(delays[0] as number);
+    expect(delays[1]).toBeLessThanOrEqual(1000);
   });
 
-  it("rejects promptly with the abort reason when aborted mid-backoff", async () => {
-    vi.useFakeTimers();
+  it("surfaces the abort reason out of the retry loop, skipping the retry", async () => {
     const controller = new AbortController();
-    const { client: c, calls } = client(
-      {},
-      new Response("", { status: 429, headers: { "retry-after": "10" } }),
-    );
+    const { client: c, calls } = client({ sleep: abortableSleep }, res429("10"));
     const p = c.request("GET", "/api/articles", { signal: controller.signal });
-    const rejection = expect(p).rejects.toThrow(/stop/);
-    await vi.advanceTimersByTimeAsync(100);
     controller.abort(new Error("stop"));
-    await rejection;
-    expect(calls).toHaveLength(1);
+    await expect(p).rejects.toThrow(/stop/);
+    expect(calls).toHaveLength(1); // no second attempt after the abort
   });
 
   it("rejects without calling fetch when the signal is already aborted", async () => {
@@ -270,32 +325,21 @@ describe("retry", () => {
     expect(calls).toHaveLength(0);
   });
 
-  it("completes the backoff normally when a signal is attached but never aborted", async () => {
-    vi.useFakeTimers();
+  it("completes a real backoff and retries when a signal is attached but never aborts", async () => {
+    // No injected sleep here: this drives the production timer-backed sleep
+    // inside the retry loop with a non-aborting signal (baseDelayMs: 1 keeps it
+    // to a sub-millisecond real wait), covering the loop+sleep composition the
+    // injected-sleep tests above deliberately bypass.
     const controller = new AbortController();
     const { client: c, calls } = client(
-      {},
-      new Response("", { status: 429, headers: { "retry-after": "1" } }),
+      { retry: { baseDelayMs: 1 } },
+      new Response("", { status: 502 }),
       json([]),
     );
-    const p = c.request("GET", "/api/articles", { signal: controller.signal });
-    await vi.advanceTimersByTimeAsync(1000);
-    await expect(p).resolves.toEqual([]);
-    expect(calls).toHaveLength(2);
-  });
-
-  it("normalizes a non-Error abort reason", async () => {
-    vi.useFakeTimers();
-    const controller = new AbortController();
-    const { client: c } = client(
-      {},
-      new Response("", { status: 429, headers: { "retry-after": "10" } }),
+    await expect(c.request("GET", "/api/articles", { signal: controller.signal })).resolves.toEqual(
+      [],
     );
-    const p = c.request("GET", "/api/articles", { signal: controller.signal });
-    const rejection = expect(p).rejects.toThrow(/because/);
-    await vi.advanceTimersByTimeAsync(100);
-    controller.abort("because");
-    await rejection;
+    expect(calls).toHaveLength(2);
   });
 
   it("surfaces the abort reason when fetch itself rejects on abort", async () => {
@@ -312,12 +356,14 @@ describe("retry", () => {
   });
 
   it("retries 5xx for GET", async () => {
-    vi.useFakeTimers();
-    const { client: c, calls } = client({}, new Response("", { status: 502 }), json([]));
-    const p = c.request("GET", "/api/articles");
-    await vi.advanceTimersByTimeAsync(60_000);
-    await expect(p).resolves.toEqual([]);
+    const {
+      client: c,
+      calls,
+      delays,
+    } = retryClient({}, new Response("", { status: 502 }), json([]));
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([]);
     expect(calls).toHaveLength(2);
+    expect(delays).toHaveLength(1); // one backoff before the retry
   });
 
   it("does not retry 5xx for POST — double-publish risk", async () => {
@@ -329,18 +375,19 @@ describe("retry", () => {
   });
 
   it("exhausts the retry budget then throws", async () => {
-    vi.useFakeTimers();
-    const { client: c, calls } = client(
+    const {
+      client: c,
+      calls,
+      delays,
+    } = retryClient(
       { retry: { attempts: 3 } },
       new Response("", { status: 503 }),
       new Response("", { status: 503 }),
       new Response("", { status: 503 }),
     );
-    const p = c.request("GET", "/api/articles");
-    const rejection = expect(p).rejects.toBeInstanceOf(DevToApiError);
-    await vi.advanceTimersByTimeAsync(120_000);
-    await rejection;
+    await expect(c.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToApiError);
     expect(calls).toHaveLength(3);
+    expect(delays).toHaveLength(2); // slept between the three attempts
   });
 
   it("does not retry non-retryable 4xx", async () => {

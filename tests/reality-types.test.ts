@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { expect, it } from "bun:test";
 import type { paths } from "../src/generated/types.ts";
 import articles from "./fixtures/recorded/get_api-articles.json" with { type: "json" };
 import articlesId from "./fixtures/recorded/get_api-articles-id.json" with { type: "json" };

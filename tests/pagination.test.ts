@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "bun:test";
 import { paginate } from "../src/pagination.ts";
 
 const collect = async <T>(iter: AsyncIterable<T>): Promise<T[]> => {

@@ -1,7 +1,7 @@
+import { describe, expect, it } from "bun:test";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
 import { buildShotList, diffSpecs, staleFixtures } from "../scripts/spec-drift.ts";
 
 const DAY = 86_400_000;
@@ -67,8 +67,8 @@ describe("buildShotList", () => {
       [{ template: "/api/tags", method: "GET" }],
       [{ template: "/api/tags", method: "GET", ageDays: 100 }],
     );
-    expect(out).toContain("npm run record -- --only /api/tags");
-    expect(count(out, "npm run record")).toBe(1);
+    expect(out).toContain("bun run record -- --only /api/tags");
+    expect(count(out, "bun run record")).toBe(1);
   });
 
   it("lists an added template with no command, and a removed template's fixture with one", () => {
@@ -79,7 +79,7 @@ describe("buildShotList", () => {
     );
     expect(out).toContain("/api/new");
     expect(out).not.toContain("--only /api/new");
-    expect(out).toContain("npm run record -- --only /api/gone");
+    expect(out).toContain("bun run record -- --only /api/gone");
   });
 
   it("lists a changed operation's fixture command", () => {
@@ -88,7 +88,7 @@ describe("buildShotList", () => {
       [{ template: "/api/tags", method: "GET" }],
       [],
     );
-    expect(out).toContain("npm run record -- --only /api/tags");
+    expect(out).toContain("bun run record -- --only /api/tags");
   });
 
   it("renders the write-cycle group command once for multiple stale write fixtures", () => {
@@ -100,7 +100,7 @@ describe("buildShotList", () => {
         { template: "/api/articles/{id}", method: "PUT", ageDays: 100 },
       ],
     );
-    expect(count(out, "npm run record -- --only write-cycle")).toBe(1);
+    expect(count(out, "bun run record -- --only write-cycle")).toBe(1);
     expect(out).not.toContain("--only /api/articles\n");
   });
 

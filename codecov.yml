@@ -1,0 +1,15 @@
+# Coverage gates on the patch (the lines a PR changes), not a hard project-wide
+# 100%. Bun's line counter counts the unreachable closing brace of the retry
+# loop's `for(;;)`, which no honest test can hit, so a whole-repo 100% gate would
+# sit permanently red. New code still has to be covered; the pre-existing artifact
+# does not block the repo.
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        target: 100%
+        threshold: 0%
+comment: false

@@ -1,11 +1,11 @@
 /**
  * Offline drift-to-shot-list (KTD5/KTD6). Turns two signals — a structural diff
  * of the upstream spec against the pinned snapshot, and recorded-fixture age —
- * into a ready-to-paste list of targeted `npm run record` commands. Prints the
+ * into a ready-to-paste list of targeted `bun run record` commands. Prints the
  * shot list to stdout (empty when nothing is stale or drifted); the workflow
  * captures it for the issue body.
  *
- * Run: node --experimental-strip-types scripts/spec-drift.ts [upstream.json] [pinned.json]
+ * Run: bun scripts/spec-drift.ts [upstream.json] [pinned.json]
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -63,8 +63,8 @@ export function staleFixtures(dir: string, nowMs: number, maxAgeDays: number): S
 /** GET reads target their own template; every write goes through the atomic write-cycle group. */
 const commandFor = (f: FixtureMeta): string =>
   f.method === "GET"
-    ? `npm run record -- --only ${f.template}`
-    : "npm run record -- --only write-cycle";
+    ? `bun run record -- --only ${f.template}`
+    : "bun run record -- --only write-cycle";
 
 /** Render drift + staleness findings as markdown with one re-record command per finding. */
 export function buildShotList(

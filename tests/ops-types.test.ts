@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { expect, it } from "bun:test";
 import { DevToClient } from "../src/index.ts";
 import type { NoQueryAndBody, NoQueryAndBodyOp, OpEntry } from "../src/ops.ts";
 

@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "bun:test";
 import { DevToClient } from "../src/client.ts";
 import { DevToApiError } from "../src/errors.ts";
 import type { components } from "../src/generated/types.ts";

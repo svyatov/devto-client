@@ -9,7 +9,7 @@
  * Each run leaves its unpublished draft behind — v1 has no article-delete
  * endpoint; the run logs the draft id for manual cleanup.
  *
- * Run: DEVTO_API_KEY=... node --experimental-strip-types scripts/record-fixtures.ts
+ * Run: DEVTO_API_KEY=... bun scripts/record-fixtures.ts
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
