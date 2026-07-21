@@ -1,12 +1,16 @@
 /**
  * Guards the changelog against a silent release-please failure.
  *
- * conventional-commits-parser reads a body line beginning `word(` as the start
- * of a nested conventional header, the shape release-please uses to split a
- * squash merge back into its parts. A second `(` before the closing `)` is a
- * syntax error there, so the parser throws, release-please catches it, logs at
- * debug level, and drops the *whole commit* from the changelog. Every job stays
- * green and the entry is simply absent.
+ * `@conventional-commits/parser` reads a body line beginning `word(` as the
+ * start of a scope, the shape release-please uses to split a squash merge back
+ * into its parts. A second `(` before the closing `)` is a syntax error there,
+ * so the parser throws, release-please catches it, logs at debug level, and
+ * drops the *whole commit* from the changelog. Every job stays green and the
+ * entry is simply absent.
+ *
+ * There is no version to upgrade to: 0.4.1 is npm `latest` and shipped in
+ * January 2021, release-please pins `^0.4.1`, and the bug is open upstream as
+ * conventional-commits/parser#54 and googleapis/release-please#2564.
  *
  * Commit 5c7bd8f lost its entry from two separate release PRs this way: its
  * body carried the code sample `/\/+$/.exec("a" + "/".repeat(50_000) + "x")`,
