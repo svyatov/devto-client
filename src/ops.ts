@@ -87,8 +87,12 @@ type IterQueryOf<O> = [QueryOf<O>] extends [never] ? never : Omit<QueryOf<O>, "p
 /** The `paths`-indexed operation object for a (path, verb) pair. */
 export type OpAt<P extends keyof paths, V extends keyof paths[P]> = paths[P][V];
 
-/** Trailing per-call options: transport concerns kept out of the params object. */
-export type CallOptions = { signal?: AbortSignal; timeoutMs?: number };
+/**
+ * Trailing per-call options: transport concerns kept out of the params object.
+ * A `traceId` given to an `*All` iterator covers the whole walk, since the pages
+ * share this object; each page still draws its own `callId`.
+ */
+export type CallOptions = { signal?: AbortSignal; timeoutMs?: number; traceId?: string };
 
 /**
  * Flatten an assembled intersection into a single field list so param aliases
@@ -215,6 +219,7 @@ export function bindOps<N>(rf: RequestFn, table: OpTable): N {
       // `!== undefined`, not truthiness: 0 is a caller asking for an already-spent
       // budget, which must reach transport and fail rather than silently mean "default"
       if (opts?.timeoutMs !== undefined) reqOpts.timeoutMs = opts.timeoutMs;
+      if (opts?.traceId !== undefined) reqOpts.traceId = opts.traceId;
       return rf(method, fillPath(entry.path, pathParams), reqOpts, never404);
     };
 

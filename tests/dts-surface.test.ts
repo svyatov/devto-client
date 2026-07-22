@@ -21,6 +21,7 @@ let schemas = "";
 let http = "";
 let ops = "";
 let errors = "";
+let events = "";
 
 beforeAll(() => {
   out = mkdtempSync(join(tmpdir(), "devto-dts-"));
@@ -35,6 +36,7 @@ beforeAll(() => {
   http = readFileSync(join(out, "http.d.ts"), "utf8");
   ops = readFileSync(join(out, "ops.d.ts"), "utf8");
   errors = readFileSync(join(out, "errors.d.ts"), "utf8");
+  events = readFileSync(join(out, "events.d.ts"), "utf8");
 }, 120_000);
 
 afterAll(() => {
@@ -130,6 +132,8 @@ describe("dts-surface guard (R5)", () => {
         "retry?",
         "timeoutMs?",
         "pace?",
+        "onEvent?",
+        "debug?",
         "onResponse?",
         "headers?",
         "fetch?",
@@ -141,8 +145,25 @@ describe("dts-surface guard (R5)", () => {
 
     it("pins the RequestOptions members", () => {
       const block = members("RequestOptions");
-      for (const member of ["query?", "body?", "signal?", "headers?", "timeoutMs?"]) {
+      for (const member of ["query?", "body?", "signal?", "headers?", "timeoutMs?", "traceId?"]) {
         expect(block, member).toContain(member);
+      }
+    });
+
+    it("pins DevToEvent and its members on the package root (R15)", () => {
+      // a handler branching on the kind needs every member to survive emit, and
+      // the union has to be reachable without importing a subpath
+      expect(index).toContain("DevToEvent");
+      const union = events.match(/type DevToEvent =([^;]*);/)?.[1];
+      expect(union).toBeDefined();
+      for (const member of [
+        "DevToRequestEvent",
+        "DevToResponseEvent",
+        "DevToRetryEvent",
+        "DevToFailureEvent",
+      ]) {
+        expect(union, member).toContain(member);
+        expect(index, member).toContain(member);
       }
     });
 

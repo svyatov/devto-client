@@ -1,3 +1,4 @@
+import { createDebugPrinter } from "./debug.ts";
 import {
   type Contradiction,
   DevToApiError,
@@ -5,6 +6,7 @@ import {
   type ErrorEnvelope,
   type ResponseMeta,
 } from "./errors.ts";
+import { type DevToEvent, type DevToRetryEvent, safeEmit } from "./events.ts";
 import { createPacer, type Pacer } from "./pacing.ts";
 import { abortReason, sleep } from "./timing.ts";
 import { VERSION } from "./version.ts";
@@ -18,6 +20,9 @@ const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 // setTimeout stores its delay in a 32-bit int; anything larger (or non-finite)
 // silently becomes 1ms, which would turn "wait a very long time" into "fail now"
 const MAX_TIMER_MS = 2_147_483_647;
+// module scope, not per client: the keyless-plus-authenticated pair everyone ends
+// up with logs into one sink, and two calls numbered 1 correlate to nothing (KTD6)
+let calls = 0;
 
 /** Retry policy for transient failures: 429 responses (any method) and 5xx on idempotent methods. */
 export interface RetryOptions {
@@ -59,10 +64,28 @@ export interface ClientOptions {
    */
   pace?: Pacer | false;
   /**
-   * Called with transport metadata for every response, success or failure, before
-   * the body is read. This is where cache status reaches a successful call: a
-   * `fromCache` 200 means a CDN answered, which for an authenticated read may mean
-   * it answered with someone else's bytes. Throwing from here cannot affect the call.
+   * Called with every request attempt, response, retry wait and failure, each
+   * correlated by a call id. See {@link DevToEvent}, and give your handler a
+   * `default` arm: the union is open. Throwing from here cannot affect the call.
+   */
+  onEvent?: (e: DevToEvent) => void;
+  /**
+   * Print every event to `console.error` as one human-readable line. Composes
+   * with {@link ClientOptions.onEvent}; setting one does not suppress the other.
+   * The line format is diagnostic output and may change in any release.
+   */
+  debug?: boolean;
+  /**
+   * Called with transport metadata for every response, success or failure. This is
+   * where cache status reaches a successful call: a `fromCache` 200 means a CDN
+   * answered, which for an authenticated read may mean it answered with someone
+   * else's bytes. Throwing from here cannot affect the call.
+   *
+   * @deprecated Use {@link ClientOptions.onEvent} and branch on the `response`
+   * kind, which carries the same fields plus the method, the URL, the raw
+   * `Headers` and elapsed time. Removed in 3.0. Note the timing: as of 2.1 this
+   * fires at attempt end rather than before the body is read, so it no longer
+   * runs ahead of a body read it might have wanted to preempt.
    */
   onResponse?: (meta: ResponseMeta) => void;
   /**
@@ -91,6 +114,12 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   /** Overrides the client's `timeoutMs` for this call. */
   timeoutMs?: number;
+  /**
+   * Your own correlation id, carried verbatim on every event this call emits and
+   * never rewritten. It sits beside the generated `callId` rather than replacing
+   * it, so a paginated walk sharing one `traceId` still tells its pages apart.
+   */
+  traceId?: string;
 }
 
 export interface ResolvedConfig {
@@ -99,7 +128,7 @@ export interface ResolvedConfig {
   retry: Required<RetryOptions> | null;
   timeoutMs: number;
   pace: Pacer | null;
-  onResponse: ((meta: ResponseMeta) => void) | undefined;
+  emit: (e: DevToEvent) => void;
   headers: Record<string, string> | undefined;
   fetch: typeof globalThis.fetch;
   sleep: (ms: number, signal: AbortSignal | undefined) => Promise<void>;
@@ -119,6 +148,28 @@ export function resolveConfig(options: ClientOptions): ResolvedConfig {
     );
   }
   const resolvedSleep = options.sleep ?? sleep;
+  // every observer the caller asked for, collapsed here so the attempt loop has
+  // one call per event kind and no branching over which hooks exist (KTD7)
+  const handlers: ((e: DevToEvent) => void)[] = [];
+  if (options.debug === true) handlers.push(createDebugPrinter());
+  if (options.onEvent) handlers.push(options.onEvent);
+  const { onResponse } = options;
+  if (onResponse) {
+    // the deprecated shim, kept out of the loop entirely: it projects today's
+    // ResponseMeta back out of the wider event and ignores every other kind.
+    // Its return value is passed back up so an async observer's rejection still
+    // reaches the guard rather than escaping as an unhandled one.
+    handlers.push((e) => {
+      if (e.kind !== "response") return undefined;
+      return onResponse({
+        status: e.status,
+        fromCache: e.fromCache,
+        age: e.age,
+        requestId: e.requestId,
+        contradiction: e.contradiction,
+      });
+    });
+  }
   return {
     apiKey: options.apiKey,
     baseUrl,
@@ -135,7 +186,11 @@ export function resolveConfig(options: ClientOptions): ResolvedConfig {
     // covers pacing waits; one handed in keeps its own, since it may serve two
     // clients that injected different sleeps (KTD4)
     pace: options.pace === false ? null : (options.pace ?? createPacer({ sleep: resolvedSleep })),
-    onResponse: options.onResponse,
+    // one hostile handler must not cost its siblings the event, so each is
+    // dispatched through its own guard rather than the loop being wrapped
+    emit: (e) => {
+      for (const handler of handlers) safeEmit(handler, e);
+    },
     headers: options.headers,
     fetch: options.fetch ?? globalThis.fetch,
     sleep: resolvedSleep,
@@ -286,92 +341,142 @@ export async function request<T>(
   // below hold canonical names, so classify off one normalized copy
   const verb = method.toUpperCase();
   const paceKind = WRITES.has(verb) ? "write" : "read";
+  // drawn once per call, after the pre-flight abort above: a call that never
+  // reached an attempt has nothing to report, so it spends no id (KTD8)
+  const callId = ++calls;
+  const target = url.toString();
 
   for (let attempt = 1; ; attempt++) {
-    // pacing draws on the same budget as everything else, so a hold that would
-    // wake past the deadline fails the call instead of sleeping through it
-    await config.pace?.acquire(paceKind, { deadlineAt, signal: opts.signal });
-
-    const remaining = deadlineAt - Date.now();
-    if (remaining <= 0) throw expired();
-
-    // KTD1: one controller per attempt, armed until the body is consumed. Composing
-    // `AbortSignal.any([opts.signal, AbortSignal.timeout(...)])` instead would pile
-    // one composite per page onto a caller signal reused across a listAll walk:
-    // the documented Node leak. The finally below is what keeps that from happening.
-    const controller = new AbortController();
-    const deadline = expired();
-    const timer = setTimeout(() => controller.abort(deadline), Math.min(remaining, MAX_TIMER_MS));
-    const onAbort = (): void => {
-      if (opts.signal) controller.abort(abortReason(opts.signal));
-    };
-    // a listener added to an already-aborted signal never fires, and the caller
-    // may have aborted while we were paced or backing off: check, then subscribe
-    if (opts.signal?.aborted) {
-      clearTimeout(timer);
-      throw abortReason(opts.signal);
-    }
-    opts.signal?.addEventListener("abort", onAbort, { once: true });
+    const at = { callId, traceId: opts.traceId, method, url: target, attempt };
+    config.emit({ kind: "request", ...at });
 
     let wait: number;
+    let why: DevToRetryEvent["reason"];
+    // hoisted to attempt scope so the cleanup below can run for a throw raised
+    // before either was set, which is what widening the `try` costs (KTD1)
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let onAbort: (() => void) | undefined;
+    // set the moment headers arrive; its presence is what says a response event
+    // is owed, independently of whether the attempt also failed (KTD2)
+    let seen: { meta: ResponseMeta; headers: Headers } | undefined;
+    // the error this attempt built from its own response: throwing it is a
+    // rejection, not a transport failure, so the `catch` must not report it
+    let apiError: DevToApiError | undefined;
+    let pacedMs = 0;
+    let durationMs = 0;
+    let startedAt: number | undefined;
+
     try {
-      let res: Response;
       try {
-        res = await config.fetch(url.toString(), { ...init, signal: controller.signal });
-      } catch (cause) {
+        // pacing draws on the same budget as everything else, so a hold that would
+        // wake past the deadline fails the call instead of sleeping through it.
+        // Timed here rather than through the `Pacer` interface, so a caller-supplied
+        // pacer reports its holds too (KTD3).
+        const heldFrom = Date.now();
+        await config.pace?.acquire(paceKind, { deadlineAt, signal: opts.signal });
+        pacedMs = Date.now() - heldFrom;
+        // network time starts after the hold and stays unset until then, so a
+        // refused hold reports a zero duration rather than counting itself (KTD4)
+        startedAt = Date.now();
+
+        const remaining = deadlineAt - Date.now();
+        if (remaining <= 0) throw expired();
+
+        // KTD1: one controller per attempt, armed until the body is consumed. Composing
+        // `AbortSignal.any([opts.signal, AbortSignal.timeout(...)])` instead would pile
+        // one composite per page onto a caller signal reused across a listAll walk:
+        // the documented Node leak. The finally below is what keeps that from happening.
+        const controller = new AbortController();
+        const deadline = expired();
+        timer = setTimeout(() => controller.abort(deadline), Math.min(remaining, MAX_TIMER_MS));
+        onAbort = (): void => {
+          if (opts.signal) controller.abort(abortReason(opts.signal));
+        };
+        // a listener added to an already-aborted signal never fires, and the caller
+        // may have aborted while we were paced or backing off: check, then subscribe
         if (opts.signal?.aborted) throw abortReason(opts.signal);
-        if (cause === deadline) throw deadline;
-        throw new Error(`${method} ${url} failed`, { cause });
-      }
+        opts.signal?.addEventListener("abort", onAbort, { once: true });
 
-      const meta = readTransportMeta(res, credentialed, never404);
-      try {
-        // an async observer returns a promise the `catch` below cannot see, and an
-        // unhandled rejection takes the whole process down on Node's default
-        const settled: unknown = config.onResponse?.(meta);
-        if (settled instanceof Promise) void settled.catch(() => {});
-      } catch {
-        // an observer's failure is the observer's problem, not the call's
-      }
-
-      if (res.ok) {
-        if (res.status === 204) return undefined as T;
-        const text = await res.text();
-        return (text === "" ? undefined : JSON.parse(text)) as T;
-      }
-
-      // a cached 429 replays the same stored bytes on every attempt: it cannot be
-      // won, and each try spends rate budget on the way (R3). 5xx is excluded: a
-      // short-TTL cached 500 can still recover on a later attempt.
-      const retriesLeft = retry !== null && attempt < retry.attempts;
-      if (retriesLeft && res.status === 429 && !meta.fromCache) {
-        const retryAfterMs = parseRetryAfter(res.headers.get("retry-after"));
-        if (retryAfterMs === null) {
-          wait = clampToBudget(retry.throttleDelayMs, deadlineAt);
-        } else if (Date.now() + retryAfterMs > deadlineAt) {
-          // the server named a time; obeying a shortened version of it is
-          // meaningless, so an overshoot fails now and says what it declined
-          throw new DevToTimeoutError(
-            `${method} ${url} was asked to wait ${retryAfterMs}ms, past its ${timeoutMs}ms deadline`,
-            retryAfterMs,
-          );
-        } else {
-          wait = retryAfterMs;
+        let res: Response;
+        try {
+          res = await config.fetch(target, { ...init, signal: controller.signal });
+        } catch (cause) {
+          if (opts.signal?.aborted) throw abortReason(opts.signal);
+          if (cause === deadline) throw deadline;
+          throw new Error(`${method} ${url} failed`, { cause });
         }
-      } else if (retriesLeft && res.status >= 500 && IDEMPOTENT.has(verb)) {
-        wait = clampToBudget(backoffDelay(attempt, retry), deadlineAt);
-      } else {
-        throw await toApiError(res, meta);
+
+        const meta = readTransportMeta(res, credentialed, never404);
+        seen = { meta, headers: res.headers };
+
+        if (res.ok) {
+          if (res.status === 204) return undefined as T;
+          const text = await res.text();
+          return (text === "" ? undefined : JSON.parse(text)) as T;
+        }
+
+        // a cached 429 replays the same stored bytes on every attempt: it cannot be
+        // won, and each try spends rate budget on the way (R3). 5xx is excluded: a
+        // short-TTL cached 500 can still recover on a later attempt.
+        const retriesLeft = retry !== null && attempt < retry.attempts;
+        if (retriesLeft && res.status === 429 && !meta.fromCache) {
+          why = "throttle";
+          const retryAfterMs = parseRetryAfter(res.headers.get("retry-after"));
+          if (retryAfterMs === null) {
+            wait = clampToBudget(retry.throttleDelayMs, deadlineAt);
+          } else if (Date.now() + retryAfterMs > deadlineAt) {
+            // the server named a time; obeying a shortened version of it is
+            // meaningless, so an overshoot fails now and says what it declined
+            throw new DevToTimeoutError(
+              `${method} ${url} was asked to wait ${retryAfterMs}ms, past its ${timeoutMs}ms deadline`,
+              retryAfterMs,
+            );
+          } else {
+            wait = retryAfterMs;
+          }
+        } else if (retriesLeft && res.status >= 500 && IDEMPOTENT.has(verb)) {
+          why = "server";
+          wait = clampToBudget(backoffDelay(attempt, retry), deadlineAt);
+        } else {
+          apiError = await toApiError(res, meta);
+          throw apiError;
+        }
+        // only the retry paths reach here. Release the socket before the wait: an
+        // unread body pins its connection, and the waits have no ceiling any more.
+        void res.body?.cancel().catch(() => {});
+      } finally {
+        if (startedAt !== undefined) durationMs = Date.now() - startedAt;
+        // an inner `finally` rather than the outer one: it has to run before the
+        // `catch` below, or a body that died mid-read would report failure first
+        if (seen) {
+          config.emit({
+            kind: "response",
+            ...at,
+            ...seen.meta,
+            headers: seen.headers,
+            durationMs,
+            pacedMs,
+          });
+        }
       }
-      // only the retry paths reach here. Release the socket before the wait: an
-      // unread body pins its connection, and the waits have no ceiling any more.
-      void res.body?.cancel().catch(() => {});
+    } catch (err) {
+      if (err !== apiError)
+        config.emit({ kind: "failure", ...at, error: err, durationMs, pacedMs });
+      throw err;
     } finally {
-      clearTimeout(timer);
-      opts.signal?.removeEventListener("abort", onAbort);
+      if (timer !== undefined) clearTimeout(timer);
+      if (onAbort !== undefined) opts.signal?.removeEventListener("abort", onAbort);
     }
 
-    await config.sleep(wait, opts.signal);
+    config.emit({ kind: "retry", ...at, waitMs: wait, reason: why });
+    try {
+      await config.sleep(wait, opts.signal);
+    } catch (err) {
+      // KTD8: a call that dies in the wait has already emitted events, so ending
+      // on a `retry` nothing ever answered would leave a logger hanging
+      config.emit({ kind: "failure", ...at, error: err, durationMs, pacedMs });
+      throw err;
+    }
   }
 }
 
