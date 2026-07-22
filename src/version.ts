@@ -7,4 +7,4 @@
  * `tests/http.test.ts` pins this against `package.json` so drift fails CI
  * rather than shipping a lying user-agent.
  */
-export const VERSION = "2.0.0"; // x-release-please-version
+export const VERSION = "2.1.0"; // x-release-please-version
