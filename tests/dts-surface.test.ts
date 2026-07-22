@@ -166,7 +166,9 @@ describe("dts-surface guard (R5)", () => {
         expect(union, member).toContain(`"${member}"`);
       }
       const responseMeta = errors.match(/interface ResponseMeta \{([\s\S]*?)\n\}/)?.[1];
-      expect(responseMeta).toContain("contradiction: Contradiction | undefined");
+      // optional on purpose: a required key here would break every consumer that
+      // builds a ResponseMeta literal, making this a major rather than a minor
+      expect(responseMeta).toContain("contradiction?: Contradiction | undefined");
     });
 
     it("pins CallOptions, the bag every namespace method actually takes", () => {

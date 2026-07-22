@@ -379,6 +379,8 @@ const raw = await devto.request<unknown>("GET", "/api/articles/latest", {
 
 `client.request(method, path, opts)` still layers on the versioned header, auth, retries, and error handling: it only hands you back control over the path and payload. It's the one place the `{ query, body, signal }` options object survives, precisely because a raw call has no spec to derive its shape from.
 
+One thing it can't give you is `impossible-404`. That detector needs to know the endpoint never returns 404, which is a claim the generated set makes about the operations it has evidence for, and a raw path isn't one of them. You still get `v0-under-v1` and `credentialed-refusal` here, since neither needs to know which endpoint you called. So read a clean `contradiction` on a raw call as "two of three detectors found nothing", not as a clean bill of health.
+
 ## Contributing
 
 Most contributions come down to teaching the client an endpoint it doesn't cover yet, and [CONTRIBUTING.md](CONTRIBUTING.md) walks you from a fresh clone through that first PR: setup, the two quality gates, and the add-an-endpoint loop. The [Code of Conduct](CODE_OF_CONDUCT.md) applies to everyone taking part.

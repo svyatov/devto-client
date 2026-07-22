@@ -46,8 +46,12 @@ export interface ResponseMeta {
    * A stored response contradicts something this request asserted, naming which
    * detector proved it. See {@link Contradiction}. Undefined means no detector
    * fired, which is not a guarantee the response is sound.
+   *
+   * The key is optional only so that adding it stayed a minor release: code that
+   * builds a `ResponseMeta` by hand predates it. Every response this client reads
+   * sets it, so consumers can treat it as present.
    */
-  contradiction: Contradiction | undefined;
+  contradiction?: Contradiction | undefined;
 }
 
 /**
