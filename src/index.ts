@@ -1,6 +1,7 @@
 export { DevToClient } from "./client.ts";
 export {
   DevToApiError,
+  type DevToErrorCategory,
   DevToTimeoutError,
   type ErrorEnvelope,
   type ResponseMeta,

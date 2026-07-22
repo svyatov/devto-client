@@ -1,9 +1,12 @@
-/** The `{ error, status }` envelope rendered by Forem's v1 API controllers. */
-export interface ErrorEnvelope {
-  error: string;
-  /** Hand-rolled 400s (e.g. semantic_search) omit this. */
-  status?: number;
-}
+import type { components } from "./generated/types.ts";
+
+/**
+ * The `{ error, status }` envelope rendered by Forem's v1 API controllers
+ * (hand-rolled 400s such as semantic_search omit `status`). A 1:1 alias over
+ * the generated component (KTD4), so a spec rename breaks here at compile time
+ * rather than drifting from the hand-written shape it used to duplicate.
+ */
+export type ErrorEnvelope = components["schemas"]["ErrorEnvelope"];
 
 /** Transport-level facts read off a response's headers, never its body. */
 export interface ResponseMeta {
@@ -22,6 +25,47 @@ export interface ResponseMeta {
 }
 
 /**
+ * The meaning of a failure, derived from its HTTP status so a `catch` block can
+ * branch on intent instead of matching status integers. Reads the response, not
+ * the spec: it stays correct for statuses the spec never declares (the
+ * throttler's 429, a 403), because classification is a runtime fact.
+ *
+ * Compatibility (R9): this union can gain members in a minor release, so an
+ * exhaustive `switch` needs a default arm. `unknown` is where every unmapped
+ * status lands, so that arm always has something to catch.
+ */
+export type DevToErrorCategory =
+  | "rate-limited"
+  | "validation"
+  | "not-found"
+  | "conflict"
+  | "unauthorized"
+  | "forbidden"
+  | "server"
+  | "unknown";
+
+/** Map a response status to its category (R4), exact-match with a 5xx band and an explicit fallback. */
+function categorize(status: number): DevToErrorCategory {
+  switch (status) {
+    case 429:
+      return "rate-limited";
+    case 400:
+    case 422:
+      return "validation";
+    case 404:
+      return "not-found";
+    case 409:
+      return "conflict";
+    case 401:
+      return "unauthorized";
+    case 403:
+      return "forbidden";
+    default:
+      return status >= 500 && status <= 599 ? "server" : "unknown";
+  }
+}
+
+/**
  * Every non-2xx response surfaces as this single error class: HTTP status,
  * the parsed `{ error, status }` envelope when the body is one, and the raw
  * body text otherwise (Rack::Attack's 429 is plain text).
@@ -29,6 +73,8 @@ export interface ResponseMeta {
 export class DevToApiError extends Error {
   override readonly name: string = "DevToApiError";
   readonly status: number;
+  /** The failure's meaning, derived from {@link status}. See {@link DevToErrorCategory}. */
+  readonly category: DevToErrorCategory;
   readonly body: ErrorEnvelope | undefined;
   readonly rawBody: string;
   /** Upstream `x-request-id`, when the response carried one. */
@@ -53,6 +99,7 @@ export class DevToApiError extends Error {
           : `HTTP ${status}`,
     );
     this.status = status;
+    this.category = categorize(status);
     this.body = body;
     this.rawBody = rawBody;
     this.requestId = meta?.requestId;
