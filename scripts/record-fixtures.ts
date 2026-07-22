@@ -15,7 +15,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs as parseNodeArgs } from "node:util";
-import { DevToApiError } from "../src/errors.ts";
+import { DevToApiError, type ResponseMeta } from "../src/errors.ts";
 import {
   type ClientOptions,
   type RequestOptions,
@@ -95,12 +95,20 @@ export function scrub(value: unknown, scrubContent = false): unknown {
  * Records each read, persisting every fixture to `outDir` the moment it is
  * captured (KTD4) so a crash mid-crawl keeps completed work. 401/403/404 means
  * the key can't access it: skip, not fail.
+ *
+ * With a `latest` cell wired to the transport, every read's provenance is
+ * established before it becomes evidence (R9/R10). Both exits are guarded, and
+ * the skip path is the one that matters: 401, 403 and 404 are exactly the
+ * statuses a poisoned cache entry replays, so a run against the `/api/pages`
+ * poisoning would otherwise print `skipped: GET /api/pages (404)` and pass green
+ * while dropping the endpoint from the fixture set.
  */
 export async function recordReads(
   rf: Rf,
   specs: ReadSpec[],
   outDir: string,
   pauseMs = 3000, // keyless per-IP throttling on dev.to is far stricter than the per-key 3 GET/s
+  latest?: LatestResponse,
 ): Promise<{ recorded: Recorded[]; skipped: string[]; files: string[] }> {
   const recorded: Recorded[] = [];
   const skipped: string[] = [];
@@ -112,6 +120,17 @@ export async function recordReads(
       const opts: RequestOptions = {};
       if (spec.query) opts.query = spec.query;
       let payload = await rf<unknown>(method, spec.path, opts);
+      const meta = takeMeta(latest);
+      if (meta?.contradiction !== undefined) {
+        throw new Error(
+          `refusing to record ${method} ${spec.template} from ${spec.path}: ${meta.contradiction}, so the response was not generated for this request`,
+        );
+      }
+      // still written: a plain cache hit is a payload the origin did generate,
+      // just not for us, and no busting parameter reliably forces a fresh one
+      if (meta?.fromCache === true) {
+        console.warn(`cache hit, not a fresh origin response: ${method} ${spec.template}`);
+      }
       if (spec.trim !== undefined && Array.isArray(payload)) payload = payload.slice(0, spec.trim);
       const rec: Recorded = {
         template: spec.template,
@@ -124,6 +143,13 @@ export async function recordReads(
       files.push(writeFixture(outDir, rec));
     } catch (err) {
       if (err instanceof DevToApiError && [401, 403, 404].includes(err.status)) {
+        // a privilege-gated endpoint writes nothing to vouch for, so an origin
+        // refusal is still a skip; a cached one is a replay wearing its costume
+        if (err.fromCache) {
+          throw new Error(
+            `refusing to skip ${method} ${spec.template} from ${spec.path}: ${err.contradiction ?? `a cached ${err.status}`}, so the fixture would be dropped on someone else's response`,
+          );
+        }
         skipped.push(`${method} ${spec.template} (${err.status})`);
       } else {
         throw err;
@@ -315,11 +341,35 @@ export function selectReads(all: ReadSpec[], selectors: string[]): ReadSpec[] {
 }
 
 /**
+ * The provenance seam (KTD8): a mutable cell the installed `onResponse` writes
+ * the last response's metadata into, so the loop that just made a request can
+ * ask where its bytes came from. Deliberately not part of `ResolvedConfig`, so
+ * the transport's own type stays untouched.
+ */
+export interface LatestResponse {
+  meta: ResponseMeta | undefined;
+}
+
+/**
+ * Read the last response's metadata and empty the cell in one move. Taking rather
+ * than peeking is what keeps one request's provenance from being attributed to
+ * the next: a call that never got a response leaves nothing behind to inherit.
+ */
+export function takeMeta(latest: LatestResponse | undefined): ResponseMeta | undefined {
+  const { meta } = latest ?? {};
+  if (latest) latest.meta = undefined;
+  return meta;
+}
+
+/**
  * The recording client's transport settings, out here rather than inside the main
  * guard so a test can read them. Pacing and throttle patience are the library's
  * now. This script no longer hand-rolls either.
  */
-export function buildRecorderConfig(env: NodeJS.ProcessEnv = process.env): ResolvedConfig {
+export function buildRecorderConfig(
+  env: NodeJS.ProcessEnv = process.env,
+  latest?: LatestResponse,
+): ResolvedConfig {
   const target = resolveTarget(env);
   const options: ClientOptions = {
     baseUrl: target.baseUrl,
@@ -335,6 +385,11 @@ export function buildRecorderConfig(env: NodeJS.ProcessEnv = process.env): Resol
   };
   if (target.apiKey !== undefined) options.apiKey = target.apiKey;
   if (target.allowInsecureHttp) options.allowInsecureHttp = true;
+  if (latest) {
+    options.onResponse = (meta): void => {
+      latest.meta = meta;
+    };
+  }
   return resolveConfig(options);
 }
 
@@ -344,7 +399,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const target = resolveTarget(process.env);
   assertRecordedTierTarget(target.baseUrl, outDir);
   const apiKey = target.apiKey;
-  const config = buildRecorderConfig(process.env);
+  const latest: LatestResponse = { meta: undefined };
+  const config = buildRecorderConfig(process.env, latest);
   const rf: Rf = (method, path, opts) => request(config, method, path, opts);
 
   const runAll = only.length === 0;
@@ -428,7 +484,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const allReads = [...publicReads, ...userReads];
   const selectedReads = runAll ? allReads : selectReads(allReads, readSelectors);
   // recordReads persists each fixture as it lands (KTD4): no separate batch write
-  const reads = await recordReads(rf, selectedReads, outDir, target.pauseMs);
+  const reads = await recordReads(rf, selectedReads, outDir, target.pauseMs, latest);
   if (apiKey !== undefined) {
     const userTemplates = new Set(userReads.map((u) => u.template));
     assertUserTierRecorded(

@@ -6,6 +6,7 @@ import {
   assertRecordedTierTarget,
   assertUserTierRecorded,
   buildRecorderConfig,
+  type LatestResponse,
   parseArgs,
   RECORDED_DIR,
   type ReadSpec,
@@ -17,7 +18,7 @@ import {
   scrub,
   selectReads,
 } from "../scripts/record-fixtures.ts";
-import { DevToApiError } from "../src/errors.ts";
+import { DevToApiError, type ResponseMeta } from "../src/errors.ts";
 import { resolveConfig } from "../src/http.ts";
 
 const tmp = (): string => mkdtempSync(join(tmpdir(), "rec-"));
@@ -164,6 +165,155 @@ describe("recordReads", () => {
       ),
     ).rejects.toThrow(/boom/);
     expect(readdirSync(dir).sort()).toEqual(["get_api-tags.json", "get_api-videos.json"]);
+  });
+});
+
+/**
+ * R9/R10: a fixture is evidence about dev.to, so a response that provably was not
+ * generated for the request it answered must never become one. Both of
+ * `recordReads`' exits are guarded, and a cached error fails the run rather than
+ * reaching the skipped list.
+ */
+describe("recordReads provenance gate (U4)", () => {
+  const meta = (over: Partial<ResponseMeta> = {}): ResponseMeta => ({
+    status: 200,
+    fromCache: false,
+    age: undefined,
+    requestId: undefined,
+    contradiction: undefined,
+    ...over,
+  });
+
+  /** An `rf` that fills the cell the way the installed observer would, then answers. */
+  const answering = (latest: LatestResponse, answers: Record<string, ResponseMeta>): Rf =>
+    (async (_method: string, path: string) => {
+      const seen = answers[path] ?? meta();
+      latest.meta = seen;
+      if (seen.status >= 400) throw new DevToApiError(seen.status, undefined, "", seen);
+      return [{ id: 1 }];
+    }) as unknown as Rf;
+
+  const read = (template: string): ReadSpec => ({ template, path: template });
+
+  it("refuses to write a contradicted read, naming the endpoint and the detector", async () => {
+    const dir = tmp();
+    const latest: LatestResponse = { meta: undefined };
+    const rf = answering(latest, {
+      "/api/tags": meta({ fromCache: true, contradiction: "v0-under-v1" }),
+    });
+    await expect(recordReads(rf, [read("/api/tags")], dir, 0, latest)).rejects.toThrow(
+      /refusing to record GET \/api\/tags .*v0-under-v1/,
+    );
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
+  it("writes a plain cache hit but warns naming the endpoint", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const latest: LatestResponse = { meta: undefined };
+    const rf = answering(latest, { "/api/tags": meta({ fromCache: true }) });
+    const { recorded } = await recordReads(rf, [read("/api/tags")], tmp(), 0, latest);
+    expect(recorded).toHaveLength(1);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("/api/tags"));
+    warn.mockRestore();
+  });
+
+  it("writes an origin-served read with no warning", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const latest: LatestResponse = { meta: undefined };
+    const { recorded } = await recordReads(
+      answering(latest, {}),
+      [read("/api/tags")],
+      tmp(),
+      0,
+      latest,
+    );
+    expect(recorded).toHaveLength(1);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("fails the run on a 404 served from cache instead of skipping it", async () => {
+    // the /api/pages case: a cached v0 404 for an endpoint v1 answers with 200
+    const latest: LatestResponse = { meta: undefined };
+    const rf = answering(latest, {
+      "/api/pages": meta({ status: 404, fromCache: true, contradiction: "impossible-404" }),
+    });
+    await expect(recordReads(rf, [read("/api/pages")], tmp(), 0, latest)).rejects.toThrow(
+      /refusing to skip GET \/api\/pages .*impossible-404/,
+    );
+  });
+
+  it("fails the run on a cached 401, naming credentialed-refusal", async () => {
+    const latest: LatestResponse = { meta: undefined };
+    const rf = answering(latest, {
+      "/api/users/me": meta({
+        status: 401,
+        fromCache: true,
+        contradiction: "credentialed-refusal",
+      }),
+    });
+    await expect(recordReads(rf, [read("/api/users/me")], tmp(), 0, latest)).rejects.toThrow(
+      /credentialed-refusal/,
+    );
+  });
+
+  it("names the cached status when a cached error carried no contradiction", async () => {
+    const latest: LatestResponse = { meta: undefined };
+    const rf = answering(latest, { "/api/tags": meta({ status: 404, fromCache: true }) });
+    await expect(recordReads(rf, [read("/api/tags")], tmp(), 0, latest)).rejects.toThrow(
+      /a cached 404/,
+    );
+  });
+
+  it("still skips an origin-served 401, 403 or 404", async () => {
+    const latest: LatestResponse = { meta: undefined };
+    const rf = answering(latest, {
+      "/api/readinglist": meta({ status: 401 }),
+      "/api/badges": meta({ status: 403 }),
+      "/api/pages": meta({ status: 404 }),
+    });
+    const { skipped, recorded } = await recordReads(
+      rf,
+      [read("/api/readinglist"), read("/api/badges"), read("/api/pages")],
+      tmp(),
+      0,
+      latest,
+    );
+    expect(recorded).toEqual([]);
+    expect(skipped).toEqual([
+      "GET /api/readinglist (401)",
+      "GET /api/badges (403)",
+      "GET /api/pages (404)",
+    ]);
+  });
+
+  it("never attributes one read's provenance to the next", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const latest: LatestResponse = { meta: undefined };
+    const rf = answering(latest, { "/api/tags": meta({ fromCache: true }) });
+    await recordReads(rf, [read("/api/tags"), read("/api/videos")], tmp(), 0, latest);
+    // the second read was origin-served: exactly one warning, and it names the first
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("/api/tags"));
+    warn.mockRestore();
+  });
+
+  it("stops at the first read it cannot vouch for", async () => {
+    const dir = tmp();
+    const latest: LatestResponse = { meta: undefined };
+    const rf = answering(latest, {
+      "/api/tags": meta({ fromCache: true, contradiction: "v0-under-v1" }),
+    });
+    await expect(
+      recordReads(rf, [read("/api/tags"), read("/api/videos")], dir, 0, latest),
+    ).rejects.toThrow(/refusing to record/);
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
+  it("records exactly as before when no cell is wired in", async () => {
+    const rf = vi.fn(async () => [{ id: 1 }]) as unknown as Rf;
+    const { recorded } = await recordReads(rf, [read("/api/tags")], tmp(), 0);
+    expect(recorded).toHaveLength(1);
   });
 });
 

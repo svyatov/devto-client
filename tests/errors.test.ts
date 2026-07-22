@@ -104,7 +104,12 @@ describe("DevToApiError.category (U3)", () => {
   // AE4, partially: a cached unauthorized response classifies with the cache signal
   // set. The no-retry half lives in the transport (src/http.ts) and its own tests.
   it("maps a cached unauthorized response to unauthorized with the cache signal", () => {
-    const err = new DevToApiError(401, undefined, "", { fromCache: true, age: 5, requestId: "r" });
+    const err = new DevToApiError(401, undefined, "", {
+      fromCache: true,
+      age: 5,
+      requestId: "r",
+      contradiction: undefined,
+    });
     expect(err.category).toBe("unauthorized");
     expect(err.fromCache).toBe(true);
   });

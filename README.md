@@ -168,21 +168,25 @@ The category reads the response, not the spec, so it stays correct where the spe
 
 Two things to keep in mind. Don't retry `rate-limited` or `server` from your `catch`: by the time a `DevToApiError` reaches you the transport has already exhausted its own retries for both, so a caller-side loop just spends rate budget getting nowhere (see [Retries](#retries)). And keep that `default` arm: the union can gain members in a minor release, and `unknown` is where every unmapped status already lands, so the arm always has something to catch.
 
-Three more fields tell you where the response came from:
+Four more fields tell you where the response came from:
 
 ```ts
 console.log(err.requestId); // upstream x-request-id, the handle to quote in a bug report
 console.log(err.fromCache); // true when a CDN answered instead of the origin
 console.log(err.age); // how many seconds the cached copy had been sitting there
+console.log(err.contradiction); // set when the response can't have been generated for your request
 ```
 
 A `fromCache` 429 is the nasty one. dev.to's CDN doesn't vary on your credential, so a stored 429 generated for someone else can be replayed at you, and every retry reads the same stored bytes. The client stops retrying that one. It can't be won, and each attempt spends rate budget getting nowhere.
 
-Cache status matters just as much on calls that succeed, which is somewhere an error object can't reach. Pass an `onResponse` observer and you'll see it on every response:
+`contradiction` is the stronger claim, and it names which of three proofs fired. `v0-under-v1` means the reply carried Forem's v0 deprecation marker even though the client sent the versioned v1 header. `impossible-404` means a cached 404 came back from an endpoint an authenticated walk found never to 404. `credentialed-refusal` means a cached 401 or 403 answered a request carrying a key that response was never shown. All three are advisory: the client won't retry, throw, or swallow anything on their account, so a false positive costs you a flag rather than a call.
+
+Cache status matters just as much on calls that succeed, which is somewhere an error object can't reach. Pass an `onResponse` observer and you'll see them on every response:
 
 ```ts
 const devto = new DevToClient({
-  onResponse: ({ status, fromCache, age, requestId }) => {
+  onResponse: ({ status, fromCache, age, requestId, contradiction }) => {
+    if (contradiction) console.warn(`${status} answers someone else's request: ${contradiction}`);
     if (fromCache) console.warn(`${status} served from cache, ${age}s old (${requestId})`);
   },
 });
@@ -289,7 +293,7 @@ const archive = new DevToClient({ pace }); // same pacer, one shared budget
 
 Each client holds its own budget unless you hand two of them the same pacer. Worth knowing: dev.to throttles per IP as well as per key, so two clients on one machine already share a server-side budget whether or not they share a pacer. Independent pacers under-protect you rather than merely over-pacing.
 
-Turn it off with `pace: false`. The main reason to is an admin key, which is exempt upstream. The client can't detect one, and the only reliable probe would be `/api/users/me`, the endpoint that intermittently 401s on a perfectly good key. So pacing stays on for everyone and admins opt out by hand.
+Turn it off with `pace: false`. The main reason to is an admin key, which is exempt upstream. The client can't detect one, and the only reliable probe would be `/api/users/me`, where a 401 might be dev.to's edge replaying a refusal it stored for someone else rather than a verdict on your key. So pacing stays on for everyone and admins opt out by hand.
 
 One boundary to be aware of if you fire many calls concurrently. Every deadline clock starts when its call is created, so more than roughly `timeoutMs × rate` requests in flight at once (about 90 reads at the defaults) means the tail of the burst exhausts its deadline waiting for a slot and fails with `DevToTimeoutError`. That's deliberate: a request that can't start inside its own budget should say so rather than queue invisibly.
 
@@ -346,7 +350,7 @@ The call surface is ergonomic, but the core stays faithful to the server: respon
 | Privilege-gated | `POST /api/reactions`, `POST /api/reactions/toggle` | Admin-gated upstream despite looking like regular user endpoints; ordinary keys get 401. |
 | Privilege-gated | `PUT /api/articles/{id}/unpublish`, the moderation actions under `/api/users/{id}` | Need `super_moderator`; ordinary keys get 401. |
 | Privilege-gated | `POST`/`PATCH /api/recommended_articles_lists` | Admin-gated. This table said api-key until a run climbed the ladder and found otherwise. |
-| Quirk | `GET /api/users/me` | Has been observed intermittently returning 401 on dev.to with a valid key that authenticates elsewhere. |
+| Quirk | dev.to's edge cache, on every endpoint | The `vary` header lists neither the versioned `Accept` nor your credential, so neither dimension the response depends on is part of the cache key. The origin compounds it by marking successes `private` while leaving errors cacheable, so every reachable case is a stored 4xx replayed at a request that should have succeeded: a v0-generated 404 on `/api/pages`, a stranger's 401 on `/api/users/me`. The client reports it as `contradiction`; the walk behind the never-404 detector is [`spec/never-404.json`](spec/never-404.json). |
 | Corrected | duplicate `page` param on `GET /api/comments` | The spec declares it twice; the overlay removes the inline copy. |
 | Corrected | 11 responses declared as `{"type": "object", "items": {"$ref": ...}}` | `items` is array-only, so on an object the `$ref` never resolves and the response types out as unknown. Affects the `show` operations for articles, users, organizations, segments, profile images and trends, plus the two billboards writes. Eight are confirmed against a running Forem or a recorded fixture; the trends read and the two billboards writes rest on the structural defect alone, and say so in their overlay entry. |
 | Corrected | `comments_count` on `ArticleSummary` | The articles serializer emits it, the upstream schema omits it. Typed required, matching `Article`, `MyArticle` and `ReadingListArticle`, which already require it. Note this narrows the type for anyone constructing an `ArticleSummary` (a test mock, say) rather than just reading one. |

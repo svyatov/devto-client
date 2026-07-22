@@ -1,0 +1,136 @@
+{
+  "provenance": {
+    "instrument": "devto-live",
+    "observedAt": "2026-07-22",
+    "tier": "api-key",
+    "walk": "authenticated GET of every candidate at its bare path, rotating Accept-Encoding (gzip, br, deflate, identity) until a response reported a cache miss; only that fresh response was counted"
+  },
+  "operations": {
+    "get /api/admin/concepts": {
+      "status": 401
+    },
+    "get /api/admin/request_redirects": {
+      "status": 401
+    },
+    "get /api/admin/users": {
+      "status": 401
+    },
+    "get /api/agent_sessions": {
+      "status": 200
+    },
+    "get /api/analytics/dashboard": {
+      "status": 200
+    },
+    "get /api/analytics/follower_engagement": {
+      "status": 200
+    },
+    "get /api/analytics/heatmap": {
+      "status": 200
+    },
+    "get /api/analytics/historical": {
+      "status": 422
+    },
+    "get /api/analytics/past_day": {
+      "status": 200
+    },
+    "get /api/analytics/referrers": {
+      "status": 200
+    },
+    "get /api/analytics/top_contributors": {
+      "status": 200
+    },
+    "get /api/analytics/totals": {
+      "status": 200
+    },
+    "get /api/articles/latest": {
+      "status": 200
+    },
+    "get /api/articles/me": {
+      "status": 200
+    },
+    "get /api/articles/me/all": {
+      "status": 200
+    },
+    "get /api/articles/me/published": {
+      "status": 200
+    },
+    "get /api/articles/me/unpublished": {
+      "status": 200
+    },
+    "get /api/articles/search": {
+      "status": 200
+    },
+    "get /api/articles/semantic_search": {
+      "status": 400
+    },
+    "get /api/badge_achievements": {
+      "status": 401
+    },
+    "get /api/badges": {
+      "status": 401
+    },
+    "get /api/billboards": {
+      "status": 401
+    },
+    "get /api/concepts": {
+      "status": 200
+    },
+    "get /api/concepts/search": {
+      "status": 400
+    },
+    "get /api/followers/users": {
+      "status": 200
+    },
+    "get /api/follows/tags": {
+      "status": 200
+    },
+    "get /api/health_checks/app": {
+      "status": 401
+    },
+    "get /api/health_checks/cache": {
+      "status": 401
+    },
+    "get /api/health_checks/database": {
+      "status": 401
+    },
+    "get /api/instance": {
+      "status": 200
+    },
+    "get /api/organizations": {
+      "status": 200
+    },
+    "get /api/pages": {
+      "status": 200
+    },
+    "get /api/readinglist": {
+      "status": 200
+    },
+    "get /api/recommended_articles_lists": {
+      "status": 401
+    },
+    "get /api/segments": {
+      "status": 401
+    },
+    "get /api/subforems": {
+      "status": 200
+    },
+    "get /api/surveys": {
+      "status": 401
+    },
+    "get /api/tags": {
+      "status": 200
+    },
+    "get /api/trends": {
+      "status": 200
+    },
+    "get /api/users/me": {
+      "status": 200
+    },
+    "get /api/users/search": {
+      "status": 401
+    },
+    "get /api/videos": {
+      "status": 200
+    }
+  }
+}

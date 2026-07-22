@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { generate, loadSpec } from "../scripts/generate-signatures.ts";
+import { generate, loadObservation, loadSpec } from "../scripts/generate-signatures.ts";
 // U4 export surface: flat friendly names import directly (R3); every alias,
 // including the DOM-denylisted ones, is reachable through the `DevTo` namespace.
 // The denylist's *absence* from the flat surface is asserted on the emitted
@@ -12,7 +12,8 @@ import type { Article, DevTo, User } from "../src/index.ts";
  * (KTD3/R1). U2 extends this with the completeness gate; U3 with param types.
  */
 const spec = loadSpec();
-const { signatures, schemas } = generate(spec);
+const observation = loadObservation();
+const { signatures, schemas } = generate(spec, observation);
 
 /** Compile-time assertion helper: `Assert<false>` is a type error. */
 type Assert<T extends true> = T;
@@ -62,7 +63,7 @@ describe("friendly-types", () => {
       type: "object",
       items: { $ref: "#/components/schemas/Segment" },
     };
-    const emitted = generate(malformed).signatures;
+    const emitted = generate(malformed, observation).signatures;
     expect(emitted).toContain(
       'get: (id: number, opts?: CallOptions) => CallResult<"/api/segments/{id}", "get">;',
     );
@@ -107,7 +108,7 @@ describe("friendly-types", () => {
     (op as { responses: Record<string, unknown> }).responses = {
       200: { content: { "application/json": { schema: { $ref: "#/components/schemas/Nope" } } } },
     };
-    expect(() => generate(mutated)).toThrow(
+    expect(() => generate(mutated, observation)).toThrow(
       /response schema "Nope" for get \/api\/articles\/\{id\}/,
     );
   });
@@ -125,7 +126,7 @@ describe("friendly-types", () => {
         },
       },
     };
-    expect(() => generate(mutated)).toThrow(
+    expect(() => generate(mutated, observation)).toThrow(
       /response schema "Nope" for get \/api\/articles\/\{id\}/,
     );
   });
@@ -147,7 +148,7 @@ describe("friendly-types", () => {
       },
       201: { content: { "application/json": { schema: { $ref: "#/components/schemas/User" } } } },
     };
-    const { signatures: sig } = generate(mutated);
+    const { signatures: sig } = generate(mutated, observation);
     expect(sig).toContain(
       'get: (id: number, opts?: CallOptions) => CallResult<"/api/articles/{id}", "get">;',
     );
@@ -163,7 +164,7 @@ describe("friendly-types", () => {
       },
       204: {},
     };
-    const { signatures: sig } = generate(mutated);
+    const { signatures: sig } = generate(mutated, observation);
     expect(sig).toContain(
       'get: (id: number, opts?: CallOptions) => CallResult<"/api/articles/{id}", "get">;',
     );
@@ -179,7 +180,7 @@ describe("friendly-types", () => {
         content: { "application/json": { schema: { $ref: "#/components/schemas/ArticleShow" } } },
       },
     };
-    const { signatures: sig } = generate(mutated);
+    const { signatures: sig } = generate(mutated, observation);
     expect(sig).toContain(
       'get: (id: number, opts?: CallOptions) => CallResult<"/api/articles/{id}", "get">;',
     );
@@ -188,7 +189,7 @@ describe("friendly-types", () => {
   it("does not gate body-only schemas: `Article` (create/update body) needs no map entry (KTD2)", () => {
     // generation succeeds even though the body schema literally named `Article`
     // has no map key; only `ArticleShow → Article` is aliased.
-    expect(() => generate(spec)).not.toThrow();
+    expect(() => generate(spec, observation)).not.toThrow();
     expect(schemas).toContain('export type Article = components["schemas"]["ArticleShow"];');
   });
 
@@ -224,7 +225,7 @@ describe("friendly-types", () => {
   });
 
   it("is deterministic: regenerating schemas is byte-identical", () => {
-    const again = generate(spec);
+    const again = generate(spec, observation);
     expect(again.schemas).toBe(schemas);
     expect(again.signatures).toBe(signatures);
   });

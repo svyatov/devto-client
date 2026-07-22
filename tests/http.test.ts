@@ -511,7 +511,13 @@ describe("transport metadata (U1)", () => {
         headers: { "x-cache": "HIT, MISS", age: "104", "x-request-id": "req-abc" },
       }),
     );
-    expect(meta).toEqual({ status: 429, fromCache: true, age: 104, requestId: "req-abc" });
+    expect(meta).toEqual({
+      status: 429,
+      fromCache: true,
+      age: 104,
+      requestId: "req-abc",
+      contradiction: undefined,
+    });
   });
 
   it("treats a HIT at either tier as cache-served (KTD6)", () => {
@@ -585,7 +591,9 @@ describe("transport metadata (U1)", () => {
       json([{ id: 1 }], 200, { "x-cache": "MISS, HIT", age: "33", "x-request-id": "req-xyz" }),
     );
     await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 1 }]);
-    expect(seen).toEqual([{ status: 200, fromCache: true, age: 33, requestId: "req-xyz" }]);
+    expect(seen).toEqual([
+      { status: 200, fromCache: true, age: 33, requestId: "req-xyz", contradiction: undefined },
+    ]);
   });
 
   it("fires the observer on failed calls too, before the error is thrown", async () => {
@@ -640,6 +648,119 @@ describe("transport metadata (U1)", () => {
     } finally {
       process.off("unhandledRejection", onUnhandled);
     }
+  });
+});
+
+/**
+ * The contradiction detectors (U2/U3). Every case is decided from a stubbed
+ * `Response`'s headers: no test below reads a body to reach a verdict, which is
+ * what keeps detection ahead of the retry decision (R7).
+ */
+describe("contradiction detection (U2)", () => {
+  /** Forem's v0 deprecation marker, verbatim from a dev.to response. */
+  const V0_WARNING =
+    "299 - This endpoint is part of the V0 (beta) API. To start using the V1 endpoints add the `Accept` header and set it to `application/vnd.forem.api-v1+json`.";
+  const HIT = { "x-cache": "MISS, HIT" };
+  const res = (status: number, headers: Record<string, string>): Response =>
+    new Response("{}", { status, headers });
+  const flagOn = (status: number, headers: Record<string, string>, ...args: boolean[]) =>
+    readTransportMeta(res(status, headers), ...(args as [boolean?, boolean?])).contradiction;
+
+  it("flags the v0 marker cached or fresh, and ignores an unrelated warning", () => {
+    expect(flagOn(200, { warning: V0_WARNING, ...HIT })).toBe("v0-under-v1");
+    // fresh matters most: a v0 body from the origin is the worse bug, not a lesser one
+    expect(flagOn(200, { warning: V0_WARNING, "x-cache": "MISS, MISS" })).toBe("v0-under-v1");
+    expect(flagOn(200, { warning: '199 - "miscellaneous warning"', ...HIT })).toBeUndefined();
+  });
+
+  it("flags a cached 404 only for an operation in the never-404 set", () => {
+    expect(flagOn(404, HIT, false, true)).toBe("impossible-404");
+    expect(flagOn(404, HIT, false, false)).toBeUndefined();
+    // the genuine not-found the R4 narrowing exists for: credentialed, cached, not in the set
+    expect(flagOn(404, HIT, true, false)).toBeUndefined();
+  });
+
+  it("flags a cached refusal only when the request carried a credential", () => {
+    expect(flagOn(401, HIT, true)).toBe("credentialed-refusal");
+    expect(flagOn(403, HIT, true)).toBe("credentialed-refusal");
+    expect(flagOn(401, HIT, false)).toBeUndefined();
+    // the real privilege gates on /api/badges and /api/surveys: origin-served, so quiet
+    expect(flagOn(401, { "x-cache": "MISS, MISS" }, true)).toBeUndefined();
+    expect(flagOn(401, {}, true)).toBeUndefined();
+  });
+
+  it("reports the strongest evidence when more than one detector could fire", () => {
+    expect(flagOn(401, { warning: V0_WARNING, ...HIT }, true)).toBe("v0-under-v1");
+    expect(flagOn(404, HIT, true, true)).toBe("impossible-404");
+  });
+
+  it("reaches an observer on a 200 and a caught error on a 401, with the same value", async () => {
+    const seen: (string | undefined)[] = [];
+    const { client: c } = client(
+      { apiKey: "k", onResponse: (m) => seen.push(m.contradiction) },
+      json([{ id: 1 }], 200, { warning: V0_WARNING }),
+      json({ error: "unauthorized" }, 401, HIT),
+    );
+    await c.request("GET", "/api/articles");
+    const err = (await c.request("GET", "/api/users/me").catch((e: unknown) => e)) as DevToApiError;
+    expect(seen).toEqual(["v0-under-v1", "credentialed-refusal"]);
+    expect(err.contradiction).toBe("credentialed-refusal");
+  });
+
+  it("counts a key supplied through per-request headers as a credential", async () => {
+    const { client: c } = client({}, json({ error: "unauthorized" }, 401, HIT));
+    const err = (await c
+      .request("GET", "/api/users/me", { headers: { "api-key": "k" } })
+      .catch((e: unknown) => e)) as DevToApiError;
+    expect(err.contradiction).toBe("credentialed-refusal");
+  });
+
+  it("changes nothing else: same value, same error, same request count (R6)", async () => {
+    const { client: c, calls } = client(
+      { apiKey: "k" },
+      json([{ id: 1 }], 200, { warning: V0_WARNING, ...HIT }),
+    );
+    await expect(c.request("GET", "/api/articles")).resolves.toEqual([{ id: 1 }]);
+    expect(calls).toHaveLength(1);
+
+    // a flagged 429 is still not retried, and a flagged 401 still throws
+    const { client: d, calls: dCalls } = retryClient({ apiKey: "k" }, res429("1", HIT));
+    await expect(d.request("GET", "/api/articles")).rejects.toBeInstanceOf(DevToApiError);
+    expect(dCalls).toHaveLength(1);
+  });
+});
+
+describe("the escape-hatch boundary (U3)", () => {
+  const HIT = { "x-cache": "MISS, HIT" };
+  const notFound = (): Response => json({ error: "not found" }, 404, HIT);
+  const thrown = async (call: Promise<unknown>): Promise<DevToApiError> =>
+    (await call.catch((e: unknown) => e)) as DevToApiError;
+
+  it("surfaces impossible-404 for a namespace method whose op is in the set", async () => {
+    const { client: c } = client({ apiKey: "k" }, notFound());
+    expect((await thrown(c.tags.list())).contradiction).toBe("impossible-404");
+  });
+
+  it("stays quiet for a namespace method whose op is not in the set", async () => {
+    // /api/comments declares a 404 upstream, so it is never a candidate
+    const { client: c } = client({ apiKey: "k" }, notFound());
+    expect((await thrown(c.comments.list({ a_id: "1" }))).contradiction).toBeUndefined();
+  });
+
+  it("withholds detector two from client.request, and keeps detector three there", async () => {
+    const { client: c } = client({ apiKey: "k" }, notFound(), json({ error: "no" }, 401, HIT));
+    expect((await thrown(c.request("GET", "/api/tags"))).contradiction).toBeUndefined();
+    expect((await thrown(c.request("GET", "/api/tags"))).contradiction).toBe(
+      "credentialed-refusal",
+    );
+  });
+
+  it("carries the same resolution into an iterator's pages", async () => {
+    const { client: c } = client({ apiKey: "k" }, json([{ id: 1 }], 200), notFound());
+    const iterator = c.tags.listAll();
+    await iterator.next();
+    const err = (await iterator.next().catch((e: unknown) => e)) as DevToApiError;
+    expect(err.contradiction).toBe("impossible-404");
   });
 });
 

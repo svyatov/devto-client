@@ -20,6 +20,7 @@ let signatures = "";
 let schemas = "";
 let http = "";
 let ops = "";
+let errors = "";
 
 beforeAll(() => {
   out = mkdtempSync(join(tmpdir(), "devto-dts-"));
@@ -33,6 +34,7 @@ beforeAll(() => {
   schemas = readFileSync(join(out, "generated", "schemas.d.ts"), "utf8");
   http = readFileSync(join(out, "http.d.ts"), "utf8");
   ops = readFileSync(join(out, "ops.d.ts"), "utf8");
+  errors = readFileSync(join(out, "errors.d.ts"), "utf8");
 }, 120_000);
 
 afterAll(() => {
@@ -152,6 +154,19 @@ describe("dts-surface guard (R5)", () => {
       // the one assertion in tests/ allowed to name the removed option: it is
       // what proves the removal reached the public surface, not just the source
       expect(block).not.toContain("maxDelayMs");
+    });
+
+    it("pins the Contradiction union and its home on ResponseMeta", () => {
+      // a consumer branching on the value needs every member to survive emit; a
+      // rename or a silently dropped member fails here rather than at their build
+      expect(index).toContain("Contradiction");
+      const union = errors.match(/type Contradiction = ([^;]*);/)?.[1];
+      expect(union).toBeDefined();
+      for (const member of ["v0-under-v1", "impossible-404", "credentialed-refusal"]) {
+        expect(union, member).toContain(`"${member}"`);
+      }
+      const responseMeta = errors.match(/interface ResponseMeta \{([\s\S]*?)\n\}/)?.[1];
+      expect(responseMeta).toContain("contradiction: Contradiction | undefined");
     });
 
     it("pins CallOptions, the bag every namespace method actually takes", () => {
