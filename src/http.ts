@@ -161,6 +161,7 @@ function backoffDelay(attempt: number, retry: Required<RetryOptions>): number {
  */
 function detectContradiction(
   res: Response,
+  fromCache: boolean,
   credentialed: boolean,
   never404: boolean,
 ): Contradiction | undefined {
@@ -168,8 +169,11 @@ function detectContradiction(
   // path. The client hard-codes the v1 Accept header below, so its presence is a
   // contradiction whether the edge or the origin produced it: a v0 body served
   // fresh is the worse bug, and the flag must not hide it behind a cache check.
-  if (res.headers.get("warning")?.startsWith("299") === true) return "v0-under-v1";
-  if (!(res.headers.get("x-cache")?.toUpperCase().includes("HIT") ?? false)) return undefined;
+  // Matched per list element rather than as a prefix: `Warning` is a comma-joined
+  // list, and an intermediary emitting its own warning first would otherwise hide
+  // Forem's behind it.
+  if (/(?:^|,\s*)299\b/.test(res.headers.get("warning") ?? "")) return "v0-under-v1";
+  if (!fromCache) return undefined;
   if (res.status === 404 && never404) return "impossible-404";
   // 401 and 403 both, the pair the rest of the project already treats alike as a
   // refusal: a cached 403 replay is the same defect as a cached 401.
@@ -193,14 +197,15 @@ export function readTransportMeta(
   never404 = false,
 ): ResponseMeta {
   const age = res.headers.get("age");
+  // dev.to reports two tiers ("HIT, MISS", "MISS, HIT"); either one hitting
+  // means the bytes skipped the origin. No header at all means no CDN (KTD6).
+  const fromCache = res.headers.get("x-cache")?.toUpperCase().includes("HIT") ?? false;
   return {
     status: res.status,
-    // dev.to reports two tiers ("HIT, MISS", "MISS, HIT"); either one hitting
-    // means the bytes skipped the origin. No header at all means no CDN (KTD6).
-    fromCache: res.headers.get("x-cache")?.toUpperCase().includes("HIT") ?? false,
+    fromCache,
     age: age !== null && /^\d+$/.test(age) ? Number(age) : undefined,
     requestId: res.headers.get("x-request-id") ?? undefined,
-    contradiction: detectContradiction(res, credentialed, never404),
+    contradiction: detectContradiction(res, fromCache, credentialed, never404),
   };
 }
 
@@ -258,12 +263,15 @@ export async function request<T>(
   headers.set("accept", ACCEPT_V1);
   if (config.apiKey !== undefined) headers.set("api-key", config.apiKey);
 
+  // Asked of the assembled headers, not `config.apiKey`, so a key a caller
+  // supplied through `headers` counts as a credential too. Both the redirect
+  // guard and the contradiction detector below read this one answer.
+  const credentialed = headers.has("api-key");
+
   const init: RequestInit = { method, headers };
   // fetch strips Authorization on cross-origin redirects but forwards custom
   // headers like api-key. Refuse redirects outright rather than leak the key.
-  // Asked of the assembled headers, not `config.apiKey`, so a key a caller
-  // supplied through `headers` is guarded the same way.
-  if (headers.has("api-key")) init.redirect = "error";
+  if (credentialed) init.redirect = "error";
   if (opts.body !== undefined) {
     init.body = JSON.stringify(opts.body);
     if (!headers.has("content-type")) headers.set("content-type", "application/json");
@@ -316,10 +324,7 @@ export async function request<T>(
         throw new Error(`${method} ${url} failed`, { cause });
       }
 
-      // asked of the assembled headers, not `config.apiKey`, so a key a caller
-      // supplied through `headers` counts as a credential the same way the
-      // redirect guard above treats it
-      const meta = readTransportMeta(res, headers.has("api-key"), never404);
+      const meta = readTransportMeta(res, credentialed, never404);
       try {
         // an async observer returns a promise the `catch` below cannot see, and an
         // unhandled rejection takes the whole process down on Node's default

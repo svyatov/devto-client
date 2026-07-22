@@ -661,16 +661,21 @@ describe("contradiction detection (U2)", () => {
   const V0_WARNING =
     "299 - This endpoint is part of the V0 (beta) API. To start using the V1 endpoints add the `Accept` header and set it to `application/vnd.forem.api-v1+json`.";
   const HIT = { "x-cache": "MISS, HIT" };
-  const res = (status: number, headers: Record<string, string>): Response =>
-    new Response("{}", { status, headers });
   const flagOn = (status: number, headers: Record<string, string>, ...args: boolean[]) =>
-    readTransportMeta(res(status, headers), ...(args as [boolean?, boolean?])).contradiction;
+    readTransportMeta(json({}, status, headers), ...(args as [boolean?, boolean?])).contradiction;
 
   it("flags the v0 marker cached or fresh, and ignores an unrelated warning", () => {
     expect(flagOn(200, { warning: V0_WARNING, ...HIT })).toBe("v0-under-v1");
     // fresh matters most: a v0 body from the origin is the worse bug, not a lesser one
     expect(flagOn(200, { warning: V0_WARNING, "x-cache": "MISS, MISS" })).toBe("v0-under-v1");
     expect(flagOn(200, { warning: '199 - "miscellaneous warning"', ...HIT })).toBeUndefined();
+    // `Warning` is a list and Headers comma-joins it, so an intermediary that
+    // warns first must not hide Forem's marker behind its own
+    expect(flagOn(200, { warning: `199 - "cache note", ${V0_WARNING}`, ...HIT })).toBe(
+      "v0-under-v1",
+    );
+    // and the code must match as a list element, not as a substring anywhere
+    expect(flagOn(200, { warning: '199 - "expires in 299 seconds"', ...HIT })).toBeUndefined();
   });
 
   it("flags a cached 404 only for an operation in the never-404 set", () => {
