@@ -16,6 +16,7 @@ import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs as parseNodeArgs } from "node:util";
 import { DevToApiError, type ResponseMeta } from "../src/errors.ts";
+import { NEVER_404 } from "../src/generated/routing.ts";
 import {
   type ClientOptions,
   type RequestOptions,
@@ -103,6 +104,20 @@ export function scrub(value: unknown, scrubContent = false): unknown {
  * poisoning would otherwise print `skipped: GET /api/pages (404)` and pass green
  * while dropping the endpoint from the fixture set.
  */
+/**
+ * A refusal the origin generated is a real privilege gate and a legitimate skip.
+ * A cached or contradicted one is a replay wearing the same costume, and skipping
+ * on it drops the step on someone else's response (R10). Shared by both recorders:
+ * the write cycle's two privilege gates skip on exactly the statuses a poisoned
+ * entry replays, so leaving them unguarded would fix half the defect.
+ */
+function assertOriginRefusal(err: DevToApiError, label: string): void {
+  if (!err.fromCache && err.contradiction === undefined) return;
+  throw new Error(
+    `refusing to skip ${label}: ${err.contradiction ?? `a cached ${err.status}`}, so it would be dropped on someone else's response. Re-run once the edge entry expires`,
+  );
+}
+
 export async function recordReads(
   rf: Rf,
   specs: ReadSpec[],
@@ -121,9 +136,16 @@ export async function recordReads(
       if (spec.query) opts.query = spec.query;
       let payload = await rf<unknown>(method, spec.path, opts);
       const meta = takeMeta(latest);
+      // an empty cell means the observer never ran, which would leave the two
+      // checks below inert and the run green: the gate fails closed instead
+      if (latest !== undefined && meta === undefined) {
+        throw new Error(
+          `no response metadata for ${method} ${spec.template} from ${spec.path}: nothing vouched for this response`,
+        );
+      }
       if (meta?.contradiction !== undefined) {
         throw new Error(
-          `refusing to record ${method} ${spec.template} from ${spec.path}: ${meta.contradiction}, so the response was not generated for this request`,
+          `refusing to record ${method} ${spec.template} from ${spec.path}: ${meta.contradiction}, so the response was not generated for this request. Re-run once the edge entry expires`,
         );
       }
       // still written: a plain cache hit is a payload the origin did generate,
@@ -142,14 +164,11 @@ export async function recordReads(
       recorded.push(rec);
       files.push(writeFixture(outDir, rec));
     } catch (err) {
+      // drained here too, or a refusal's metadata would still be sitting in the
+      // cell when the next read is taken and could vouch for the wrong response
+      takeMeta(latest);
       if (err instanceof DevToApiError && [401, 403, 404].includes(err.status)) {
-        // a privilege-gated endpoint writes nothing to vouch for, so an origin
-        // refusal is still a skip; a cached one is a replay wearing its costume
-        if (err.fromCache) {
-          throw new Error(
-            `refusing to skip ${method} ${spec.template} from ${spec.path}: ${err.contradiction ?? `a cached ${err.status}`}, so the fixture would be dropped on someone else's response`,
-          );
-        }
+        assertOriginRefusal(err, `${method} ${spec.template} from ${spec.path}`);
         skipped.push(`${method} ${spec.template} (${err.status})`);
       } else {
         throw err;
@@ -204,6 +223,7 @@ export async function recordWriteCycle(
     emit("/api/articles/{id}/unpublish", "PUT", `/api/articles/${draft.id}/unpublish`, null);
   } catch (err) {
     if (!(err instanceof DevToApiError && [401, 403].includes(err.status))) throw err;
+    assertOriginRefusal(err, "PUT /api/articles/{id}/unpublish");
     console.warn(`skipped: PUT /api/articles/{id}/unpublish (${err.status}, privilege-gated)`);
   }
 
@@ -227,6 +247,7 @@ export async function recordWriteCycle(
     }
   } catch (err) {
     if (!(err instanceof DevToApiError && [401, 403].includes(err.status))) throw err;
+    assertOriginRefusal(err, "POST /api/reactions/toggle");
     console.warn(`skipped: POST /api/reactions/toggle (${err.status}, admin-gated)`);
   }
 
@@ -245,7 +266,7 @@ export function writeFixture(dir: string, rec: Recorded): string {
   return file;
 }
 
-const DEFAULT_BASE_URL = "https://dev.to";
+export const DEFAULT_BASE_URL = "https://dev.to";
 const LOOPBACK = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
 
 /**
@@ -401,7 +422,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const apiKey = target.apiKey;
   const latest: LatestResponse = { meta: undefined };
   const config = buildRecorderConfig(process.env, latest);
-  const rf: Rf = (method, path, opts) => request(config, method, path, opts);
+  // the recorder is where a cached 404 does the most damage, so it resolves
+  // never-404 membership the same way `bindOps` does: every member is a bare
+  // path with no parameters, so the concrete path is its own op key
+  const rf: Rf = (method, path, opts) =>
+    request(config, method, path, opts, NEVER_404.has(`${method.toLowerCase()} ${path}`));
 
   const runAll = only.length === 0;
   const wantWriteCycle = only.includes("write-cycle");

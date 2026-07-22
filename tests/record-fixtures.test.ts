@@ -257,6 +257,46 @@ describe("recordReads provenance gate (U4)", () => {
     );
   });
 
+  it("fails the run on a fresh contradicted refusal, not just a cached one", async () => {
+    // v0-under-v1 fires on origin-served responses too, and a v0-generated 404
+    // drops the endpoint just as silently as a replayed one would
+    const latest: LatestResponse = { meta: undefined };
+    const rf = answering(latest, {
+      "/api/pages": meta({ status: 404, fromCache: false, contradiction: "v0-under-v1" }),
+    });
+    await expect(recordReads(rf, [read("/api/pages")], tmp(), 0, latest)).rejects.toThrow(
+      /refusing to skip GET \/api\/pages .*v0-under-v1/,
+    );
+  });
+
+  it("drains the cell on a skip, so a refusal cannot vouch for the next read", async () => {
+    const latest: LatestResponse = { meta: undefined };
+    // only the first read fills the cell; the second answers without touching it,
+    // so a cell left dirty by the skip would carry the 401 forward as its provenance
+    const rf = (async (_method: string, path: string) => {
+      if (path === "/api/readinglist") {
+        latest.meta = meta({ status: 401 });
+        throw new DevToApiError(401, undefined, "", latest.meta);
+      }
+      return [{ id: 1 }];
+    }) as unknown as Rf;
+    await expect(
+      recordReads(rf, [read("/api/readinglist"), read("/api/tags")], tmp(), 0, latest),
+    ).rejects.toThrow(/no response metadata for GET \/api\/tags/);
+  });
+
+  it("fails closed when the cell is empty, rather than recording unvouched bytes", async () => {
+    // deleting the observer that fills the cell would otherwise leave every check
+    // above inert and the run green: exactly the silent pass this gate exists for
+    const latest: LatestResponse = { meta: undefined };
+    const rf = (async () => [{ id: 1 }]) as unknown as Rf;
+    const dir = tmp();
+    await expect(recordReads(rf, [read("/api/tags")], dir, 0, latest)).rejects.toThrow(
+      /no response metadata for GET \/api\/tags/,
+    );
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
   it("names the cached status when a cached error carried no contradiction", async () => {
     const latest: LatestResponse = { meta: undefined };
     const rf = answering(latest, { "/api/tags": meta({ status: 404, fromCache: true }) });
@@ -418,6 +458,22 @@ describe("recordWriteCycle", () => {
     }) as unknown as Rf;
     const recorded = await recordWriteCycle(rf, 7, tmp());
     expect(recorded.map((r) => r.template)).not.toContain("/api/reactions/toggle");
+  });
+
+  it("fails the write cycle on a cached refusal instead of calling it a privilege gate", async () => {
+    // the same defect recordReads refuses, one function over: a replayed 401 is
+    // indistinguishable from a real gate until you read the cache flag
+    const cached = { status: 401, fromCache: true, age: 90, requestId: undefined } as const;
+    const rf = vi.fn(async (method: string, path: string) => {
+      if (path.endsWith("/unpublish")) {
+        throw new DevToApiError(401, undefined, "", { ...cached, contradiction: undefined });
+      }
+      if (method === "POST" && path === "/api/articles") return { id: 42 };
+      return {};
+    }) as unknown as Rf;
+    await expect(recordWriteCycle(rf, 7, tmp())).rejects.toThrow(
+      /refusing to skip PUT \/api\/articles\/\{id\}\/unpublish: a cached 401/,
+    );
   });
 
   it("propagates a non-privilege error from the reaction toggle", async () => {

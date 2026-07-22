@@ -146,8 +146,14 @@ export function validateObservation(raw: unknown): Never404Observation {
     fail("operations is missing");
   }
   for (const [key, record] of Object.entries(operations as Record<string, unknown>)) {
-    if (typeof (record as { status?: unknown } | null)?.status !== "number") {
-      fail(`operation ${key} must record the status the walk saw`);
+    const { status } = (record ?? {}) as { status?: unknown };
+    if (typeof status !== "number") fail(`operation ${key} must record the status the walk saw`);
+    // the walk never writes these, so reaching here means the file was edited by
+    // hand or by another tool. A 404 refutes the very claim the entry makes, and
+    // a 429 or 5xx never reached the routing layer that would have decided.
+    if (status === 404) fail(`operation ${key} records a 404, which refutes its own entry`);
+    if (status === 429 || (typeof status === "number" && status >= 500)) {
+      fail(`operation ${key} records ${status}, which says nothing about whether the path exists`);
     }
   }
   return raw as Never404Observation;
@@ -442,10 +448,10 @@ export function generate(
   // candidate with nothing behind it is named rather than failed. A network walk
   // must never block an unrelated spec update, and a hard failure here would make
   // a red CI run the only way to learn the set has gone stale.
-  const candidates = never404Candidates(spec);
-  const never404 = candidates.filter((key) => key in observed.operations);
-  for (const key of candidates) {
-    if (!(key in observed.operations)) {
+  const never404: string[] = [];
+  for (const key of never404Candidates(spec)) {
+    if (key in observed.operations) never404.push(key);
+    else {
       console.warn(
         `never-404 candidate with no observation behind it: ${key} (run bun scripts/observe-never-404.ts)`,
       );

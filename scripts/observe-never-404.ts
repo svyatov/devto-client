@@ -19,6 +19,8 @@
  * shrink the set for that reason alone.
  *
  * Run: DEVTO_API_KEY=... bun scripts/observe-never-404.ts [out-file]
+ * Set OBSERVED_TIER when the key is not a plain api-key one: it names the rung
+ * the provenance block records, and a walk on another tier is not set drift.
  */
 import { writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -32,6 +34,7 @@ import {
 } from "./generate-signatures.ts";
 import {
   buildRecorderConfig,
+  DEFAULT_BASE_URL,
   type LatestResponse,
   resolveTarget,
   takeMeta,
@@ -45,14 +48,7 @@ export interface Probe {
   fromCache: boolean;
 }
 
-export type Verdict = "admitted" | "rejected" | "unobserved";
-
-/** Only the first fresh probe decides; every hit before it was answering someone else. */
-export function classify(probes: Probe[]): Verdict {
-  const fresh = probes.find((p) => !p.fromCache);
-  if (fresh === undefined) return "unobserved";
-  return fresh.status === 404 ? "rejected" : "admitted";
-}
+type Verdict = "admitted" | "rejected" | "unobserved";
 
 export interface WalkResult {
   operations: Never404Observation["operations"];
@@ -71,27 +67,60 @@ export async function observe(
   const result: WalkResult = { operations: {}, rejected: [], unobserved: [] };
   for (const key of candidates) {
     const path = key.slice(key.indexOf(" ") + 1);
-    const probes: Probe[] = [];
-    for (const encoding of ENCODINGS) {
-      const seen = await probe(path, encoding);
-      probes.push(seen);
-      if (!seen.fromCache) break;
+    const statuses: number[] = [];
+    let fresh: Probe | undefined;
+    try {
+      for (const encoding of ENCODINGS) {
+        const seen = await probe(path, encoding);
+        statuses.push(seen.status);
+        if (!seen.fromCache) {
+          fresh = seen;
+          break;
+        }
+      }
+    } catch (err) {
+      // one unreachable candidate must not discard the whole walk: a re-run
+      // inside the edge's TTL reads its own warmed entries, so the evidence a
+      // second attempt can gather is strictly worse than what this one holds
+      console.warn(`probe failed, treating as unobserved: ${key} (${String(err)})`);
+      fresh = undefined;
     }
-    const verdict = classify(probes);
-    const fresh = probes.find((p) => !p.fromCache);
-    if (verdict === "admitted" && fresh) result.operations[key] = { status: fresh.status };
-    else if (verdict === "rejected") result.rejected.push(key);
-    else result.unobserved.push(key);
-    console.log(`${verdict}: ${key} (${probes.map((p) => p.status).join(", ")})`);
+    // only the first fresh probe decides; every hit before it answered someone else
+    let verdict: Verdict;
+    if (fresh === undefined) {
+      verdict = "unobserved";
+      result.unobserved.push(key);
+    } else if (fresh.status === 404) {
+      verdict = "rejected";
+      result.rejected.push(key);
+    } else if (fresh.status === 429 || fresh.status >= 500) {
+      // the origin never reached the routing layer, so it said nothing about
+      // whether this path exists. A refusal (401, 400, 422) did: it answered.
+      verdict = "unobserved";
+      result.unobserved.push(key);
+    } else {
+      verdict = "admitted";
+      result.operations[key] = { status: fresh.status };
+    }
+    console.log(`${verdict}: ${key} (${statuses.join(", ")})`);
   }
   return result;
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const outFile = process.argv[2] ?? OBSERVATION_FILE;
-  if (resolveTarget(process.env).apiKey === undefined) {
+  const target = resolveTarget(process.env);
+  if (target.apiKey === undefined) {
     throw new Error(
       "the walk must run authenticated: an anonymous 404 says nothing about what a credentialed request gets",
+    );
+  }
+  // `devto-live` is the only instrument this file can honestly claim, and it
+  // names dev.to. Walking a self-hosted Forem into the committed file would
+  // stamp a provenance the walk did not have, mirroring assertRecordedTierTarget.
+  if (outFile === OBSERVATION_FILE && target.baseUrl !== DEFAULT_BASE_URL) {
+    throw new Error(
+      `refusing to write ${OBSERVATION_FILE} from ${target.baseUrl}: its provenance claims ${DEFAULT_BASE_URL}. Pass a different out file.`,
     );
   }
   const latest: LatestResponse = { meta: undefined };

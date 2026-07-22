@@ -170,6 +170,50 @@ describe("the never-404 set (U1)", () => {
     expect((await observe(fresh(404), ["get /api/tags"])).rejected).toEqual(["get /api/tags"]);
   });
 
+  it("stops at the first fresh probe rather than walking every encoding", async () => {
+    // the early exit is the walk's whole rate budget: without it every candidate
+    // costs four live requests and warms three more entries for the next run.
+    // It also decides WHICH response counts, so a later miss cannot overwrite it.
+    const seen: string[] = [];
+    const probe = async (_path: string, encoding: string) => {
+      seen.push(encoding);
+      return { status: seen.length === 1 ? 500 : 200, fromCache: seen.length > 2 };
+    };
+    const walked = await observe(probe, ["get /api/tags"]);
+    expect(seen).toEqual(["gzip"]);
+    expect(walked.operations).toEqual({});
+    expect(walked.unobserved).toEqual(["get /api/tags"]);
+  });
+
+  it("treats a fresh 429 or 5xx as no evidence, unlike a fresh refusal", async () => {
+    const fresh = (status: number) => async () => ({ status, fromCache: false });
+    // the origin never reached the routing layer, so it said nothing about the path
+    for (const status of [429, 500, 503]) {
+      const walked = await observe(fresh(status), ["get /api/tags"]);
+      expect(walked.operations, String(status)).toEqual({});
+      expect(walked.unobserved, String(status)).toEqual(["get /api/tags"]);
+    }
+    // a refusal did answer: it proves the router resolved the path
+    expect((await observe(fresh(401), ["get /api/tags"])).operations).toEqual({
+      "get /api/tags": { status: 401 },
+    });
+  });
+
+  it("keeps walking when one candidate's probe throws", async () => {
+    // a re-run reads its own warmed entries, so discarding a walk that already
+    // holds evidence is strictly worse than banking what it has
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const probe = async (path: string) => {
+      if (path === "/api/tags") throw new Error("socket hang up");
+      return { status: 200, fromCache: false };
+    };
+    const walked = await observe(probe, ["get /api/tags", "get /api/videos"]);
+    expect(walked.unobserved).toEqual(["get /api/tags"]);
+    expect(walked.operations).toEqual({ "get /api/videos": { status: 200 } });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("get /api/tags"));
+    warn.mockRestore();
+  });
+
   it("emits nothing for an observation the spec no longer proposes as a candidate", () => {
     // a stale entry must not resurrect a set member once the spec declares a 404 for it
     const stale = {
@@ -193,6 +237,14 @@ describe("the never-404 set (U1)", () => {
   });
 
   it("refuses a malformed observation rather than emitting a partial set", () => {
+    expect(() => generate(spec, null)).toThrow(/must be an object/);
+    expect(() => generate(spec, [])).toThrow(/must be an object/);
+    expect(() => generate(spec, { provenance: observation.provenance })).toThrow(
+      /operations is missing/,
+    );
+    expect(() => generate(spec, { ...observation, operations: [] })).toThrow(
+      /operations is missing/,
+    );
     expect(() => generate(spec, {})).toThrow(/provenance is missing/);
     expect(() =>
       generate(spec, {
@@ -206,5 +258,16 @@ describe("the never-404 set (U1)", () => {
     expect(() => generate(spec, { ...observation, operations: { "get /api/tags": {} } })).toThrow(
       /must record the status/,
     );
+  });
+
+  it("refuses a recorded status that cannot support the entry it appears under", () => {
+    // the walk never writes these, so one here means the file was edited by hand
+    const withStatus = (status: number) => ({
+      ...observation,
+      operations: { "get /api/tags": { status } },
+    });
+    expect(() => generate(spec, withStatus(404))).toThrow(/refutes its own entry/);
+    expect(() => generate(spec, withStatus(503))).toThrow(/says nothing about whether the path/);
+    expect(() => generate(spec, withStatus(429))).toThrow(/says nothing about whether the path/);
   });
 });
