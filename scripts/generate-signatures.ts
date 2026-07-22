@@ -12,7 +12,7 @@
  * Three files are produced:
  *   src/generated/signatures.ts: the labeled namespace interfaces (types)
  *   src/generated/schemas.ts: friendly entity aliases + per-method param types
- *   src/generated/routing.ts: runtime params routing (query vs body) manifest
+ *   src/generated/routing.ts: params routing (query vs body) + the never-404 set
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -94,6 +94,89 @@ export function loadSpec(): Spec {
     JSON.parse(readFileSync("spec/api_v1.json", "utf8")),
     JSON.parse(readFileSync("spec/overlay.json", "utf8")) as OverlayEntry[],
   ).spec as Spec;
+}
+
+/**
+ * What can establish a never-404 observation (KTD1). Its own vocabulary rather
+ * than the overlay's `INSTRUMENTS`: those govern spec corrections, and none of
+ * them means "a walk against dev.to production". One value is enough today.
+ */
+export const OBSERVATION_INSTRUMENTS = ["devto-live"] as const;
+
+/**
+ * The committed record behind the never-404 set: a file-level provenance block
+ * plus one entry per admitted operation, keyed like `opRouting`. Spec silence
+ * proposes a candidate; only an entry here admits one (R5).
+ */
+export interface Never404Observation {
+  provenance: {
+    instrument: (typeof OBSERVATION_INSTRUMENTS)[number];
+    /** When the walk ran. A claim with no date cannot go stale, which is the problem. */
+    observedAt: string;
+    /** The credential tier the walk ran at: a re-run on another key is not set drift. */
+    tier: string;
+    /** What the walk did, in enough detail to repeat it. */
+    walk: string;
+  };
+  operations: Record<string, { status: number }>;
+}
+
+export const OBSERVATION_FILE = "spec/never-404.json";
+
+/** Reject a malformed observation loudly, in `validateProvenance`'s style: no partial set. */
+export function validateObservation(raw: unknown): Never404Observation {
+  const fail = (why: string): never => {
+    throw new Error(`${OBSERVATION_FILE}: ${why}`);
+  };
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) fail("must be an object");
+  const { provenance, operations } = raw as Partial<Never404Observation>;
+  if (provenance === null || typeof provenance !== "object") fail("provenance is missing");
+  const { instrument, observedAt, tier, walk } = provenance as Never404Observation["provenance"];
+  if (!OBSERVATION_INSTRUMENTS.includes(instrument)) {
+    fail(
+      `provenance.instrument must be one of ${OBSERVATION_INSTRUMENTS.join(", ")}, got ${JSON.stringify(instrument)}`,
+    );
+  }
+  for (const [field, value] of Object.entries({ observedAt, tier, walk })) {
+    if (typeof value !== "string" || value.trim() === "") {
+      fail(`provenance.${field} must be a non-empty string`);
+    }
+  }
+  if (operations === null || typeof operations !== "object" || Array.isArray(operations)) {
+    fail("operations is missing");
+  }
+  for (const [key, record] of Object.entries(operations as Record<string, unknown>)) {
+    const { status } = (record ?? {}) as { status?: unknown };
+    if (typeof status !== "number") fail(`operation ${key} must record the status the walk saw`);
+    // the walk never writes these, so reaching here means the file was edited by
+    // hand or by another tool. A 404 refutes the very claim the entry makes, and
+    // a 429 or 5xx never reached the routing layer that would have decided.
+    if (status === 404) fail(`operation ${key} records a 404, which refutes its own entry`);
+    if (status === 429 || (typeof status === "number" && status >= 500)) {
+      fail(`operation ${key} records ${status}, which says nothing about whether the path exists`);
+    }
+  }
+  return raw as Never404Observation;
+}
+
+export function loadObservation(): Never404Observation {
+  return validateObservation(JSON.parse(readFileSync(OBSERVATION_FILE, "utf8")));
+}
+
+/**
+ * Operations the spec permits a never-404 claim about (KTD2): GET, no path
+ * parameters, no declared 404. Structure selects; it never admits, because a
+ * spec silence is not evidence that the server cannot 404.
+ */
+export function never404Candidates(spec: Spec): string[] {
+  return Object.entries(spec.paths)
+    .filter(([path]) => pathParamNames(path).length === 0)
+    .filter(([, item]) => {
+      const get = item.get as Operation | undefined;
+      return get !== undefined && !("404" in (get.responses ?? {}));
+    })
+    .map(([path]) => `get ${path}`)
+    .sort();
 }
 
 /** "admin.requestRedirects" → "AdminRequestRedirectsNamespace" (matches the existing exports). */
@@ -321,7 +404,11 @@ function emitSchemas(header: string, ctx: Ctx): string {
   );
 }
 
-export function generate(spec: Spec): { signatures: string; schemas: string; routing: string } {
+export function generate(
+  spec: Spec,
+  observation: unknown,
+): { signatures: string; schemas: string; routing: string } {
+  const observed = validateObservation(observation);
   const ctx: Ctx = {
     sigHelpers: new Set(),
     friendlyUsed: new Set(),
@@ -357,18 +444,40 @@ export function generate(spec: Spec): { signatures: string; schemas: string; rou
     "// Regenerate with `bun run generate`; a dirty diff afterward means drift.\n";
   const signatures = `${header}${importBlock(sigHelperImports, "../ops.ts")}${importBlock(schemaImports, "./schemas.ts")}\n${interfaces.join("\n\n")}\n`;
 
+  // KTD2: spec structure selects candidates, the observation admits them, and a
+  // candidate with nothing behind it is named rather than failed. A network walk
+  // must never block an unrelated spec update, and a hard failure here would make
+  // a red CI run the only way to learn the set has gone stale.
+  const never404: string[] = [];
+  for (const key of never404Candidates(spec)) {
+    if (key in observed.operations) never404.push(key);
+    else {
+      console.warn(
+        `never-404 candidate with no observation behind it: ${key} (run bun scripts/observe-never-404.ts)`,
+      );
+    }
+  }
+
   const routingBody =
-    `${header}// Runtime params routing: which ops send their flat params as query vs body\n` +
-    "// (KTD4). Ops absent from this map take no params object. Opts follows the\n" +
-    "// positional path args directly.\n\n" +
-    `export const opRouting: Record<string, "query" | "body"> = {\n${routing.sort().join("\n")}\n};\n`;
+    `${header}// Two op-keyed tables, both keyed "<verb> <path>" (KTD3).\n` +
+    "//\n" +
+    "// opRouting: which ops send their flat params as query vs body (KTD4). Ops\n" +
+    "// absent from this map take no params object. Opts follows the positional\n" +
+    "// path args directly.\n" +
+    "//\n" +
+    "// NEVER_404: ops the spec permits a never-404 claim about (GET, no path\n" +
+    `// params, no declared 404) AND ${OBSERVATION_FILE} records a walk behind.\n` +
+    "// A cached 404 from one of these contradicts the record, which is what the\n" +
+    "// transport reports as `impossible-404`.\n\n" +
+    `export const opRouting: Record<string, "query" | "body"> = {\n${routing.sort().join("\n")}\n};\n\n` +
+    `export const NEVER_404: ReadonlySet<string> = new Set([\n${never404.map((key) => `  "${key}",`).join("\n")}\n]);\n`;
 
   return { signatures, schemas: emitSchemas(header, ctx), routing: routingBody };
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const spec = loadSpec();
-  const { signatures, schemas, routing } = generate(spec);
+  const { signatures, schemas, routing } = generate(spec, loadObservation());
   writeFileSync("src/generated/signatures.ts", signatures);
   writeFileSync("src/generated/schemas.ts", schemas);
   writeFileSync("src/generated/routing.ts", routing);

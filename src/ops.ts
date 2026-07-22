@@ -5,7 +5,7 @@
  * otherwise), bound by the one builder below. The surface-inventory test diffs
  * these tables against the composed spec's operation list.
  */
-import { opRouting } from "./generated/routing.ts";
+import { NEVER_404, opRouting } from "./generated/routing.ts";
 import type { paths } from "./generated/types.ts";
 import type { RequestOptions } from "./http.ts";
 import { paginate } from "./pagination.ts";
@@ -162,7 +162,12 @@ export type NoQueryAndBodyOp = [
   ? true
   : false;
 
-export type RequestFn = <R>(method: string, path: string, opts?: RequestOptions) => Promise<R>;
+export type RequestFn = <R>(
+  method: string,
+  path: string,
+  opts?: RequestOptions,
+  never404?: boolean,
+) => Promise<R>;
 
 function fillPath(template: string, params: Record<string, string | number>): string {
   return template.replaceAll(/\{(\w+)\}/g, (_, name: string) => {
@@ -183,7 +188,12 @@ export function bindOps<N>(rf: RequestFn, table: OpTable): N {
   const ns: Record<string, unknown> = {};
   for (const [name, entry] of Object.entries(table)) {
     const pathNames = pathParamNames(entry.path);
-    const route = opRouting[`${entry.verb} ${entry.path}`];
+    const opKey = `${entry.verb} ${entry.path}`;
+    const route = opRouting[opKey];
+    // resolved once per table entry, beside `route`: the transport imports nothing
+    // generated and does no per-call lookup, and the escape hatch, which never
+    // reaches this line, cannot receive the flag (R8/KTD4)
+    const never404 = NEVER_404.has(opKey);
     const { bodyKey } = entry;
     const method = entry.verb.toUpperCase();
 
@@ -205,7 +215,7 @@ export function bindOps<N>(rf: RequestFn, table: OpTable): N {
       // `!== undefined`, not truthiness: 0 is a caller asking for an already-spent
       // budget, which must reach transport and fail rather than silently mean "default"
       if (opts?.timeoutMs !== undefined) reqOpts.timeoutMs = opts.timeoutMs;
-      return rf(method, fillPath(entry.path, pathParams), reqOpts);
+      return rf(method, fillPath(entry.path, pathParams), reqOpts, never404);
     };
 
     // async so a missing path param rejects instead of throwing synchronously (R7)

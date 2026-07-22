@@ -15,7 +15,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs as parseNodeArgs } from "node:util";
-import { DevToApiError } from "../src/errors.ts";
+import { DevToApiError, type ResponseMeta } from "../src/errors.ts";
+import { NEVER_404 } from "../src/generated/routing.ts";
 import {
   type ClientOptions,
   type RequestOptions,
@@ -95,12 +96,34 @@ export function scrub(value: unknown, scrubContent = false): unknown {
  * Records each read, persisting every fixture to `outDir` the moment it is
  * captured (KTD4) so a crash mid-crawl keeps completed work. 401/403/404 means
  * the key can't access it: skip, not fail.
+ *
+ * With a `latest` cell wired to the transport, every read's provenance is
+ * established before it becomes evidence (R9/R10). Both exits are guarded, and
+ * the skip path is the one that matters: 401, 403 and 404 are exactly the
+ * statuses a poisoned cache entry replays, so a run against the `/api/pages`
+ * poisoning would otherwise print `skipped: GET /api/pages (404)` and pass green
+ * while dropping the endpoint from the fixture set.
  */
+/**
+ * A refusal the origin generated is a real privilege gate and a legitimate skip.
+ * A cached or contradicted one is a replay wearing the same costume, and skipping
+ * on it drops the step on someone else's response (R10). Shared by both recorders:
+ * the write cycle's two privilege gates skip on exactly the statuses a poisoned
+ * entry replays, so leaving them unguarded would fix half the defect.
+ */
+function assertOriginRefusal(err: DevToApiError, label: string): void {
+  if (!err.fromCache && err.contradiction === undefined) return;
+  throw new Error(
+    `refusing to skip ${label}: ${err.contradiction ?? `a cached ${err.status}`}, so it would be dropped on someone else's response. Re-run once the edge entry expires`,
+  );
+}
+
 export async function recordReads(
   rf: Rf,
   specs: ReadSpec[],
   outDir: string,
   pauseMs = 3000, // keyless per-IP throttling on dev.to is far stricter than the per-key 3 GET/s
+  latest?: LatestResponse,
 ): Promise<{ recorded: Recorded[]; skipped: string[]; files: string[] }> {
   const recorded: Recorded[] = [];
   const skipped: string[] = [];
@@ -112,6 +135,24 @@ export async function recordReads(
       const opts: RequestOptions = {};
       if (spec.query) opts.query = spec.query;
       let payload = await rf<unknown>(method, spec.path, opts);
+      const meta = takeMeta(latest);
+      // an empty cell means the observer never ran, which would leave the two
+      // checks below inert and the run green: the gate fails closed instead
+      if (latest !== undefined && meta === undefined) {
+        throw new Error(
+          `no response metadata for ${method} ${spec.template} from ${spec.path}: nothing vouched for this response`,
+        );
+      }
+      if (meta?.contradiction !== undefined) {
+        throw new Error(
+          `refusing to record ${method} ${spec.template} from ${spec.path}: ${meta.contradiction}, so the response was not generated for this request. Re-run once the edge entry expires`,
+        );
+      }
+      // still written: a plain cache hit is a payload the origin did generate,
+      // just not for us, and no busting parameter reliably forces a fresh one
+      if (meta?.fromCache === true) {
+        console.warn(`cache hit, not a fresh origin response: ${method} ${spec.template}`);
+      }
       if (spec.trim !== undefined && Array.isArray(payload)) payload = payload.slice(0, spec.trim);
       const rec: Recorded = {
         template: spec.template,
@@ -123,7 +164,11 @@ export async function recordReads(
       recorded.push(rec);
       files.push(writeFixture(outDir, rec));
     } catch (err) {
+      // drained here too, or a refusal's metadata would still be sitting in the
+      // cell when the next read is taken and could vouch for the wrong response
+      takeMeta(latest);
       if (err instanceof DevToApiError && [401, 403, 404].includes(err.status)) {
+        assertOriginRefusal(err, `${method} ${spec.template} from ${spec.path}`);
         skipped.push(`${method} ${spec.template} (${err.status})`);
       } else {
         throw err;
@@ -178,6 +223,7 @@ export async function recordWriteCycle(
     emit("/api/articles/{id}/unpublish", "PUT", `/api/articles/${draft.id}/unpublish`, null);
   } catch (err) {
     if (!(err instanceof DevToApiError && [401, 403].includes(err.status))) throw err;
+    assertOriginRefusal(err, "PUT /api/articles/{id}/unpublish");
     console.warn(`skipped: PUT /api/articles/{id}/unpublish (${err.status}, privilege-gated)`);
   }
 
@@ -201,6 +247,7 @@ export async function recordWriteCycle(
     }
   } catch (err) {
     if (!(err instanceof DevToApiError && [401, 403].includes(err.status))) throw err;
+    assertOriginRefusal(err, "POST /api/reactions/toggle");
     console.warn(`skipped: POST /api/reactions/toggle (${err.status}, admin-gated)`);
   }
 
@@ -219,7 +266,7 @@ export function writeFixture(dir: string, rec: Recorded): string {
   return file;
 }
 
-const DEFAULT_BASE_URL = "https://dev.to";
+export const DEFAULT_BASE_URL = "https://dev.to";
 const LOOPBACK = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
 
 /**
@@ -315,11 +362,35 @@ export function selectReads(all: ReadSpec[], selectors: string[]): ReadSpec[] {
 }
 
 /**
+ * The provenance seam (KTD8): a mutable cell the installed `onResponse` writes
+ * the last response's metadata into, so the loop that just made a request can
+ * ask where its bytes came from. Deliberately not part of `ResolvedConfig`, so
+ * the transport's own type stays untouched.
+ */
+export interface LatestResponse {
+  meta: ResponseMeta | undefined;
+}
+
+/**
+ * Read the last response's metadata and empty the cell in one move. Taking rather
+ * than peeking is what keeps one request's provenance from being attributed to
+ * the next: a call that never got a response leaves nothing behind to inherit.
+ */
+export function takeMeta(latest: LatestResponse | undefined): ResponseMeta | undefined {
+  const { meta } = latest ?? {};
+  if (latest) latest.meta = undefined;
+  return meta;
+}
+
+/**
  * The recording client's transport settings, out here rather than inside the main
  * guard so a test can read them. Pacing and throttle patience are the library's
  * now. This script no longer hand-rolls either.
  */
-export function buildRecorderConfig(env: NodeJS.ProcessEnv = process.env): ResolvedConfig {
+export function buildRecorderConfig(
+  env: NodeJS.ProcessEnv = process.env,
+  latest?: LatestResponse,
+): ResolvedConfig {
   const target = resolveTarget(env);
   const options: ClientOptions = {
     baseUrl: target.baseUrl,
@@ -335,6 +406,11 @@ export function buildRecorderConfig(env: NodeJS.ProcessEnv = process.env): Resol
   };
   if (target.apiKey !== undefined) options.apiKey = target.apiKey;
   if (target.allowInsecureHttp) options.allowInsecureHttp = true;
+  if (latest) {
+    options.onResponse = (meta): void => {
+      latest.meta = meta;
+    };
+  }
   return resolveConfig(options);
 }
 
@@ -344,8 +420,13 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const target = resolveTarget(process.env);
   assertRecordedTierTarget(target.baseUrl, outDir);
   const apiKey = target.apiKey;
-  const config = buildRecorderConfig(process.env);
-  const rf: Rf = (method, path, opts) => request(config, method, path, opts);
+  const latest: LatestResponse = { meta: undefined };
+  const config = buildRecorderConfig(process.env, latest);
+  // the recorder is where a cached 404 does the most damage, so it resolves
+  // never-404 membership the same way `bindOps` does: every member is a bare
+  // path with no parameters, so the concrete path is its own op key
+  const rf: Rf = (method, path, opts) =>
+    request(config, method, path, opts, NEVER_404.has(`${method.toLowerCase()} ${path}`));
 
   const runAll = only.length === 0;
   const wantWriteCycle = only.includes("write-cycle");
@@ -428,7 +509,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const allReads = [...publicReads, ...userReads];
   const selectedReads = runAll ? allReads : selectReads(allReads, readSelectors);
   // recordReads persists each fixture as it lands (KTD4): no separate batch write
-  const reads = await recordReads(rf, selectedReads, outDir, target.pauseMs);
+  const reads = await recordReads(rf, selectedReads, outDir, target.pauseMs, latest);
   if (apiKey !== undefined) {
     const userTemplates = new Set(userReads.map((u) => u.template));
     assertUserTierRecorded(

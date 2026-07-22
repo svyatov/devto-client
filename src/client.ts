@@ -124,7 +124,8 @@ export class DevToClient {
 
   constructor(options: ClientOptions = {}) {
     this.config = resolveConfig(options);
-    const rf: RequestFn = (method, path, opts) => request(this.config, method, path, opts);
+    const rf: RequestFn = (method, path, opts, never404) =>
+      request(this.config, method, path, opts, never404);
 
     this.articles = bindOps<ArticlesNamespace>(rf, articlesTable);
     this.comments = bindOps<CommentsNamespace>(rf, commentsTable);

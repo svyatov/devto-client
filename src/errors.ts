@@ -8,6 +8,26 @@ import type { components } from "./generated/types.ts";
  */
 export type ErrorEnvelope = components["schemas"]["ErrorEnvelope"];
 
+/**
+ * Which detector proved a response could not have been generated for the request
+ * it is answering. dev.to's edge cache leaves out of its key both dimensions the
+ * response depends on, the versioned `Accept` header and your credential, so a
+ * stored response can answer a request it never saw.
+ *
+ * - `v0-under-v1`: the reply carries Forem's v0 deprecation marker although the
+ *   client sent the versioned v1 Accept header. The one that fires on a fresh
+ *   response too: a v0 body served by the origin is a worse bug, not a lesser one.
+ * - `impossible-404`: a cached 404 from an operation an authenticated walk found
+ *   never to 404 (`spec/never-404.json`). A genuine not-found is left alone.
+ * - `credentialed-refusal`: a cached 401 or 403 answering a request that carried
+ *   a credential the stored response was never shown. The weakest of the three,
+ *   since a genuinely invalid key earns a refusal that then replays honestly.
+ *
+ * Advisory by construction: nothing is retried, thrown, or suppressed on it, so
+ * a false positive costs a spurious flag rather than a failed call.
+ */
+export type Contradiction = "v0-under-v1" | "impossible-404" | "credentialed-refusal";
+
 /** Transport-level facts read off a response's headers, never its body. */
 export interface ResponseMeta {
   /** HTTP status of the response the metadata was read from. */
@@ -22,6 +42,16 @@ export interface ResponseMeta {
   age: number | undefined;
   /** Upstream `x-request-id`: the handle to quote when reporting a bad response. */
   requestId: string | undefined;
+  /**
+   * A stored response contradicts something this request asserted, naming which
+   * detector proved it. See {@link Contradiction}. Undefined means no detector
+   * fired, which is not a guarantee the response is sound.
+   *
+   * The key is optional only so that adding it stayed a minor release: code that
+   * builds a `ResponseMeta` by hand predates it. Every response this client reads
+   * sets it, so consumers can treat it as present.
+   */
+  contradiction?: Contradiction | undefined;
 }
 
 /**
@@ -83,6 +113,8 @@ export class DevToApiError extends Error {
   readonly fromCache: boolean;
   /** Cache age in seconds, when the response reported one. */
   readonly age: number | undefined;
+  /** The response was not generated for this request. See {@link Contradiction}. */
+  readonly contradiction: Contradiction | undefined;
 
   /** `meta` is optional so existing three-argument construction keeps working. */
   constructor(
@@ -105,6 +137,7 @@ export class DevToApiError extends Error {
     this.requestId = meta?.requestId;
     this.fromCache = meta?.fromCache ?? false;
     this.age = meta?.age;
+    this.contradiction = meta?.contradiction;
   }
 }
 

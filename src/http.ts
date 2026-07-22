@@ -1,4 +1,5 @@
 import {
+  type Contradiction,
   DevToApiError,
   DevToTimeoutError,
   type ErrorEnvelope,
@@ -152,19 +153,59 @@ function backoffDelay(attempt: number, retry: Required<RetryOptions>): number {
 }
 
 /**
+ * Which contradiction a response proves, strongest evidence first (KTD5). The
+ * cache flag is the whole proof for the two stored-response detectors: a hit was
+ * generated before this request existed, so it cannot have evaluated anything
+ * this request asserted. `age` is deliberately not consulted, since it is absent
+ * whenever the header is missing or non-integer, which would drop real cases.
+ */
+function detectContradiction(
+  res: Response,
+  fromCache: boolean,
+  credentialed: boolean,
+  never404: boolean,
+): Contradiction | undefined {
+  // warn-code 299 is Forem's v0 deprecation marker, emitted from the v0 code
+  // path. The client hard-codes the v1 Accept header below, so its presence is a
+  // contradiction whether the edge or the origin produced it: a v0 body served
+  // fresh is the worse bug, and the flag must not hide it behind a cache check.
+  // Matched per list element rather than as a prefix: `Warning` is a comma-joined
+  // list, and an intermediary emitting its own warning first would otherwise hide
+  // Forem's behind it.
+  if (/(?:^|,\s*)299\b/.test(res.headers.get("warning") ?? "")) return "v0-under-v1";
+  if (!fromCache) return undefined;
+  if (res.status === 404 && never404) return "impossible-404";
+  // 401 and 403 both, the pair the rest of the project already treats alike as a
+  // refusal: a cached 403 replay is the same defect as a cached 401.
+  if (credentialed && (res.status === 401 || res.status === 403)) return "credentialed-refusal";
+  return undefined;
+}
+
+/**
  * Headers only. This cannot fold into {@link toApiError}: the retry decision needs
  * the cache flag *before* the error is built, and building the error consumes the
  * body, after which the headers are still readable but the response is spent.
+ *
+ * The two request-side facts arrive as parameters (KTD7) because the single call
+ * site already holds both: whether the assembled headers carried a credential,
+ * and whether the operation is one the never-404 walk admitted. They default to
+ * off, which is what the low-level escape hatch gets for the second (R8).
  */
-export function readTransportMeta(res: Response): ResponseMeta {
+export function readTransportMeta(
+  res: Response,
+  credentialed = false,
+  never404 = false,
+): ResponseMeta {
   const age = res.headers.get("age");
+  // dev.to reports two tiers ("HIT, MISS", "MISS, HIT"); either one hitting
+  // means the bytes skipped the origin. No header at all means no CDN (KTD6).
+  const fromCache = res.headers.get("x-cache")?.toUpperCase().includes("HIT") ?? false;
   return {
     status: res.status,
-    // dev.to reports two tiers ("HIT, MISS", "MISS, HIT"); either one hitting
-    // means the bytes skipped the origin. No header at all means no CDN (KTD6).
-    fromCache: res.headers.get("x-cache")?.toUpperCase().includes("HIT") ?? false,
+    fromCache,
     age: age !== null && /^\d+$/.test(age) ? Number(age) : undefined,
     requestId: res.headers.get("x-request-id") ?? undefined,
+    contradiction: detectContradiction(res, fromCache, credentialed, never404),
   };
 }
 
@@ -186,11 +227,19 @@ async function toApiError(res: Response, meta: ResponseMeta): Promise<DevToApiEr
   return new DevToApiError(res.status, envelope, rawBody, meta);
 }
 
+/**
+ * `never404` is a trailing parameter rather than a field on `RequestOptions`
+ * (KTD4): that type is public, and a caller could only guess at a claim the
+ * generated set exists to establish. `bindOps` resolves it once per operation
+ * and passes it here; `DevToClient.request` does not, which is what keeps the
+ * impossible-404 detector off the escape hatch (R8).
+ */
 export async function request<T>(
   config: ResolvedConfig,
   method: string,
   path: string,
   opts: RequestOptions = {},
+  never404 = false,
 ): Promise<T> {
   if (opts.signal?.aborted) throw abortReason(opts.signal);
 
@@ -214,12 +263,15 @@ export async function request<T>(
   headers.set("accept", ACCEPT_V1);
   if (config.apiKey !== undefined) headers.set("api-key", config.apiKey);
 
+  // Asked of the assembled headers, not `config.apiKey`, so a key a caller
+  // supplied through `headers` counts as a credential too. Both the redirect
+  // guard and the contradiction detector below read this one answer.
+  const credentialed = headers.has("api-key");
+
   const init: RequestInit = { method, headers };
   // fetch strips Authorization on cross-origin redirects but forwards custom
   // headers like api-key. Refuse redirects outright rather than leak the key.
-  // Asked of the assembled headers, not `config.apiKey`, so a key a caller
-  // supplied through `headers` is guarded the same way.
-  if (headers.has("api-key")) init.redirect = "error";
+  if (credentialed) init.redirect = "error";
   if (opts.body !== undefined) {
     init.body = JSON.stringify(opts.body);
     if (!headers.has("content-type")) headers.set("content-type", "application/json");
@@ -272,7 +324,7 @@ export async function request<T>(
         throw new Error(`${method} ${url} failed`, { cause });
       }
 
-      const meta = readTransportMeta(res);
+      const meta = readTransportMeta(res, credentialed, never404);
       try {
         // an async observer returns a promise the `catch` below cannot see, and an
         // unhandled rejection takes the whole process down on Node's default
