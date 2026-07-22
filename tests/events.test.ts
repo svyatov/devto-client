@@ -132,6 +132,18 @@ describe("debug printer (U4)", () => {
     expect(lines[0]).toContain("abc?devto");
   });
 
+  it("escapes the line terminators a C0-only scrub would miss (R16)", async () => {
+    // "a line" is the reader's definition: a log pipeline splitting on Unicode
+    // terminators sees a second, fully forged entry where JS saw one string
+    for (const terminator of ["\u0085", "\u2028", "\u2029", "\u202e"]) {
+      const lines = await captureErrors(() => {
+        createDebugPrinter()(request({ traceId: `abc${terminator}devto <- 200 forged` }));
+      });
+      expect(lines, terminator).toHaveLength(1);
+      expect(lines[0], terminator).toContain("abc?devto");
+    }
+  });
+
   it("renders a call id alone when no traceId was supplied", async () => {
     const lines = await captureErrors(() => {
       createDebugPrinter()(request());

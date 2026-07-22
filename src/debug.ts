@@ -15,10 +15,17 @@ const PREFIX = "devto";
  * Everything reaching a line-oriented log gets scrubbed, not only the free-text
  * `traceId`: a newline anywhere in a line forges a log entry, and the escape
  * hatch takes a caller-typed method and path too.
+ *
+ * C0 and DEL are the obvious half. The rest matter because a line is the
+ * reader's definition, not ours: U+0085, U+2028 and U+2029 end a line in
+ * Java, .NET and JS regex `.`, and the bidi overrides reorder a line whose
+ * bytes never changed.
  */
+// biome-ignore lint/suspicious/noControlCharactersInRegex: scrubbing them is the point
+const FORGEABLE = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/g;
+
 function scrub(text: string): string {
-  // biome-ignore lint/suspicious/noControlCharactersInRegex: scrubbing them is the point
-  return text.replaceAll(/[\u0000-\u001f\u007f]/g, "?");
+  return text.replaceAll(FORGEABLE, "?");
 }
 
 /** Path and query only: the host repeats on every line and the line is long enough. */
@@ -63,12 +70,11 @@ export function createDebugPrinter(): (e: DevToEvent) => void {
       case "failure":
         body = `xx ${describe(e.error)} ${at} ${e.durationMs}ms ${tail}`;
         break;
-      default: {
+      default:
         // R15: the union is open, so a kind this build has never heard of is a
-        // normal thing to receive, not a reason to throw inside a logger
-        const unrecognized = e as { kind?: unknown; callId?: unknown };
-        body = `?? ${String(unrecognized.kind)} #${String(unrecognized.callId)}`;
-      }
+        // normal thing to receive, not a reason to throw inside a logger. The
+        // base fields every member shares still render, only the body is opaque.
+        body = `?? ${String((e as { kind?: unknown }).kind)} ${at} ${tail}`;
     }
     console.error(scrub(`${PREFIX} ${body}`));
   };
