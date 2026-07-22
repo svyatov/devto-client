@@ -181,18 +181,50 @@ A `fromCache` 429 is the nasty one. dev.to's CDN doesn't vary on your credential
 
 `contradiction` is the stronger claim, and it names which of three proofs fired. `v0-under-v1` means the reply carried Forem's v0 deprecation marker even though the client sent the versioned v1 header. `impossible-404` means a cached 404 came back from an endpoint an authenticated walk found never to 404. `credentialed-refusal` means a cached 401 or 403 answered a request carrying a key that response was never shown. All three are advisory: the client won't retry, throw, or swallow anything on their account, so a false positive costs you a flag rather than a call.
 
-Cache status matters just as much on calls that succeed, which is somewhere an error object can't reach. Pass an `onResponse` observer and you'll see them on every response:
+Cache status matters just as much on calls that succeed, which is somewhere an error object can't reach. That's the job of `onEvent`, one handler called with every request attempt, every response, every retry wait and every failure:
 
 ```ts
 const devto = new DevToClient({
-  onResponse: ({ status, fromCache, age, requestId, contradiction }) => {
-    if (contradiction) console.warn(`${status} answers someone else's request: ${contradiction}`);
-    if (fromCache) console.warn(`${status} served from cache, ${age}s old (${requestId})`);
+  onEvent: (e) => {
+    if (e.kind === "response" && e.contradiction) {
+      console.warn(`${e.status} answers someone else's request: ${e.contradiction}`);
+    }
+    if (e.kind === "response" && e.fromCache) {
+      console.warn(`${e.status} served from cache, ${e.age}s old (${e.requestId})`);
+    }
   },
 });
 ```
 
-The observer fires before the body is read, on successes and failures alike, and it can't affect the call. Throw from it and the request carries on regardless.
+Those are `if`s rather than a `switch` with an exhaustive `never` arm, and that's deliberate. `DevToEvent` is an open union: a later minor release can add a kind, and an exhaustive switch would stop compiling on an upgrade that changed nothing else you use. Branch on the kinds you care about and let the rest fall through. Throwing from the handler can't affect the call either way.
+
+Every event carries `callId`, `attempt`, `method` and `url`, so two concurrent calls stay apart in your log. Supply your own `traceId` per call and it rides along verbatim, beside the generated `callId` rather than instead of it:
+
+```ts
+await devto.articles.list(undefined, { traceId: incomingRequestId });
+```
+
+An `All` walk shares one `traceId` across its pages while each page draws its own `callId`, which is what you want when the log has to answer both "which job was this?" and "which request was this?".
+
+`response` and `failure` answer different questions. A 404 that rejects with `DevToApiError` is a response: the bytes arrived, they just said no. A failure means the bytes never arrived, so a dropped socket, an expired deadline, or your own abort. A deadline that runs out midway through a body read emits both, response first, which is exactly the case a logger built on responses alone would file as a clean 200.
+
+Both of them split their timing, too. `durationMs` is network and body time; `pacedMs` is however long the [pacer](#self-pacing) held the call before it reached the network at all. A single 1100ms figure can't tell you whether your own budget was spent or dev.to was having a bad minute, and those want opposite responses.
+
+The response event also hands you the server's raw `Headers`, uncurated. Useful, and a trap: off the browser that includes `set-cookie`, so logging the object wholesale writes whatever the server set straight into your logs. The client doesn't redact it for you. Read the headers you want and leave the object alone.
+
+If you'd rather not write a handler at all, set `debug: true` and every event prints to `console.error`:
+
+```
+devto -> GET /api/articles?page=2 #7 attempt 1
+devto <- 429 GET /api/articles?page=2 84ms #7 attempt 1
+devto .. retry in 1000ms (throttle) GET /api/articles?page=2 #7 attempt 1
+devto -> GET /api/articles?page=2 #7 attempt 2
+devto <- 200 GET /api/articles?page=2 112ms #7 attempt 2
+```
+
+Those lines are illustrative, not a spec. The format is diagnostic output and can change in any release, so don't build anything that parses it. `debug` and `onEvent` compose, so turning one on doesn't turn the other off.
+
+The older `onResponse` observer still works and still receives the same four-field payload, but it's deprecated and goes away in 3.0. One thing did change for it: it now fires at attempt end rather than before the body is read. If you were leaning on it to abort a call before a body downloaded, that no longer wins the race.
 
 ## Retries
 
