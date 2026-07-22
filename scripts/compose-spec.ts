@@ -107,10 +107,52 @@ function getChild(node: Node, key: string): unknown {
   return Array.isArray(node) ? node[Number(key)] : node[key];
 }
 
+/**
+ * Attach the error envelope as the body schema of every declared 4xx/5xx
+ * response that names none (KTD1): one overlay claim fans out here rather than
+ * as 101 hand-written entries. Skip-if-present and never overwrites, so a
+ * response that already declares `content` is left byte-identical and R3 holds
+ * (KTD2). Absence-tolerant: a spec whose `components.schemas` lacks
+ * `ErrorEnvelope` gets no dangling `$ref`. Returns the attachment count so a
+ * test can pin the fan-out (KTD5).
+ */
+function attachErrorEnvelope(spec: Node): number {
+  const components = (spec as Record<string, unknown>).components;
+  const schemas =
+    components && typeof components === "object"
+      ? (components as Record<string, unknown>).schemas
+      : undefined;
+  if (schemas === null || typeof schemas !== "object") return 0;
+  if (!("ErrorEnvelope" in (schemas as Record<string, unknown>))) return 0;
+
+  const paths = (spec as Record<string, unknown>).paths;
+  if (paths === null || typeof paths !== "object") return 0;
+
+  let count = 0;
+  for (const pathItem of Object.values(paths as Record<string, unknown>)) {
+    if (pathItem === null || typeof pathItem !== "object") continue;
+    for (const op of Object.values(pathItem as Record<string, unknown>)) {
+      const responses = (op as { responses?: unknown } | null)?.responses;
+      if (responses === null || typeof responses !== "object") continue;
+      for (const [code, resp] of Object.entries(responses as Record<string, unknown>)) {
+        if (!/^[45]/.test(code)) continue;
+        if (resp === null || typeof resp !== "object" || Array.isArray(resp)) continue;
+        const r = resp as Record<string, unknown>;
+        if ("content" in r || "$ref" in r) continue;
+        r.content = {
+          "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } },
+        };
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
 export function compose(
   snapshot: unknown,
   overlay: OverlayEntry[],
-): { spec: unknown; deletable: string[] } {
+): { spec: unknown; deletable: string[]; attached: number } {
   const spec = structuredClone(snapshot) as Node;
   const deletable: string[] = [];
 
@@ -154,16 +196,19 @@ export function compose(
     }
   }
 
-  return { spec, deletable };
+  const attached = attachErrorEnvelope(spec);
+  return { spec, deletable, attached };
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const snapshot = JSON.parse(readFileSync("spec/api_v1.json", "utf8"));
   const overlay = JSON.parse(readFileSync("spec/overlay.json", "utf8")) as OverlayEntry[];
-  const { spec, deletable } = compose(snapshot, overlay);
+  const { spec, deletable, attached } = compose(snapshot, overlay);
   for (const target of deletable) {
     console.warn(`overlay entry is a no-op and can be deleted: ${target}`);
   }
   writeFileSync("spec/composed.json", `${JSON.stringify(spec, null, 2)}\n`);
-  console.log(`composed spec written (${overlay.length} overlay entries applied)`);
+  console.log(
+    `composed spec written (${overlay.length} overlay entries applied, ${attached} error envelopes attached)`,
+  );
 }
