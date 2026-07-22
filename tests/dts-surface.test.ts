@@ -198,7 +198,7 @@ describe("dts-surface guard (R5)", () => {
       // exactly how a documented per-call timeoutMs shipped as a no-op
       const block = ops.match(/type CallOptions = \{([^}]*)\}/)?.[1];
       expect(block).toBeDefined();
-      for (const member of ["signal?", "timeoutMs?"]) {
+      for (const member of ["signal?", "timeoutMs?", "traceId?"]) {
         expect(block, member).toContain(member);
       }
     });
