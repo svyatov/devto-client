@@ -373,8 +373,13 @@ export async function request<T>(
         // Timed here rather than through the `Pacer` interface, so a caller-supplied
         // pacer reports its holds too (KTD3).
         const heldFrom = Date.now();
-        await config.pace?.acquire(paceKind, { deadlineAt, signal: opts.signal });
-        pacedMs = Date.now() - heldFrom;
+        try {
+          await config.pace?.acquire(paceKind, { deadlineAt, signal: opts.signal });
+        } finally {
+          // a hold the caller aborted still held the call: reporting zero there
+          // would read as an instant death on the failure event
+          pacedMs = Date.now() - heldFrom;
+        }
         // network time starts after the hold and stays unset until then, so a
         // refused hold reports a zero duration rather than counting itself (KTD4)
         startedAt = Date.now();
