@@ -127,6 +127,47 @@ try {
 
 You might expect every error body to be JSON. It isn't: rate-limit 429s arrive as plain text, and some hand-rolled 400s omit the `status` field. `DevToApiError` covers all three shapes.
 
+Reading `err.status` and matching integers is how error handling rots. Branch on `err.category` instead, a discriminant derived from the status so a 2 AM publish can decide for itself whether to back off, fix its input, or give up:
+
+```ts
+import { DevToApiError, type DevToErrorCategory } from "devto-client";
+
+try {
+  await devto.articles.create({ article: { title, body_markdown } });
+} catch (err) {
+  if (!(err instanceof DevToApiError)) throw err;
+  switch (err.category) {
+    case "rate-limited": // already out of retries by now: back off, don't loop
+    case "server":
+      await alertAndPause(err);
+      break;
+    case "validation":
+      console.error(err.body?.error); // the payload is wrong; fix it, retrying won't help
+      break;
+    case "unauthorized":
+    case "forbidden":
+      throw err; // the credential can't do this; stop
+    default:
+      throw err; // not-found, conflict, unknown, and any category a later release adds
+  }
+}
+```
+
+The category reads the response, not the spec, so it stays correct where the spec is silent, and the spec is silent about two of these: it declares neither the throttler's 429 nor a 403 anywhere. Here's the full mapping:
+
+| Status | Category |
+| --- | --- |
+| 429 | `rate-limited` |
+| 400, 422 | `validation` |
+| 404 | `not-found` |
+| 409 | `conflict` |
+| 401 | `unauthorized` |
+| 403 | `forbidden` |
+| 5xx | `server` |
+| anything else | `unknown` |
+
+Two things to keep in mind. Don't retry `rate-limited` or `server` from your `catch`: by the time a `DevToApiError` reaches you the transport has already exhausted its own retries for both, so a caller-side loop just spends rate budget getting nowhere (see [Retries](#retries)). And keep that `default` arm: the union can gain members in a minor release, and `unknown` is where every unmapped status already lands, so the arm always has something to catch.
+
 Three more fields tell you where the response came from:
 
 ```ts

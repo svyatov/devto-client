@@ -2,7 +2,7 @@
   {
     "target": "/components/schemas/ErrorEnvelope",
     "expect": null,
-    "reason": "missing schema: upstream spec declares no error response types; Api::V1::ApiController renders { error, status } (hand-rolled 400s omit status)",
+    "reason": "missing schema: upstream spec declares no error response types; Api::V1::ApiController renders { error, status } (hand-rolled 400s omit status); a compose-time pass fans this one claim out onto every declared 4xx/5xx response that names no body",
     "patch": {
       "type": "object",
       "properties": {
@@ -17,6 +17,7 @@
     },
     "provenance": {
       "instrument": "forem-source",
+      "forem": "ae359ff41b2a",
       "corroborated": false
     }
   },

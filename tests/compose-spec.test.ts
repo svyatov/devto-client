@@ -119,6 +119,108 @@ describe("compose", () => {
   });
 });
 
+describe("error-envelope pass", () => {
+  const envRef = "#/components/schemas/ErrorEnvelope";
+  const withErrors = () => ({
+    paths: {
+      "/api/things": {
+        get: {
+          responses: {
+            "200": { description: "ok" },
+            "404": { description: "missing" },
+            "500": { description: "boom" },
+          },
+        },
+        post: {
+          responses: {
+            "422": {
+              description: "invalid",
+              content: { "application/json": { schema: { type: "object" } } },
+            },
+          },
+        },
+      },
+    },
+    components: { schemas: { ErrorEnvelope: { type: "object" } } },
+  });
+  type Fx = ReturnType<typeof withErrors>;
+  const responses = (spec: unknown, method: "get" | "post") =>
+    (spec as Fx).paths["/api/things"][method].responses as Record<string, unknown>;
+
+  it("attaches the envelope to a 4xx and a 5xx response lacking content", () => {
+    const { spec, attached } = compose(withErrors(), []);
+    const r = responses(spec, "get");
+    expect(r["404"]).toEqual({
+      description: "missing",
+      content: { "application/json": { schema: { $ref: envRef } } },
+    });
+    expect(r["500"]).toEqual({
+      description: "boom",
+      content: { "application/json": { schema: { $ref: envRef } } },
+    });
+    expect(attached).toBe(2);
+  });
+
+  it("leaves a response that already declares content byte-identical", () => {
+    const { spec } = compose(withErrors(), []);
+    expect(responses(spec, "post")["422"]).toEqual({
+      description: "invalid",
+      content: { "application/json": { schema: { type: "object" } } },
+    });
+  });
+
+  it("does not touch a 2xx response", () => {
+    const { spec } = compose(withErrors(), []);
+    expect(responses(spec, "get")["200"]).toEqual({ description: "ok" });
+  });
+
+  // R3: the pass adds bodies, never statuses.
+  it("leaves the declared status set unchanged", () => {
+    const before = Object.keys(withErrors().paths["/api/things"].get.responses);
+    const { spec } = compose(withErrors(), []);
+    expect(Object.keys(responses(spec, "get"))).toEqual(before);
+  });
+
+  // KTD2: no ErrorEnvelope component means no dangling $ref, zero attachments.
+  it("attaches nothing when the ErrorEnvelope component is absent", () => {
+    const fx = withErrors();
+    fx.components.schemas = {} as Fx["components"]["schemas"];
+    const { spec, attached } = compose(fx, []);
+    expect(attached).toBe(0);
+    expect(responses(spec, "get")["404"]).toEqual({ description: "missing" });
+  });
+
+  it("reports zero attachments for a spec with no declared error responses", () => {
+    const { attached } = compose(base(), []);
+    expect(attached).toBe(0);
+  });
+
+  // KTD5: the real snapshot + overlay fans the one claim out to exactly 101.
+  it("attaches exactly 101 envelopes against the real snapshot and overlay", () => {
+    const snapshot = JSON.parse(readFileSync("spec/api_v1.json", "utf8"));
+    const overlay = JSON.parse(readFileSync("spec/overlay.json", "utf8"));
+    expect(compose(snapshot, overlay).attached).toBe(101);
+  });
+
+  it("is idempotent: composing an already-composed spec attaches nothing more", () => {
+    const first = compose(withErrors(), []);
+    const second = compose(first.spec, []);
+    expect(second.attached).toBe(0);
+    expect(second.spec).toEqual(first.spec);
+  });
+
+  // R2: the one claim carries a pinned Forem commit; instrument and corroboration hold.
+  it("pins the Forem commit on the ErrorEnvelope overlay entry", () => {
+    const overlay = JSON.parse(readFileSync("spec/overlay.json", "utf8")) as OverlayEntry[];
+    const entry = overlay.find((e) => e.target === "/components/schemas/ErrorEnvelope");
+    expect(entry?.provenance).toEqual({
+      instrument: "forem-source",
+      forem: "ae359ff41b2a",
+      corroborated: false,
+    });
+  });
+});
+
 describe("provenance", () => {
   const withProvenance = (provenance: unknown): OverlayEntry =>
     ({ ...entry({}), provenance }) as OverlayEntry;
