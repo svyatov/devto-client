@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.1.0](https://github.com/svyatov/devto-client/compare/v2.0.0...v2.1.0) (2026-07-22)
+
+
+### Features
+
+* observe every attempt, retry and failure through one handler ([#25](https://github.com/svyatov/devto-client/issues/25)) ([091f649](https://github.com/svyatov/devto-client/commit/091f649e96da190f67d0c966de274c82737981bd))
+* report a response that was not generated for its request ([#24](https://github.com/svyatov/devto-client/issues/24)) ([7650f0a](https://github.com/svyatov/devto-client/commit/7650f0a4bdfe4502073fecf3bd1f94325bef8a3c))
+* type the error half of the API contract ([#22](https://github.com/svyatov/devto-client/issues/22)) ([f18d69a](https://github.com/svyatov/devto-client/commit/f18d69adc185b3607b975eec87044cbbd8e06a5e))
+
+
+### Bug Fixes
+
+* **overlay:** name the governs-nothing state for fixture provenance ([3690621](https://github.com/svyatov/devto-client/commit/3690621bb8f0799e4c271e348c53d95c4a8233ee)), closes [#20](https://github.com/svyatov/devto-client/issues/20)
+
 ## [2.0.0](https://github.com/svyatov/devto-client/compare/v1.0.1...v2.0.0) (2026-07-21)
 
 
