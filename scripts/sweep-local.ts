@@ -250,6 +250,7 @@ export const DOCUMENTED_RUNG: { prefix: string; rung: Rung }[] = [
   { prefix: "/api/reactions", rung: "admin" },
   { prefix: "/api/recommended_articles_lists", rung: "admin" },
   { prefix: "/api/segments", rung: "admin" },
+  { prefix: "/api/surveys", rung: "admin" },
   { prefix: "/api/users", rung: "super_moderator" },
 ];
 

@@ -51,8 +51,8 @@ const FULL: Required<Discovered> = {
     recommendedArticlesList: 28,
     requestRedirect: 29,
     segment: 30,
-    survey: 32,
-    userIdentity: 31,
+    survey: 31,
+    userIdentity: 32,
   },
 };
 

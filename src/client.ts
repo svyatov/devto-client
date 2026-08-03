@@ -93,7 +93,7 @@ export class DevToClient {
   readonly healthChecks: HealthChecksNamespace;
   /** Trends and their articles. */
   readonly trends: TrendsNamespace;
-  /** Surveys and their poll results. */
+  /** Surveys, their poll results, and survey administration. Admin-gated upstream, reads included; ordinary keys get 401. */
   readonly surveys: SurveysNamespace;
   /** Concepts and their articles. */
   readonly concepts: ConceptsNamespace;
