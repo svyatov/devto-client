@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/svyatov/devto-client/compare/v2.1.0...v2.2.0) (2026-08-03)
+
+
+### Features
+
+* re-sync the pinned spec and surface survey administration ([#26](https://github.com/svyatov/devto-client/issues/26)) ([21b7b4c](https://github.com/svyatov/devto-client/commit/21b7b4cb45d3194c63aa6d258d779e2a81cf284e)), closes [#23](https://github.com/svyatov/devto-client/issues/23)
+
 ## [2.1.0](https://github.com/svyatov/devto-client/compare/v2.0.0...v2.1.0) (2026-07-22)
 
 
