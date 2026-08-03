@@ -1,14 +1,14 @@
 # devto-client
 
+An unofficial, zero-dependency TypeScript client for the [dev.to (Forem) v1 API](https://developers.forem.com/api/v1), written for anyone building against dev.to who'd rather not rediscover its undocumented traps one production bug at a time.
+
 [![npm version](https://img.shields.io/npm/v/devto-client?style=flat-square)](https://www.npmjs.com/package/devto-client)
 [![CI](https://img.shields.io/github/actions/workflow/status/svyatov/devto-client/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/svyatov/devto-client/actions/workflows/ci.yml)
 [![coverage](https://img.shields.io/codecov/c/github/svyatov/devto-client?style=flat-square)](https://codecov.io/gh/svyatov/devto-client)
 [![minzipped size](https://img.shields.io/bundlephobia/minzip/devto-client?style=flat-square)](https://bundlephobia.com/package/devto-client)
 [![license](https://img.shields.io/npm/l/devto-client?style=flat-square)](./LICENSE)
 
-An unofficial, zero-dependency TypeScript client for the [dev.to (Forem) v1 API](https://developers.forem.com/api/v1). Every endpoint typed, every correctness trap handled by default.
-
-The raw API punishes hand-rollers. Forget the versioned Accept header and your requests silently downgrade to the deprecated v0 API, which returns different shapes. Miss the undocumented rate limits and you get plain-text 429s your JSON parser chokes on. This client bakes the fixes in so you can't reach for the wrong thing.
+Every endpoint typed, every correctness trap handled by default. The raw API punishes hand-rollers: forget the versioned Accept header and your requests silently downgrade to the deprecated v0 API, which returns different shapes. Miss the undocumented rate limits and you get plain-text 429s your JSON parser chokes on. This client bakes the fixes in so you can't reach for the wrong thing.
 
 ## Install
 
@@ -29,6 +29,11 @@ const articles = await devto.articles.list({ tag: "typescript", per_page: 3 });
 for (const article of articles) {
   console.log(article.title, article.url); // fully typed, autocomplete included
 }
+
+// Three lines, whatever's current under that tag:
+//   Understanding the satisfies Operator  https://dev.to/someone/understanding-the-satisfies-operator-1a2b
+//   Type-Safe Env Vars in 20 Lines        https://dev.to/someone/type-safe-env-vars-in-20-lines-3c4d
+//   Why Your Generics Are Lying to You    https://dev.to/someone/why-your-generics-are-lying-to-you-5e6f
 ```
 
 That's a real request against dev.to. The response type comes from Forem's own OpenAPI spec, so `article.` in your editor lists exactly what the server sends.
@@ -214,7 +219,7 @@ The response event also hands you the server's raw `Headers`, uncurated. Useful,
 
 If you'd rather not write a handler at all, set `debug: true` and every event prints to `console.error`:
 
-```
+```text
 devto -> GET /api/articles?page=2 #7 attempt 1
 devto <- 429 GET /api/articles?page=2 84ms #7 attempt 1
 devto .. retry in 1000ms (throttle) GET /api/articles?page=2 #7 attempt 1
@@ -416,9 +421,15 @@ One thing it can't give you is `impossible-404`. That detector needs to know the
 
 ## Contributing
 
+Bugs, questions, and ideas all land in the same place: [GitHub Issues](https://github.com/svyatov/devto-client/issues). There's no forum and no chat, so an issue is the front door for "this is broken" and "how do I do X?" alike.
+
 Most contributions come down to teaching the client an endpoint it doesn't cover yet, and [CONTRIBUTING.md](CONTRIBUTING.md) walks you from a fresh clone through that first PR: setup, the two quality gates, and the add-an-endpoint loop. The [Code of Conduct](CODE_OF_CONDUCT.md) applies to everyone taking part.
 
 Version history lives in [CHANGELOG.md](CHANGELOG.md). Security problems have their own private reporting route in [SECURITY.md](SECURITY.md); please use that instead of a public issue.
+
+## Maintenance
+
+Actively maintained by one person, in the open, on nobody's schedule but the maintainer's. Forem's spec gets tracked and fixes ship as they land. Issues get read; a reply usually takes days rather than hours, and a well-scoped PR gets through faster than a well-argued issue.
 
 ## License
 
