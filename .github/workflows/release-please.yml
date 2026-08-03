@@ -80,6 +80,13 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # The last moment a wrong version or a bad artifact can be stopped. An npm
+    # version is immutable, so everything after this job is permanent. The
+    # `release` environment carries a required reviewer, which holds the run
+    # here until someone approves it. Self-approval is allowed on purpose: at
+    # one maintainer, prevent-self-review would be a deadlock rather than a
+    # gate, and the pause is what the rule is actually asking for.
+    environment: release
     permissions:
       contents: read
       id-token: write # npm trusted publishing (OIDC provenance)
