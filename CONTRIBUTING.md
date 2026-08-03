@@ -25,6 +25,14 @@ bun test        # Bun's test runner
 
 `bun run check` is the fast one: it formats, lints, and type-checks. Run it before you commit and it'll fix formatting in place. `bun test` runs the suite. Coverage is tracked on [Codecov](https://codecov.io/gh/svyatov/devto-client), and CI's patch-coverage check fails a PR that adds code without a test covering it, so bring a test for anything you touch. CI runs the suite under Bun and also imports the built ESM under the minimum supported Node, so match those locally if something passes for you but not in CI.
 
+## Opening a pull request
+
+Fork the repository, branch off `main`, commit, and push the branch to your fork. Then open a pull request against `main` here. There's no integration branch to target and no release branch to avoid, so `main` is always the answer.
+
+What an acceptable contribution has to satisfy is the checklist in [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md), which GitHub drops into the description box for you: both gates green, a test covering new or changed behavior, spec-first if you're adding an endpoint, and Conventional Commits. None of it is ceremony. Each line is something CI or a review will check anyway, and the template just says so before you find out the slow way.
+
+Your PR title matters more than it looks. Squash merge is the strategy here, so the title becomes the commit message release-please parses, which is what decides whether your change shows up in the changelog at all. `feat: add tag lookup` earns an entry; `Update stuff` earns nothing.
+
 ## Adding an endpoint
 
 Say Forem ships a new route and you want it on the client. The work happens in two places, in this order: the spec first, then the resource table.
@@ -63,6 +71,12 @@ One trap is worth knowing about, because it fails silently. Your PR title and bo
 Don't go looking for a version to upgrade to. That parser last shipped in January 2021, release-please pins it at `^0.4.1`, and the bug is open upstream as [conventional-commits/parser#54](https://github.com/conventional-commits/parser/issues/54) and [release-please#2564](https://github.com/googleapis/release-please/issues/2564). The check in CI is the fix available to us.
 
 There is no npm token in this repository, and there never will be. The publish authenticates through OIDC trusted publishing, so npm verifies the workflow itself rather than a stored credential, and every published version carries a provenance attestation you can check on its npm page. That's also why the tests and the build run in a separate job from the publish: the job holding the publish identity installs no project dependencies and builds nothing, so nothing your `bun install` pulls in ever runs next to it.
+
+## Who decides
+
+One maintainer, [Leonid Svyatov](https://github.com/svyatov), reviews and merges pull requests, decides what belongs on the client's surface, and cuts releases. Disagreements get settled in the pull request thread, because there's nobody to escalate to.
+
+There's no succession arranged. If the maintainer stops, the project stops with them, and the MIT license is what lets you fork it without asking anyone. That's worth knowing before you build something load-bearing on top of it.
 
 ## Never edit the generated types
 

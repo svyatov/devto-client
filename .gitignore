@@ -1,5 +1,6 @@
 .compound-engineering/
 docs/
+oss-audit-report.md
 STRATEGY.md
 CONCEPTS.md
 node_modules/
