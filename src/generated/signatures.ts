@@ -128,10 +128,12 @@ import type {
   SegmentUsersParams,
   Subforem,
   Survey,
+  SurveyCreateParams,
   SurveyListAllParams,
   SurveyListParams,
   SurveyPollTextResponsesParams,
   SurveyPollVotesParams,
+  SurveyUpdateParams,
   SurveyWithPolls,
   Tag,
   TagListAllParams,
@@ -340,7 +342,14 @@ export interface TrendsNamespace {
 export interface SurveysNamespace {
   list: (params?: SurveyListParams, opts?: CallOptions) => Promise<Survey[]>;
   listAll: (params?: SurveyListAllParams, opts?: CallOptions) => IterResult<"/api/surveys", "get">;
+  create: (params?: SurveyCreateParams, opts?: CallOptions) => Promise<SurveyWithPolls>;
   get: (id_or_slug: string, opts?: CallOptions) => Promise<SurveyWithPolls>;
+  update: (
+    id_or_slug: string,
+    params?: SurveyUpdateParams,
+    opts?: CallOptions,
+  ) => Promise<SurveyWithPolls>;
+  delete: (id_or_slug: string, opts?: CallOptions) => Promise<void>;
   pollTextResponses: (
     id_or_slug: string,
     params?: SurveyPollTextResponsesParams,

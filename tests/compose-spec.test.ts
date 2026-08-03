@@ -195,11 +195,11 @@ describe("error-envelope pass", () => {
     expect(attached).toBe(0);
   });
 
-  // KTD5: the real snapshot + overlay fans the one claim out to exactly 101.
-  it("attaches exactly 101 envelopes against the real snapshot and overlay", () => {
+  // KTD5: the real snapshot + overlay fans the one claim out to exactly 109.
+  it("attaches exactly 109 envelopes against the real snapshot and overlay", () => {
     const snapshot = JSON.parse(readFileSync("spec/api_v1.json", "utf8"));
     const overlay = JSON.parse(readFileSync("spec/overlay.json", "utf8"));
-    expect(compose(snapshot, overlay).attached).toBe(101);
+    expect(compose(snapshot, overlay).attached).toBe(109);
   });
 
   it("is idempotent: composing an already-composed spec attaches nothing more", () => {

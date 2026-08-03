@@ -112,6 +112,10 @@ export type TrendArticlesAllParams = Prettify<
 >;
 export type SurveyListParams = Prettify<CallQuery<"/api/surveys", "get">>;
 export type SurveyListAllParams = Prettify<IterQuery<"/api/surveys", "get">>;
+export type SurveyCreateParams = Prettify<CallBodyInner<"/api/surveys", "post", "survey">>;
+export type SurveyUpdateParams = Prettify<
+  CallBodyInner<"/api/surveys/{id_or_slug}", "patch", "survey">
+>;
 export type SurveyPollTextResponsesParams = Prettify<
   CallQuery<"/api/surveys/{id_or_slug}/poll_text_responses", "get">
 >;

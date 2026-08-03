@@ -3613,7 +3613,53 @@ export interface paths {
      */
     get: operations["getSurveys"];
     put?: never;
-    post?: never;
+    /**
+     * Create a survey
+     * @description Create a new survey with optional nested polls and poll options. Requires Administrator privileges.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      /** @description Survey properties to create. */
+      requestBody?: {
+        content: {
+          "application/json": components["schemas"]["SurveyInput"];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["SurveyWithPolls"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ErrorEnvelope"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ErrorEnvelope"];
+          };
+        };
+      };
+    };
     delete?: never;
     options?: never;
     head?: never;
@@ -3638,10 +3684,119 @@ export interface paths {
     get: operations["getSurveyByIdOrSlug"];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Delete a survey
+     * @description Delete an existing survey. Requires Administrator privileges.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The ID or slug of the survey. */
+          id_or_slug: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ErrorEnvelope"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ErrorEnvelope"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ErrorEnvelope"];
+          };
+        };
+      };
+    };
     options?: never;
     head?: never;
-    patch?: never;
+    /**
+     * Update a survey
+     * @description Update an existing survey, including its polls and options. Requires Administrator privileges.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The ID or slug of the survey. */
+          id_or_slug: string;
+        };
+        cookie?: never;
+      };
+      /** @description Survey properties to update. */
+      requestBody?: {
+        content: {
+          "application/json": components["schemas"]["SurveyInput"];
+        };
+      };
+      responses: {
+        /** @description Successful */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["SurveyWithPolls"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ErrorEnvelope"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ErrorEnvelope"];
+          };
+        };
+        /** @description Unprocessable Entity */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ErrorEnvelope"];
+          };
+        };
+      };
+    };
     trace?: never;
   };
   "/api/surveys/{id_or_slug}/poll_votes": {
@@ -5309,6 +5464,23 @@ export interface components {
       display_title: boolean;
       /** @description Whether users can submit multiple times */
       allow_resubmission: boolean;
+      /**
+       * Format: int32
+       * @description Daily email distributions count
+       */
+      daily_email_distributions?: number;
+      /** @description Optional context paragraph for emails */
+      extra_email_context_paragraph?: string | null;
+      /**
+       * Format: int32
+       * @description Target response count
+       */
+      target_response_count?: number;
+      /**
+       * Format: date-time
+       * @description Target completion date in the future
+       */
+      target_completion_date?: string | null;
       /** Format: date-time */
       created_at: string;
       /** Format: date-time */
@@ -5318,6 +5490,100 @@ export interface components {
     SurveyWithPolls: components["schemas"]["Survey"] & {
       /** @description All polls in the survey, ordered by position */
       polls: components["schemas"]["Poll"][];
+    };
+    /** @description Parameters for creating or updating a survey */
+    SurveyInput: {
+      survey: {
+        /** @description Title of the survey */
+        title?: string;
+        /**
+         * @description Survey category
+         * @enum {string}
+         */
+        survey_type_of?: "community_pulse" | "industry" | "fun";
+        /**
+         * @description Survey category (alias of survey_type_of)
+         * @enum {string}
+         */
+        type_of?: "community_pulse" | "industry" | "fun";
+        /** @description Whether the survey is active */
+        active?: boolean;
+        /** @description Whether to show the title to respondents */
+        display_title?: boolean;
+        /** @description Whether users can submit multiple times */
+        allow_resubmission?: boolean;
+        /**
+         * Format: int32
+         * @description Daily email distributions count
+         */
+        daily_email_distributions?: number;
+        /** @description Optional context paragraph for emails */
+        extra_email_context_paragraph?: string | null;
+        /**
+         * Format: int32
+         * @description Target response count
+         */
+        target_response_count?: number;
+        /**
+         * Format: date-time
+         * @description Target completion date in the future
+         */
+        target_completion_date?: string | null;
+        polls?: {
+          /**
+           * Format: int64
+           * @description ID of the poll to update, omit for new polls
+           */
+          id?: number;
+          /** @description Question text in markdown */
+          prompt_markdown?: string;
+          /**
+           * @description Poll type
+           * @enum {string}
+           */
+          poll_type_of?: "single_choice" | "multiple_choice" | "scale" | "text_input";
+          /**
+           * @description Poll type (alias of poll_type_of)
+           * @enum {string}
+           */
+          type_of?: "single_choice" | "multiple_choice" | "scale" | "text_input";
+          /**
+           * Format: int32
+           * @description Display order within survey
+           */
+          position?: number;
+          /**
+           * Format: int32
+           * @description Minimum value for scale polls
+           */
+          scale_min?: number;
+          /**
+           * Format: int32
+           * @description Maximum value for scale polls
+           */
+          scale_max?: number;
+          /** @description Set to true to destroy this poll */
+          _destroy?: boolean;
+          poll_options?: {
+            /**
+             * Format: int64
+             * @description ID of the option to update, omit for new options
+             */
+            id?: number;
+            /** @description Option markdown text */
+            markdown?: string;
+            /** @description Optional supplementary text */
+            supplementary_text?: string;
+            /**
+             * Format: int32
+             * @description Display order within poll
+             */
+            position?: number;
+            /** @description Set to true to destroy this option */
+            _destroy?: boolean;
+          }[];
+        }[];
+      };
     };
     /** @description Representation of a single poll vote cast by a user */
     PollVote: {

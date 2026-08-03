@@ -51,6 +51,7 @@ const FULL: Required<Discovered> = {
     recommendedArticlesList: 28,
     requestRedirect: 29,
     segment: 30,
+    survey: 32,
     userIdentity: 31,
   },
 };
@@ -104,14 +105,14 @@ describe("sweep targets table", () => {
     }
   });
 
-  // Pass one's completeness proof, rewritten to pass two's totals: 129 of the 130
+  // Pass one's completeness proof, rewritten to pass two's totals: 132 of the 133
   // resolve to a concrete request, and the one holdout is the feedback-message
   // update, whose identifier no operation in the spec lists or creates.
-  it("targets 129 of 130 operations and defers none on a full discovery record", () => {
+  it("targets 132 of 133 operations and defers none on a full discovery record", () => {
     expect(
       targets.filter((t) => t.kind === "skipped" && t.cause === "prerequisite-failed"),
     ).toEqual([]);
-    expect(targets.filter((t) => t.kind === "targeted").length).toBe(129);
+    expect(targets.filter((t) => t.kind === "targeted").length).toBe(132);
     const skipped = targets.filter((t) => t.kind === "skipped");
     expect(skipped.map(key)).toEqual(["PATCH /api/feedback_messages/{id}"]);
   });
@@ -122,7 +123,7 @@ describe("sweep targets table", () => {
       .map(key)
       .sort();
     expect(writeOperations().sort()).toEqual(declared);
-    expect(declared.length).toBe(55);
+    expect(declared.length).toBe(58);
   });
 
   it("produces two distinct entries for a template carrying two verbs", () => {
@@ -183,7 +184,7 @@ describe("sweep targets table", () => {
       }
     }
     // and every other operation is untouched
-    expect(noSegment.filter((t) => t.kind === "targeted").length).toBe(127);
+    expect(noSegment.filter((t) => t.kind === "targeted").length).toBe(130);
   });
 
   it("blocks the username-and-slug read when either half is missing", () => {
@@ -195,7 +196,7 @@ describe("sweep targets table", () => {
 
   it("blocks every read on an empty discovery record without throwing", () => {
     const empty = buildTargets({});
-    expect(empty.length).toBe(130);
+    expect(empty.length).toBe(133);
     expect(empty.every((t) => t.kind === "skipped")).toBe(false); // parameterless reads still run
     const blocked = empty.filter((t) => t.kind === "skipped" && t.cause === "blocked");
     expect(blocked.length).toBeGreaterThan(0);

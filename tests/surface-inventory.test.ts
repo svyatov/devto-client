@@ -50,8 +50,8 @@ describe("surface inventory", () => {
     expect(duplicates).toEqual([]);
   });
 
-  it("covers the full 128-operation upstream surface plus the code-only extras", () => {
-    expect(specOps.size).toBe(130); // 128 upstream + presign + raw_url (KTD11)
-    expect(tableOps).toHaveLength(130);
+  it("covers the full 131-operation upstream surface plus the code-only extras", () => {
+    expect(specOps.size).toBe(133); // 131 upstream + presign + raw_url (KTD11)
+    expect(tableOps).toHaveLength(133);
   });
 });
