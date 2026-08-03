@@ -28,7 +28,7 @@ jobs:
       # Manifest mode, not the config-less `release-type: node` this used to run.
       # The config file is what carries `extra-files`, which is how src/version.ts
       # gets bumped in lockstep with package.json.
-      - uses: googleapis/release-please-action@v5
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         id: release
         with:
           config-file: release-please-config.json
@@ -45,14 +45,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
       # attw packs the tarball with npm, and the smoke check below runs under
       # node. Pin both to the package's minimum supported Node rather than
       # whatever the runner image happens to ship.
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "22.12"
       - run: bun install --frozen-lockfile
@@ -70,7 +70,7 @@ jobs:
       # this, an empty or broken dist/ publishes green, and npm versions are
       # immutable, so there is no taking it back.
       - run: node --input-type=module -e "import('./dist/index.js').then(m => { if (!m.DevToClient) throw new Error('built dist is missing DevToClient') })"
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: dist
           path: dist/
@@ -84,14 +84,14 @@ jobs:
       contents: read
       id-token: write # npm trusted publishing (OIDC provenance)
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: dist
           path: dist
       # Publishing shells to npm rather than bun because OIDC trusted publishing
       # needs npm >= 11.5.1.
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org

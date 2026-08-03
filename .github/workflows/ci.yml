@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The audit step below is the project's only watcher on 91 of its 97 resolved
+  # packages, and an advisory gets published without anyone here pushing. Run
+  # the whole thing weekly so a quiet month is not the same as a clean one.
+  schedule:
+    - cron: "23 5 * * 1"
 
 permissions:
   contents: read
@@ -20,16 +25,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
+      # GitHub's dependency graph cannot parse bun.lock. Its SBOM lists the six
+      # direct devDependencies and nothing under them, so 91 of the 97 resolved
+      # packages have no watcher on the forge side at all. `bun audit` reads
+      # bun.lock straight against npm's advisory database, which makes this step
+      # the only thing covering that residual rather than a second opinion on it.
+      # If an unfixable advisory ever walls off every PR, `--ignore <CVE>` is the
+      # release valve; nothing here ships to consumers, since the published
+      # package has no runtime dependencies.
+      - run: bun audit
       - run: bun run build
       - run: bun run check
       - run: bun run check:drift
       - run: bun test --coverage --coverage-reporter=lcov --coverage-reporter=text
-      - uses: codecov/codecov-action@v7
+      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           files: ./coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -51,11 +65,11 @@ jobs:
       matrix:
         node-version: ["22.12", "24", "26"]
     steps:
-      - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: ${{ matrix.node-version }}
       - run: bun install --frozen-lockfile
