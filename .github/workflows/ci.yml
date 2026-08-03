@@ -8,9 +8,17 @@ on:
 permissions:
   contents: read
 
+# A superseded pull-request run tells you nothing, so drop it when a new commit
+# arrives. Pushes to main are left alone: that run feeds the CI and coverage
+# badges, and cancelling it leaves them reporting a commit that is no longer HEAD.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
@@ -28,13 +36,30 @@ jobs:
         # Codecov requires an upload token on the default branch even for public
         # repos. Add it once: `gh secret set CODECOV_TOKEN` with the value from
         # the repo's page on codecov.io.
-      # The package ships for Node consumers, but the suite runs under Bun. Pack
-      # the tarball and import it by name under the minimum supported Node, so a
-      # Node-only regression or a packaging mistake (a wrong `exports` map, a file
-      # missing from `files`) fails a PR here instead of surfacing at release.
+
+  # The package ships for Node consumers, but the suite runs under Bun. Pack the
+  # tarball and import it by name, so a Node-only regression or a packaging
+  # mistake (a wrong `exports` map, a file missing from `files`) fails a PR here
+  # instead of surfacing at release. `engines.node` says >=22.12, which is a
+  # promise about every maintained line at or above it, not just the floor, so
+  # each one gets a leg. Bun-side gates stay in the job above and run once.
+  node-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["22.12", "24", "26"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
       - uses: actions/setup-node@v7
         with:
-          node-version: "22.12"
+          node-version: ${{ matrix.node-version }}
+      - run: bun install --frozen-lockfile
+      - run: bun run build
       - run: |
           npm pack
           cd "$(mktemp -d)"
