@@ -72,6 +72,22 @@ Don't go looking for a version to upgrade to. That parser last shipped in Januar
 
 There is no npm token in this repository, and there never will be. The publish authenticates through OIDC trusted publishing, so npm verifies the workflow itself rather than a stored credential, and every published version carries a provenance attestation you can check on its npm page. That's also why the tests and the build run in a separate job from the publish: the job holding the publish identity installs no project dependencies and builds nothing, so nothing your `bun install` pulls in ever runs next to it.
 
+## What SemVer covers here
+
+Versions follow [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html), and that promise means nothing until you know what it's a promise about. Here it covers everything reachable from the package's one entry point: the `DevToClient` class and its resource namespaces, the exported error classes, the exported option and event types, and the generated request and response type aliases. Break any of those and it takes a MAJOR.
+
+The generated types are in there on purpose, and it costs something. A spec re-sync that narrows or drops a field breaks callers just as surely as a hand-written change would, so it takes a MAJOR here even though the change started upstream at Forem. 2.0.0 is the precedent: `ArticleSummary` gained a required `comments_count` and that alone earned the major.
+
+Two things sit deliberately outside the promise. The `debug` output format is diagnostic text rather than an interface, and the README says so right where it shows you a sample; it can change in any release. And `DevToEvent` is an open union, so new event kinds arrive in a MINOR. Branch on it with a `default`, not with an exhaustiveness check.
+
+## Deprecating something
+
+A public item doesn't just vanish. It gets deprecated in a MINOR release first, carrying a `@deprecated` JSDoc tag that names the replacement and the earliest version it can be removed in, and it keeps working until at least the next MAJOR.
+
+`onResponse` is the worked example. Its tag in `src/http.ts` points at `onEvent`, says removal lands in 3.0, and even flags the one behavior that shifted underneath it. It still fires today. Anything on its way out gets the same treatment.
+
+This wasn't always the practice, which is why it's written down now. `maxDelayMs` was removed in 2.0.0 with no deprecation release ahead of it, so the first anyone heard was the breaking-change entry in the changelog. That's the thing this policy exists not to repeat.
+
 ## Who decides
 
 One maintainer, [Leonid Svyatov](https://github.com/svyatov), reviews and merges pull requests, decides what belongs on the client's surface, and cuts releases. Disagreements get settled in the pull request thread, because there's nobody to escalate to.
