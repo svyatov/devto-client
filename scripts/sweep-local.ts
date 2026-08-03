@@ -250,6 +250,7 @@ export const DOCUMENTED_RUNG: { prefix: string; rung: Rung }[] = [
   { prefix: "/api/reactions", rung: "admin" },
   { prefix: "/api/recommended_articles_lists", rung: "admin" },
   { prefix: "/api/segments", rung: "admin" },
+  { prefix: "/api/surveys", rung: "admin" },
   { prefix: "/api/users", rung: "super_moderator" },
 ];
 
@@ -801,6 +802,7 @@ export const CREATE_SEQUENCE: { op: string; resource: Created }[] = [
   { op: "POST /api/organizations", resource: "organization" },
   { op: "POST /api/pages", resource: "page" },
   { op: "POST /api/segments", resource: "segment" },
+  { op: "POST /api/surveys", resource: "survey" },
   { op: "POST /api/recommended_articles_lists", resource: "recommendedArticlesList" },
   { op: "POST /api/admin/request_redirects", resource: "requestRedirect" },
   { op: "POST /api/admin/users/{user_id}/identities", resource: "userIdentity" },
@@ -823,6 +825,7 @@ const LEDGER_TO_DISCOVERY: Partial<Record<Created, keyof Discovered>> = {
   recommendedArticlesList: "recommendedArticlesListId",
   requestRedirect: "requestRedirectId",
   segment: "segmentId",
+  survey: "surveyId",
 };
 
 /** The id a create handed back. Forem wraps some payloads one level (`{badge: {id}}`). */

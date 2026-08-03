@@ -38,6 +38,7 @@ export type Created =
   | "recommendedArticlesList"
   | "requestRedirect"
   | "segment"
+  | "survey"
   | "userIdentity";
 
 /**
@@ -557,6 +558,37 @@ const WRITES: Record<string, (d: Discovered) => Resolved> = {
       path: `/api/recommended_articles_lists/${id}`,
       params: { name: `Sweep list ${tag(d)} updated` },
     })),
+
+  // one poll with two options, because a survey with no polls exercises none of
+  // the nested-attributes handling the create endpoint exists to offer
+  "POST /api/surveys": (d) => ({
+    path: "/api/surveys",
+    params: {
+      survey: {
+        title: `Sweep survey ${tag(d)}`,
+        type_of: "community_pulse",
+        active: false,
+        polls: [
+          {
+            prompt_markdown: "Created by the devto-client local sweep.",
+            type_of: "single_choice",
+            position: 1,
+            poll_options: [
+              { markdown: "First", position: 1 },
+              { markdown: "Second", position: 2 },
+            ],
+          },
+        ],
+      },
+    },
+  }),
+  "PATCH /api/surveys/{id_or_slug}": (d) =>
+    made(d, "survey", (id) => ({
+      path: `/api/surveys/${id}`,
+      params: { survey: { title: `Sweep survey ${tag(d)} updated` } },
+    })),
+  "DELETE /api/surveys/{id_or_slug}": (d) =>
+    made(d, "survey", (id) => ({ path: `/api/surveys/${id}` })),
 
   "POST /api/admin/request_redirects": (d) => ({
     path: "/api/admin/request_redirects",
