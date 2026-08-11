@@ -1,19 +1,30 @@
 version: 2
 updates:
-  # The toolchain is Bun, but bun.lock sits alongside a standard package.json,
-  # so the npm ecosystem is the right declaration. Everything here is a
-  # devDependency; the published package has no runtime dependencies.
-  - package-ecosystem: npm
-    directory: /
+  # Declared `bun` and not `npm`. The toolchain writes bun.lock and no package-lock.json, and
+  # the npm ecosystem cannot read bun.lock, so the previous `npm` entry could only edit
+  # package.json. Every dependency here is declared with a caret range that already admits
+  # the current release, so that entry had nothing it was able to change and opened no pull
+  # request in the life of the repository.
+  - package-ecosystem: "bun"
+    directory: "/"
     schedule:
       interval: weekly
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
     groups:
-      dev-minor-and-patch:
-        update-types: [minor, patch]
-  # Deliberately ungrouped, unlike npm above: the release-please workflow holds
-  # the publish identity, so each action bump arrives as its own reviewable PR
-  # rather than batched into one diff line.
-  - package-ecosystem: github-actions
-    directory: /
+      bun:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: weekly
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
