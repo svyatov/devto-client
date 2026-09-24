@@ -64,7 +64,9 @@ Each property on the client is a resource namespace, and the tier column tells y
 | `devto.trends` | Trends and their articles | public |
 | `devto.surveys` | Surveys, their poll results, and survey administration | admin |
 | `devto.concepts` | Concepts and their articles | public |
-| `devto.agentSessions` | Agent sessions, plus the undocumented presign and raw-url helpers | api-key |
+| `devto.agentSessions` | Agent sessions, plus presigned upload and raw-file URLs | api-key |
+| `devto.events` | Site events: live streams, takeovers, challenges; mutations need admin | public / admin |
+| `devto.openapi` | The instance's own OpenAPI description | public |
 | `devto.badges` | Badge definitions; mutations need admin | public / admin |
 | `devto.badgeAchievements` | Badges awarded to users; awarding needs admin | public / admin |
 | `devto.billboards` | Billboards (display ads) | admin |
@@ -368,7 +370,7 @@ function reply(comment: DevTo.Comment) {
 
 Types generate from Forem's own rswag spec (`swagger/v1/api_v1.json`, pinned in [`spec/api_v1.json`](spec/api_v1.json)) composed with [`spec/overlay.json`](spec/overlay.json), a list of corrections where the upstream spec is missing schemas or disagrees with what the server actually sends. Each overlay entry records why it exists, which makes the spec-vs-reality gap machine-readable and each entry a candidate PR to Forem. A daily CI job diffs the pinned snapshot against upstream (structurally, so it names which path templates and operations changed) and flags any recorded fixture that has aged past its freshness window, filing an issue with the exact re-record command for each affected fixture. From there you re-record live responses from dev.to on demand, one endpoint at a time, instead of on a weekly schedule that dev.to's per-IP throttling made flaky; a manual reality-check run still type-checks fresh recordings against the spec, catching the server drifting under an unchanged spec.
 
-Recording against dev.to answers what the reads return and stops there, because learning what `POST /api/articles` returns means publishing junk to a real community. The writes are asked on a local Forem instead, in dependency order (create, read back, update, destroy) so each one has something real to operate on. All 133 operations get classified in a run and none are deferred; the 18 that stay unexercised each say what they lacked.
+Recording against dev.to answers what the reads return and stops there, because learning what `POST /api/articles` returns means publishing junk to a real community. The writes are asked on a local Forem instead, in dependency order (create, read back, update, destroy) so each one has something real to operate on. All 139 operations get classified in a run and none are deferred; any that stay unexercised say what they lacked.
 
 Every overlay entry names the instrument that established it: the recorded dev.to fixture, the local Forem plus the commit it was seen against, Forem's source, or the structure of the spec itself. Whether a second server agreed is derived from the paired fixture rather than asserted. That distinction has teeth: an uncorroborated local observation may add a key the spec omits, and may never remove or retype one the spec declares. A field the local server invents can only widen your types, never quietly narrow them.
 
@@ -378,8 +380,7 @@ The call surface is ergonomic, but the core stays faithful to the server: respon
 
 | Kind | What | Why |
 | --- | --- | --- |
-| Included, undocumented | `agentSessions.presign` (`POST /api/agent_sessions/presign`) | Exists in Forem's routes, absent from the spec. Marked `undocumented` in its [operation table](src/resources/agent-sessions.ts). |
-| Included, undocumented | `agentSessions.rawUrl` (`GET /api/agent_sessions/{id}/raw_url`) | Same. |
+| Widened | `tags` on `articles.create` and `articles.update` | The spec says `string[]`, and that's all Forem accepts: a plain string gets dropped without an error. The client also takes a comma-separated string, which older spec versions asked for, and splits it into an array before sending, so `tags: "js, webdev"` arrives as two tags. |
 | Excluded | listings endpoints | Dead upstream stubs returning empty responses. |
 | Excluded | `/api/display_ads` | Transitional alias of `/api/billboards`. |
 | Excluded | `suspended` user-role alias | Alias of `suspend`. |

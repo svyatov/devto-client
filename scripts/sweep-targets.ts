@@ -33,6 +33,7 @@ export type Created =
   | "badgeAchievement"
   | "billboard"
   | "concept"
+  | "event"
   | "organization"
   | "page"
   | "recommendedArticlesList"
@@ -76,6 +77,7 @@ export interface Discovered {
   badgeAchievementId?: number;
   billboardId?: number;
   conceptId?: number;
+  eventId?: number;
   segmentId?: number;
   surveyId?: string | number;
   trendId?: string | number;
@@ -273,6 +275,9 @@ const READS: Record<string, (d: Discovered) => Resolved> = {
   "/api/admin/concepts/{id}": (d) =>
     needs(d, "conceptId", (id) => ({ path: `/api/admin/concepts/${id}` })),
 
+  "/api/events": () => ({ path: "/api/events" }),
+  "/api/events/{id}": (d) => needs(d, "eventId", (id) => ({ path: `/api/events/${id}` })),
+
   "/api/follows/tags": () => ({ path: "/api/follows/tags" }),
   "/api/followers/users": () => ({ path: "/api/followers/users" }),
 
@@ -342,6 +347,8 @@ const READS: Record<string, (d: Discovered) => Resolved> = {
     needs(d, "userId", (id) => ({ path: `/api/admin/users/${id}/identities` })),
 
   "/api/videos": () => ({ path: "/api/videos" }),
+
+  "/api/v1/openapi.json": () => ({ path: "/api/v1/openapi.json" }),
 };
 
 /**
@@ -473,6 +480,28 @@ const WRITES: Record<string, (d: Discovered) => Resolved> = {
     })),
   "DELETE /api/admin/concepts/{id}": (d) =>
     made(d, "concept", (id) => ({ path: `/api/admin/concepts/${id}` })),
+
+  // unpublished, so a sweep against a shared instance never puts it on the events page
+  "POST /api/events": (d) => ({
+    path: "/api/events",
+    params: {
+      event: {
+        title: `Sweep event ${tag(d)}`,
+        event_name_slug: `sweep-${tag(d)}`,
+        event_variation_slug: "local",
+        start_time: "2030-01-01T10:00:00Z",
+        end_time: "2030-01-01T11:00:00Z",
+        type_of: "other",
+        published: false,
+      },
+    },
+  }),
+  "PATCH /api/events/{id}": (d) =>
+    made(d, "event", (id) => ({
+      path: `/api/events/${id}`,
+      params: { event: { title: `Sweep event ${tag(d)} updated` } },
+    })),
+  "DELETE /api/events/{id}": (d) => made(d, "event", (id) => ({ path: `/api/events/${id}` })),
 
   // no GET anywhere in the spec renders a feedback message, so nothing in the run
   // can produce this identifier - the honest answer is a cause, not a guessed id

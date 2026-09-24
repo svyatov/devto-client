@@ -1,7 +1,7 @@
 {
   "template": "/api/users/me",
   "method": "GET",
-  "recordedAt": "2026-07-16T19:44:12.162Z",
+  "recordedAt": "2026-09-24T09:30:28.578Z",
   "path": "/api/users/me",
   "payload": {
     "type_of": "user",
@@ -10,7 +10,7 @@
     "name": "Leonid Svyatov",
     "twitter_username": null,
     "github_username": "svyatov",
-    "email": null,
+    "email": "scrubbed@example.com",
     "summary": "Design, build, and ship end-to-end features - backend, frontend, infra - with agentic AI in the loop. Open-source maintainer and contributor.",
     "location": "Yerevan, Armenia",
     "website_url": "https://www.svyatov.com",
@@ -22,10 +22,12 @@
       10,
       75,
       91,
+      160,
+      161,
       213,
       214,
       280
     ],
-    "followers_count": 219
+    "followers_count": 708
   }
 }

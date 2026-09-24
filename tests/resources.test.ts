@@ -96,6 +96,18 @@ describe("namespace bindings: the Call rule", () => {
     expectTypeOf(created.body_markdown).toEqualTypeOf<string | null>();
   });
 
+  it("sends article tags as an array, splitting a comma-separated string (Forem drops a string)", async () => {
+    const { client, calls } = harness({}, {}, {});
+    await client.articles.create({ title: "hi", tags: "js, , webdev,bun " });
+    await client.articles.update(1, { tags: "js" });
+    await client.articles.update(1, { tags: ["js", "webdev"] });
+    const tagsOf = (i: number): unknown => JSON.parse(calls[i]?.body ?? "").article.tags;
+    expect(tagsOf(0)).toEqual(["js", "webdev", "bun"]);
+    expect(tagsOf(1)).toEqual(["js"]);
+    expect(tagsOf(2)).toEqual(["js", "webdev"]);
+    expect(JSON.parse(calls[0]?.body ?? "").article.title).toBe("hi");
+  });
+
   it("AE2: update sends the wrapped body with the path id, documented verbs only", async () => {
     const { client, calls } = harness({}, {});
     await client.articles.update(1, { published: true });
@@ -165,7 +177,7 @@ describe("namespace bindings: the Call rule", () => {
     );
   });
 
-  it("agent session undocumented extras are flagged in the table and callable", async () => {
+  it("agent session presign and raw-url helpers are callable and typed", async () => {
     const { client, calls } = harness(
       { s3_key: "k", presigned_url: "https://s3" },
       { raw_url: "https://s3/raw" },

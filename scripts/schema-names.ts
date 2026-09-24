@@ -44,6 +44,7 @@ export const schemaNames = {
   Badge: "Badge",
   BadgeAchievement: "BadgeAchievement",
   Billboard: "Billboard",
+  Event: "Event",
   // segments & sessions
   Segment: "Segment",
   SegmentBulkResult: "SegmentBulkResult",

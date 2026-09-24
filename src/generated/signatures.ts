@@ -80,6 +80,10 @@ import type {
   ConceptListParams,
   ConceptSearchParams,
   ConceptUpdateParams,
+  Event,
+  EventCreateParams,
+  EventListParams,
+  EventUpdateParams,
   ExtendedUser,
   FeedbackMessageUpdateParams,
   FollowCreateParams,
@@ -510,6 +514,18 @@ export interface FeedbackMessagesNamespace {
     params?: FeedbackMessageUpdateParams,
     opts?: CallOptions,
   ) => CallResult<"/api/feedback_messages/{id}", "patch">;
+}
+
+export interface EventsNamespace {
+  list: (params?: EventListParams, opts?: CallOptions) => Promise<Event[]>;
+  create: (params?: EventCreateParams, opts?: CallOptions) => Promise<Event>;
+  get: (id: number, opts?: CallOptions) => Promise<Event>;
+  update: (id: number, params?: EventUpdateParams, opts?: CallOptions) => Promise<Event>;
+  delete: (id: number, opts?: CallOptions) => Promise<void>;
+}
+
+export interface OpenapiNamespace {
+  get: (opts?: CallOptions) => CallResult<"/api/v1/openapi.json", "get">;
 }
 
 export interface AdminUsersNamespace {

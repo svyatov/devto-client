@@ -14,7 +14,7 @@ import {
 import { type AdminUsersNamespace, adminUsersTable } from "./resources/admin-users.ts";
 import { type AgentSessionsNamespace, agentSessionsTable } from "./resources/agent-sessions.ts";
 import { type AnalyticsNamespace, analyticsTable } from "./resources/analytics.ts";
-import { type ArticlesNamespace, articlesTable } from "./resources/articles.ts";
+import { type ArticlesNamespace, articlesTable, withArrayTags } from "./resources/articles.ts";
 import {
   type BadgeAchievementsNamespace,
   badgeAchievementsTable,
@@ -23,6 +23,7 @@ import { type BadgesNamespace, badgesTable } from "./resources/badges.ts";
 import { type BillboardsNamespace, billboardsTable } from "./resources/billboards.ts";
 import { type CommentsNamespace, commentsTable } from "./resources/comments.ts";
 import { type ConceptsNamespace, conceptsTable } from "./resources/concepts.ts";
+import { type EventsNamespace, eventsTable } from "./resources/events.ts";
 import {
   type FeedbackMessagesNamespace,
   feedbackMessagesTable,
@@ -31,6 +32,7 @@ import { type FollowersNamespace, followersTable } from "./resources/followers.t
 import { type FollowsNamespace, followsTable } from "./resources/follows.ts";
 import { type HealthChecksNamespace, healthChecksTable } from "./resources/health-checks.ts";
 import { type InstanceNamespace, instanceTable } from "./resources/instance.ts";
+import { type OpenapiNamespace, openapiTable } from "./resources/openapi.ts";
 import { type OrganizationsNamespace, organizationsTable } from "./resources/organizations.ts";
 import { type PagesNamespace, pagesTable } from "./resources/pages.ts";
 import {
@@ -97,8 +99,12 @@ export class DevToClient {
   readonly surveys: SurveysNamespace;
   /** Concepts and their articles. */
   readonly concepts: ConceptsNamespace;
-  /** Agent sessions, plus the undocumented presign and raw-url helpers. */
+  /** Agent sessions, plus presigned upload and raw-file URLs. */
   readonly agentSessions: AgentSessionsNamespace;
+  /** Site events (live streams, takeovers, challenges). Reads are public; mutations require admin credentials. */
+  readonly events: EventsNamespace;
+  /** The instance's own OpenAPI description. */
+  readonly openapi: OpenapiNamespace;
   /** Badge definitions. Mutations require admin credentials. */
   readonly badges: BadgesNamespace;
   /** Badges awarded to users. Awarding requires admin credentials. */
@@ -127,7 +133,7 @@ export class DevToClient {
     const rf: RequestFn = (method, path, opts, never404) =>
       request(this.config, method, path, opts, never404);
 
-    this.articles = bindOps<ArticlesNamespace>(rf, articlesTable);
+    this.articles = withArrayTags(bindOps<ArticlesNamespace>(rf, articlesTable));
     this.comments = bindOps<CommentsNamespace>(rf, commentsTable);
     this.users = bindOps<UsersNamespace>(rf, usersTable);
     this.organizations = bindOps<OrganizationsNamespace>(rf, organizationsTable);
@@ -146,6 +152,8 @@ export class DevToClient {
     this.surveys = bindOps<SurveysNamespace>(rf, surveysTable);
     this.concepts = bindOps<ConceptsNamespace>(rf, conceptsTable);
     this.agentSessions = bindOps<AgentSessionsNamespace>(rf, agentSessionsTable);
+    this.events = bindOps<EventsNamespace>(rf, eventsTable);
+    this.openapi = bindOps<OpenapiNamespace>(rf, openapiTable);
     this.badges = bindOps<BadgesNamespace>(rf, badgesTable);
     this.badgeAchievements = bindOps<BadgeAchievementsNamespace>(rf, badgeAchievementsTable);
     this.billboards = bindOps<BillboardsNamespace>(rf, billboardsTable);

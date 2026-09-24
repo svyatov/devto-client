@@ -158,8 +158,9 @@ export function extraKeys(payload: unknown, schema: Schema): string[] {
 }
 
 /**
- * Keys the article serializer emits only when the data exists: org membership, a flare tag.
+ * Keys the article serializer emits only when the data exists: org membership, a flare tag,
+ * and the `warnings` an update carries when the server wants to flag something.
  * Not checked per endpoint: whether a given page of articles happens to contain one is a coin
  * flip, and that flakiness has filed a false drift alarm twice.
  */
-export const CONDITIONAL_KEYS = ["organization", "flare_tag"];
+export const CONDITIONAL_KEYS = ["organization", "flare_tag", "warnings"];

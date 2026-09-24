@@ -16,8 +16,9 @@ export type {
 } from "./events.ts";
 // Friendly types (KTD5): `DevTo` is the namespace home for every alias (zero
 // collisions), plus a curated flat re-export of the names that don't clash with
-// a `lib.dom` global. The two that do, `Comment` and `RequestRedirect` (fetch's
-// redirect mode), are reachable only as `DevTo.Comment` / `DevTo.RequestRedirect`.
+// a `lib.dom` global. The three that do, `Comment`, `Event` and `RequestRedirect`
+// (fetch's redirect mode), are reachable only as `DevTo.Comment` / `DevTo.Event` /
+// `DevTo.RequestRedirect`.
 export type * as DevTo from "./generated/schemas.ts";
 export type {
   AdminUser,
@@ -69,11 +70,13 @@ export type { BadgesNamespace } from "./resources/badges.ts";
 export type { BillboardsNamespace } from "./resources/billboards.ts";
 export type { CommentsNamespace } from "./resources/comments.ts";
 export type { ConceptsNamespace } from "./resources/concepts.ts";
+export type { EventsNamespace } from "./resources/events.ts";
 export type { FeedbackMessagesNamespace } from "./resources/feedback-messages.ts";
 export type { FollowersNamespace } from "./resources/followers.ts";
 export type { FollowsNamespace } from "./resources/follows.ts";
 export type { HealthChecksNamespace } from "./resources/health-checks.ts";
 export type { InstanceNamespace } from "./resources/instance.ts";
+export type { OpenapiNamespace } from "./resources/openapi.ts";
 export type { OrganizationsNamespace } from "./resources/organizations.ts";
 export type { PagesNamespace } from "./resources/pages.ts";
 export type { PodcastEpisodesNamespace } from "./resources/podcast-episodes.ts";
