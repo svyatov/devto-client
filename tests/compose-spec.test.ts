@@ -195,11 +195,11 @@ describe("error-envelope pass", () => {
     expect(attached).toBe(0);
   });
 
-  // KTD5: the real snapshot + overlay fans the one claim out to exactly 109.
-  it("attaches exactly 109 envelopes against the real snapshot and overlay", () => {
+  // KTD5: the real snapshot + overlay fans the one claim out to exactly 111.
+  it("attaches exactly 111 envelopes against the real snapshot and overlay", () => {
     const snapshot = JSON.parse(readFileSync("spec/api_v1.json", "utf8"));
     const overlay = JSON.parse(readFileSync("spec/overlay.json", "utf8"));
-    expect(compose(snapshot, overlay).attached).toBe(109);
+    expect(compose(snapshot, overlay).attached).toBe(111);
   });
 
   it("is idempotent: composing an already-composed spec attaches nothing more", () => {
@@ -405,7 +405,7 @@ describe("composed real spec", () => {
       "devto-fixture/false": 4,
       // most of the Overlay is read off Forem's own controllers, serializers and
       // jbuilder views; six of those shapes also have a dev.to fixture that agrees
-      "forem-source/false": 48,
+      "forem-source/false": 47,
       "forem-source/true": 6,
       // no spec-structure entry is corroborated, and none can be: reading the
       // spec on its own terms involves no server for a second one to agree with

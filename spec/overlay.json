@@ -67,6 +67,36 @@
     }
   },
   {
+    "target": "/components/schemas/Article/properties/article/properties/tags",
+    "expect": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reason": "client widening: upstream moved tags from string to string[] to match the server (article_params permits { tags: [] } only, so a string was always dropped); the articles namespace splits a comma-separated string into an array before sending, keeping 2.x callers compiling and making their tags arrive",
+    "patch": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "string",
+          "description": "Comma-separated tags; the client splits this into an array"
+        }
+      ],
+      "description": "Up to 4 tags, as an array of strings or one comma-separated string"
+    },
+    "provenance": {
+      "instrument": "forem-source",
+      "forem": "5e6f981052d4",
+      "corroborated": false
+    }
+  },
+  {
     "target": "/components/schemas/ReactionResult",
     "expect": null,
     "reason": "missing schema: reactions create/toggle render { result, category, id, reactable_id, reactable_type } (verified in app/controllers/api/v1/reactions_controller.rb)",
@@ -141,100 +171,6 @@
       "application/json": {
         "schema": {
           "$ref": "#/components/schemas/ReactionResult"
-        }
-      }
-    },
-    "provenance": {
-      "instrument": "forem-source",
-      "corroborated": false
-    }
-  },
-  {
-    "target": "/paths/~1api~1agent_sessions~1presign",
-    "expect": null,
-    "reason": "code-only endpoint, verified in forem routes (agent_sessions#presign renders { s3_key, presigned_url })",
-    "patch": {
-      "post": {
-        "summary": "Generate a presigned S3 upload URL for a raw session file (undocumented)",
-        "tags": ["agent_sessions"],
-        "operationId": "presignAgentSession",
-        "responses": {
-          "200": {
-            "description": "presigned URL generated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "s3_key": {
-                      "type": "string"
-                    },
-                    "presigned_url": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["s3_key", "presigned_url"]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "unauthorized"
-          },
-          "503": {
-            "description": "S3 storage not configured"
-          }
-        }
-      }
-    },
-    "provenance": {
-      "instrument": "forem-source",
-      "corroborated": false
-    }
-  },
-  {
-    "target": "/paths/~1api~1agent_sessions~1{id}~1raw_url",
-    "expect": null,
-    "reason": "code-only endpoint, verified in forem routes (agent_sessions#raw_url renders { raw_url })",
-    "patch": {
-      "get": {
-        "summary": "Presigned URL of the raw session file (undocumented)",
-        "tags": ["agent_sessions"],
-        "operationId": "getAgentSessionRawUrl",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Agent session id or slug"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "raw file URL",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "raw_url": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["raw_url"]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "unauthorized"
-          },
-          "404": {
-            "description": "no raw file available"
-          }
         }
       }
     },

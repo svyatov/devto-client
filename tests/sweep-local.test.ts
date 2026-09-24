@@ -349,7 +349,7 @@ describe("the sweep loop", () => {
     expect(findings.every((f) => f.kind === "unexercised")).toBe(true);
     // no operation is deferred any more: the write half is targeted, and a dead
     // port blocks it on the request rather than on the table
-    expect(findings.filter((f) => f.method !== "GET").length).toBe(58);
+    expect(findings.filter((f) => f.method !== "GET").length).toBe(61);
   });
 });
 
@@ -1088,8 +1088,8 @@ describe("the report", () => {
       method: o.method,
     }));
     const md = renderReport(findings, "ae359ff41b2a", "http://localhost:3000");
-    expect(md).toContain("133 operations classified");
-    expect(md).toContain("| matched | 133 |");
+    expect(md).toContain("139 operations classified");
+    expect(md).toContain("| matched | 139 |");
   });
 
   it("gives the confirmed-empty verdict its own section and counts row", () => {

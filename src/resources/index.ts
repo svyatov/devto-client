@@ -10,11 +10,13 @@ import { badgesTable } from "./badges.ts";
 import { billboardsTable } from "./billboards.ts";
 import { commentsTable } from "./comments.ts";
 import { conceptsTable } from "./concepts.ts";
+import { eventsTable } from "./events.ts";
 import { feedbackMessagesTable } from "./feedback-messages.ts";
 import { followersTable } from "./followers.ts";
 import { followsTable } from "./follows.ts";
 import { healthChecksTable } from "./health-checks.ts";
 import { instanceTable } from "./instance.ts";
+import { openapiTable } from "./openapi.ts";
 import { organizationsTable } from "./organizations.ts";
 import { pagesTable } from "./pages.ts";
 import { podcastEpisodesTable } from "./podcast-episodes.ts";
@@ -59,6 +61,8 @@ export const allTables: Record<string, OpTable> = {
   recommendedArticlesLists: recommendedArticlesListsTable,
   analytics: analyticsTable,
   feedbackMessages: feedbackMessagesTable,
+  events: eventsTable,
+  openapi: openapiTable,
   "admin.users": adminUsersTable,
   "admin.concepts": adminConceptsTable,
   "admin.requestRedirects": adminRequestRedirectsTable,

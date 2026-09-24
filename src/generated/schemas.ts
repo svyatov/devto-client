@@ -26,6 +26,7 @@ export type PodcastEpisodeSummary = components["schemas"]["PodcastEpisodeIndex"]
 export type Badge = components["schemas"]["Badge"];
 export type BadgeAchievement = components["schemas"]["BadgeAchievement"];
 export type Billboard = components["schemas"]["Billboard"];
+export type Event = components["schemas"]["Event"];
 export type Segment = components["schemas"]["Segment"];
 export type SegmentBulkResult = components["schemas"]["SegmentBulkResult"];
 export type AgentSession = components["schemas"]["AgentSessionShow"];
@@ -174,6 +175,9 @@ export type AnalyticTotalsParams = Prettify<CallQuery<"/api/analytics/totals", "
 export type FeedbackMessageUpdateParams = Prettify<
   CallBodyInner<"/api/feedback_messages/{id}", "patch", "feedback_message">
 >;
+export type EventListParams = Prettify<CallQuery<"/api/events", "get">>;
+export type EventCreateParams = Prettify<CallBodyInner<"/api/events", "post", "event">>;
+export type EventUpdateParams = Prettify<CallBodyInner<"/api/events/{id}", "patch", "event">>;
 export type AdminUserListParams = Prettify<CallQuery<"/api/admin/users", "get">>;
 export type AdminUserListAllParams = Prettify<IterQuery<"/api/admin/users", "get">>;
 export type AdminUserCreateParams = Prettify<CallBody<"/api/admin/users", "post">>;

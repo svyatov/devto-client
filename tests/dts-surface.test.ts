@@ -44,7 +44,7 @@ afterAll(() => {
 });
 
 /** Friendly names that shadow a lib.dom global, so they stay off the flat surface (KTD5). */
-const DENYLIST = new Set(["Comment", "RequestRedirect"]);
+const DENYLIST = new Set(["Comment", "Event", "RequestRedirect"]);
 
 /** The single flat `export type { … } from "./generated/schemas.ts"` line in index.d.ts. */
 const flatReExport = (): string => {
@@ -95,8 +95,10 @@ describe("dts-surface guard (R5)", () => {
     const flat = flatReExport();
     expect(flat).not.toMatch(/\bComment\b/);
     expect(flat).not.toMatch(/\bRequestRedirect\b/);
-    // but both are declared in schemas.d.ts, so DevTo.Comment / DevTo.RequestRedirect resolve
+    expect(flat).not.toMatch(/\bEvent\b/);
+    // but all are declared in schemas.d.ts, so DevTo.Comment / DevTo.Event / DevTo.RequestRedirect resolve
     expect(schemas).toContain("export type Comment =");
+    expect(schemas).toContain("export type Event =");
     expect(schemas).toContain("export type RequestRedirect =");
   });
 

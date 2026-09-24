@@ -243,6 +243,7 @@ export const DOCUMENTED_RUNG: { prefix: string; rung: Rung }[] = [
   { prefix: "/api/badges", rung: "admin" },
   { prefix: "/api/billboards", rung: "admin" },
   { prefix: "/api/concepts", rung: "anonymous" },
+  { prefix: "/api/events", rung: "admin" },
   { prefix: "/api/feedback_messages", rung: "super_moderator" },
   { prefix: "/api/follows", rung: "user" },
   { prefix: "/api/organizations", rung: "anonymous" },
@@ -799,6 +800,7 @@ export const CREATE_SEQUENCE: { op: string; resource: Created }[] = [
   { op: "POST /api/badge_achievements", resource: "badgeAchievement" },
   { op: "POST /api/billboards", resource: "billboard" },
   { op: "POST /api/admin/concepts", resource: "concept" },
+  { op: "POST /api/events", resource: "event" },
   { op: "POST /api/organizations", resource: "organization" },
   { op: "POST /api/pages", resource: "page" },
   { op: "POST /api/segments", resource: "segment" },
@@ -820,6 +822,7 @@ const LEDGER_TO_DISCOVERY: Partial<Record<Created, keyof Discovered>> = {
   badgeAchievement: "badgeAchievementId",
   billboard: "billboardId",
   concept: "conceptId",
+  event: "eventId",
   organization: "organizationId",
   page: "pageId",
   recommendedArticlesList: "recommendedArticlesListId",
@@ -1199,6 +1202,7 @@ export async function discover(rf: Rf): Promise<Discovered & { baseline: Baselin
   await set("badgeAchievementId", "/api/badge_achievements");
   await set("billboardId", "/api/billboards");
   await set("conceptId", "/api/concepts");
+  await set("eventId", "/api/events");
   await set("segmentId", "/api/segments");
   await set("surveyId", "/api/surveys");
   await set("trendId", "/api/trends");

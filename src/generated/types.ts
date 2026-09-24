@@ -61,6 +61,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/agent_sessions/presign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * request a presigned URL to upload raw session transcript to S3
+     * @description Generate an S3 presigned PUT URL and object key for uploading raw session transcripts directly to S3.
+     */
+    post: operations["presignAgentSession"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/agent_sessions/{id}/raw_url": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * request a presigned S3 GET URL to download the raw session transcript
+     * @description Retrieve a temporary presigned GET URL to download the original raw transcript file from S3.
+     */
+    get: operations["getAgentSessionRawUrl"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/analytics/totals": {
     parameters: {
       query?: never;
@@ -478,11 +518,12 @@ export interface paths {
      *     - **title**: A compelling and descriptive title for the article.
      *     - **body_markdown**: The main text of the article in Markdown format. You can use standard Markdown as well as Forem-specific Liquid tags (e.g., `{% embed ... %}`). You can also include YAML front matter at the very beginning of the markdown to specify metadata such as tags, series, and cover image.
      *     - **published**: Set to `true` to immediately publish the article and make it visible in feeds. Set to `false` (default) to save it as a draft.
-     *     - **tags**: A comma-separated list of tags (up to 4 tags). Tags help categorize your post and improve discoverability.
+     *     - **tags**: An array of up to 4 tag strings, e.g. `['ruby', 'rails']`. Tags help categorize your post and improve discoverability.
      *     - **series**: Group articles together by specifying a series name. If the series does not exist, it will be created.
      *     - **main_image**: Absolute URL of the cover image for the article.
      *     - **canonical_url**: If this post was originally published elsewhere, specify the canonical URL to maintain SEO integrity.
      *     - **description**: A short summary of the article used for previews and SEO meta description.
+     *     - **ai_disclosure_level**: AI tooling usage disclosure (`not_disclosed`, `no_ai`, `some_ai`, `fully_autonomous`).
      */
     post: operations["createArticle"];
     delete?: never;
@@ -563,7 +604,7 @@ export interface paths {
      *
      *     ### Authorization Constraints:
      *     - The API key provided must belong to the author of the article.
-     *     - Supports updating individual fields such as `title`, `body_markdown`, `published`, `tags`, etc.
+     *     - Supports updating individual fields such as `title`, `body_markdown`, `published`, `tags`, `ai_disclosure_level`, etc.
      *     - Setting `published: false` on an already published article will revert it to draft status.
      */
     put: operations["updateArticle"];
@@ -746,7 +787,7 @@ export interface paths {
         query: {
           /** @description The search query term to match semantically. */
           q: string;
-          /** @description Limit of articles returned (default 10, max 50). */
+          /** @description Limit of articles returned (default 30, max 100). */
           per_page?: number;
           /** @description Pagination page index. */
           page?: number;
@@ -989,6 +1030,8 @@ export interface paths {
      *     - **user_id**: The numeric ID of the user receiving the badge.
      *     - **badge_id**: The numeric ID of the badge being awarded.
      *     - **rewarding_context_message_markdown**: Optional personalized message shown in the notification or profile feed to explain why the user was awarded the badge.
+     *     - **metadata**: Optional key/value data stored with the achievement for context.
+     *     - If the badge cannot be awarded more than once and the user already holds it, the request is rejected with `409 Conflict`, and the conflicting `achievement_id` is included in the response. A `422` is returned for other request errors.
      */
     post: {
       parameters: {
@@ -1006,6 +1049,9 @@ export interface paths {
               badge_id: number;
               rewarding_context_message_markdown?: string;
               include_default_description?: boolean;
+              metadata?: {
+                [key: string]: unknown;
+              };
             };
           };
         };
@@ -1018,6 +1064,28 @@ export interface paths {
           };
           content: {
             "application/json": components["schemas"]["BadgeAchievement"];
+          };
+        };
+        /** @description conflict */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              errors: string[];
+              /** @description ID of the conflicting achievement awarding the badge to the user. */
+              achievement_id: number;
+            };
+          };
+        };
+        /** @description unprocessable */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ErrorEnvelope"];
           };
         };
       };
@@ -2140,6 +2208,61 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/events": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve events
+     * @description Retrieve a list of events on the platform.
+     *
+     *     ### Query Parameters:
+     *     - **type_of**: Filter events by their type (`live_stream`, `takeover`, `other`, `challenge`).
+     */
+    get: operations["getEvents"];
+    put?: never;
+    /**
+     * Create an event
+     * @description Create a new event. Requires administrator privileges.
+     */
+    post: operations["createEvent"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/events/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve an event
+     * @description Retrieve a single event by ID.
+     */
+    get: operations["getEventById"];
+    put?: never;
+    post?: never;
+    /**
+     * Delete an event
+     * @description Delete an event. Requires administrator privileges.
+     */
+    delete: operations["deleteEvent"];
+    options?: never;
+    head?: never;
+    /**
+     * Update an event
+     * @description Update an existing event. Requires administrator privileges.
+     */
+    patch: operations["updateEvent"];
+    trace?: never;
+  };
   "/api/feedback_messages/{id}": {
     parameters: {
       query?: never;
@@ -2486,6 +2609,28 @@ export interface paths {
         };
       };
     };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/openapi.json": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * OpenAPI description
+     * @description Retrieve the machine-readable OpenAPI contract for this Forem instance.
+     *
+     *     Automated clients should use this document instead of inferring endpoint schemas from responses or errors.
+     */
+    get: operations["getOpenAPIDescription"];
     put?: never;
     post?: never;
     delete?: never;
@@ -4075,11 +4220,7 @@ export interface paths {
     };
     /**
      * The authenticated user
-     * @description This endpoint allows the client to retrieve information about the authenticated user.
-     *
-     *     ### Usage Tips:
-     *     - Requires a valid `api-key` header to identify the user.
-     *     - Useful for checking permissions, verifying linking state, or retrieving user-specific profile settings.
+     * @description Returned only for delegated Bearer tokens, on any Bearer-capable endpoint, when the configured JWKS endpoint cannot be reached or returns an unusable key set and no cached keys remain. Invalid tokens are 401, never 503.
      */
     get: operations["getUserMe"];
     put?: never;
@@ -4438,7 +4579,7 @@ export interface paths {
     get?: never;
     /**
      * Update user notification settings (Admin)
-     * @description Update a user's email notification preferences (e.g., unsubscribing them from the system newsletter). Requires Super Admin credentials.
+     * @description Update a user's email notification preferences (e.g., unsubscribing them from the system newsletter or the periodic digest). Any subset of the listed properties may be supplied; at least one is required. Requires Super Admin credentials.
      */
     put: {
       parameters: {
@@ -4456,6 +4597,12 @@ export interface paths {
           "application/json": {
             notification_setting: {
               email_newsletter?: boolean;
+              email_digest_periodic?: boolean;
+              email_comment_notifications?: boolean;
+              email_follower_notifications?: boolean;
+              email_mention_notifications?: boolean;
+              email_unread_notifications?: boolean;
+              email_badge_notifications?: boolean;
             };
           };
         };
@@ -4827,40 +4974,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/api/agent_sessions/presign": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Generate a presigned S3 upload URL for a raw session file (undocumented) */
-    post: operations["presignAgentSession"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/agent_sessions/{id}/raw_url": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Presigned URL of the raw session file (undocumented) */
-    get: operations["getAgentSessionRawUrl"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4918,6 +5031,13 @@ export interface components {
        * @description Reading time, in minutes
        */
       reading_time_minutes: number;
+      /**
+       * @description Level of AI tooling usage disclosure
+       * @enum {string}
+       */
+      ai_disclosure_level?: "not_disclosed" | "no_ai" | "some_ai" | "fully_autonomous";
+      /** @description Human-readable label of AI disclosure */
+      ai_disclosure_label?: string;
       user: components["schemas"]["SharedUser"];
       flare_tag?: components["schemas"]["ArticleFlareTag"];
       organization?: components["schemas"]["SharedOrganization"];
@@ -4953,8 +5073,14 @@ export interface components {
         main_image?: string | null;
         canonical_url?: string | null;
         description?: string;
-        tags?: string;
+        /** @description Up to 4 tags, as an array of strings or one comma-separated string */
+        tags?: string[] | string;
         organization_id?: number | null;
+        /**
+         * @description Level of AI tooling usage disclosure
+         * @enum {string}
+         */
+        ai_disclosure_level?: "not_disclosed" | "no_ai" | "some_ai" | "fully_autonomous";
       };
     };
     /** @description Representation of an Organization */
@@ -5111,7 +5237,7 @@ export interface components {
       summary?: string | null;
       twitter_username?: string | null;
       github_username?: string | null;
-      /** @description Email (if user allows displaying email on their profile) or nil */
+      /** @description Email (requires authentication and if user allows displaying email on their profile) or nil */
       email?: string | null;
       website_url?: string | null;
       location?: string | null;
@@ -5155,6 +5281,13 @@ export interface components {
       id_code?: string;
       /** Format: date-time */
       created_at?: string;
+      /**
+       * @description Level of AI tooling usage disclosure
+       * @enum {string}
+       */
+      ai_disclosure_level?: "not_disclosed" | "no_ai" | "some_ai" | "fully_autonomous";
+      /** @description Human-readable label of AI disclosure */
+      ai_disclosure_label?: string;
       body_html?: string;
       user?: {
         name?: string;
@@ -5457,7 +5590,7 @@ export interface components {
        * @description Survey category
        * @enum {string}
        */
-      survey_type_of: "community_pulse" | "industry" | "fun";
+      survey_type_of: "community_pulse" | "industry" | "fun" | "beta_testing";
       /** @description Whether the survey is currently active */
       active?: boolean | null;
       /** @description Whether to show the title to respondents */
@@ -5500,12 +5633,12 @@ export interface components {
          * @description Survey category
          * @enum {string}
          */
-        survey_type_of?: "community_pulse" | "industry" | "fun";
+        survey_type_of?: "community_pulse" | "industry" | "fun" | "beta_testing";
         /**
          * @description Survey category (alias of survey_type_of)
          * @enum {string}
          */
-        type_of?: "community_pulse" | "industry" | "fun";
+        type_of?: "community_pulse" | "industry" | "fun" | "beta_testing";
         /** @description Whether the survey is active */
         active?: boolean;
         /** @description Whether to show the title to respondents */
@@ -5732,6 +5865,10 @@ export interface components {
       badge_id: number;
       rewarding_context_message_markdown?: string | null;
       include_default_description?: boolean;
+      /** @description Key/value data supplied for context */
+      metadata?: {
+        [key: string]: unknown;
+      };
       /** Format: date-time */
       created_at: string;
       /** Format: date-time */
@@ -5765,6 +5902,66 @@ export interface components {
       description: string;
       logo_image_url: string;
       cover_image_url: string;
+    };
+    /** @description Representation of an event */
+    Event: {
+      /** Format: int64 */
+      id: number;
+      title: string;
+      event_name_slug: string;
+      event_variation_slug: string;
+      description?: string | null;
+      /** @description Full text dump of all event details, intended for agent and API consumption. */
+      full_details?: string | null;
+      /** @enum {string} */
+      type_of: "live_stream" | "takeover" | "other" | "challenge";
+      /** Format: date-time */
+      start_time: string;
+      /** Format: date-time */
+      end_time: string;
+      published: boolean;
+      primary_stream_url?: string | null;
+      bg_color_hex?: string | null;
+      /** @enum {string} */
+      broadcast_config?: "no_broadcast" | "tagged_broadcast" | "global_broadcast";
+      /** Format: date-time */
+      broadcast_ended_at?: string | null;
+      /** Format: int64 */
+      user_id?: number | null;
+      /** Format: int64 */
+      organization_id?: number | null;
+      /** Format: int64 */
+      page_id?: number | null;
+      data?: Record<string, never> | null;
+      tags_array?: string[];
+      cached_tag_list?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /** @description Representation of an Event to be created/updated */
+    EventInput: {
+      event: {
+        title: string;
+        event_name_slug: string;
+        event_variation_slug: string;
+        description?: string | null;
+        /** @description Full text dump of all event details. */
+        full_details?: string | null;
+        primary_stream_url?: string | null;
+        /** @default false */
+        published: boolean;
+        /** Format: date-time */
+        start_time: string;
+        /** Format: date-time */
+        end_time: string;
+        /** @enum {string} */
+        type_of?: "live_stream" | "takeover" | "other" | "challenge";
+        organization_id?: number | null;
+        tag_list?: string | null;
+        data?: Record<string, never> | null;
+      };
     };
     ErrorEnvelope: {
       error: string;
@@ -6065,6 +6262,93 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AgentSessionShow"];
+        };
+      };
+      /** @description unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorEnvelope"];
+        };
+      };
+      /** @description not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorEnvelope"];
+        };
+      };
+    };
+  };
+  presignAgentSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description successful */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            s3_key: string;
+            presigned_url: string;
+          };
+        };
+      };
+      /** @description unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorEnvelope"];
+        };
+      };
+      /** @description service unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorEnvelope"];
+        };
+      };
+    };
+  };
+  getAgentSessionRawUrl: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description The unique slug or ID of the agent session.
+         * @example my-session-abc123
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description successful */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            raw_url: string;
+          };
         };
       };
       /** @description unauthorized */
@@ -6950,6 +7234,126 @@ export interface operations {
       };
     };
   };
+  getEvents: {
+    parameters: {
+      query?: {
+        /** @description Filter events by type. */
+        type_of?: "live_stream" | "takeover" | "other" | "challenge";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of events */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Event"][];
+        };
+      };
+    };
+  };
+  createEvent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Event parameters to create. */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["EventInput"];
+      };
+    };
+    responses: {
+      /** @description Event created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Event"];
+        };
+      };
+    };
+  };
+  getEventById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the event. */
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested event */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Event"];
+        };
+      };
+    };
+  };
+  deleteEvent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the event to delete. */
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Event deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  updateEvent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the event to update. */
+        id: number;
+      };
+      cookie?: never;
+    };
+    /** @description Event parameters to update. */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["EventInput"];
+      };
+    };
+    responses: {
+      /** @description Event updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Event"];
+        };
+      };
+    };
+  };
   getFollowedTags: {
     parameters: {
       query?: never;
@@ -7033,6 +7437,30 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ErrorEnvelope"];
+        };
+      };
+    };
+  };
+  getOpenAPIDescription: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The OpenAPI description */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            openapi: string;
+            info: Record<string, never>;
+            paths: Record<string, never>;
+          };
         };
       };
     };
@@ -7974,6 +8402,15 @@ export interface operations {
           "application/json": components["schemas"]["ErrorEnvelope"];
         };
       };
+      /** @description Delegated access unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorEnvelope"];
+        };
+      };
     };
   };
   getUser: {
@@ -8090,90 +8527,6 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["VideoArticle"][];
-        };
-      };
-    };
-  };
-  presignAgentSession: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description presigned URL generated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            s3_key: string;
-            presigned_url: string;
-          };
-        };
-      };
-      /** @description unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorEnvelope"];
-        };
-      };
-      /** @description S3 storage not configured */
-      503: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorEnvelope"];
-        };
-      };
-    };
-  };
-  getAgentSessionRawUrl: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Agent session id or slug */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description raw file URL */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            raw_url: string;
-          };
-        };
-      };
-      /** @description unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorEnvelope"];
-        };
-      };
-      /** @description no raw file available */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorEnvelope"];
         };
       };
     };
