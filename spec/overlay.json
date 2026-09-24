@@ -1231,6 +1231,22 @@
           "type": "integer",
           "nullable": true
         },
+        "ai_disclosure_level": {
+          "type": "string",
+          "enum": ["not_disclosed", "no_ai", "some_ai", "fully_autonomous"],
+          "description": "Level of AI tooling usage disclosure"
+        },
+        "ai_disclosure_label": {
+          "type": "string",
+          "description": "Human-readable label of AI disclosure"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Present only on an update the server wants to flag, such as an undisclosed AI level"
+        },
         "cover_image": {
           "type": "string",
           "nullable": true

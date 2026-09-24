@@ -6050,6 +6050,15 @@ export interface components {
       published_timestamp: string;
       language?: string | null;
       subforem_id?: number | null;
+      /**
+       * @description Level of AI tooling usage disclosure
+       * @enum {string}
+       */
+      ai_disclosure_level?: "not_disclosed" | "no_ai" | "some_ai" | "fully_autonomous";
+      /** @description Human-readable label of AI disclosure */
+      ai_disclosure_label?: string;
+      /** @description Present only on an update the server wants to flag, such as an undisclosed AI level */
+      warnings?: string[];
       cover_image: string | null;
       social_image: string;
       canonical_url: string;
