@@ -9,6 +9,10 @@ on:
   # the whole thing weekly so a quiet month is not the same as a clean one.
   schedule:
     - cron: "23 5 * * 1"
+  # release-please.yml dispatches this on the release PR's branch. That PR is
+  # opened by GITHUB_TOKEN, which starts no pull_request runs, and main's ruleset
+  # requires these jobs before it merges.
+  workflow_dispatch:
 
 permissions:
   contents: read

@@ -24,6 +24,7 @@ jobs:
       pull-requests: write
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
+      pr_branch: ${{ steps.release.outputs.prs_created == 'true' && fromJSON(steps.release.outputs.pr).headBranchName || '' }}
     steps:
       # Manifest mode, not the config-less `release-type: node` this used to run.
       # The config file is what carries `extra-files`, which is how src/version.ts
@@ -33,6 +34,27 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  # The release PR is opened and pushed by GITHUB_TOKEN, which starts no
+  # pull_request runs, so main's required checks never report on it and the
+  # merge stays blocked. workflow_dispatch is the one event that token can still
+  # start, and a dispatched run reports its checks on the branch head, which is
+  # the PR head. A job of its own keeps `actions: write` away from the
+  # third-party action above.
+  dispatch-checks:
+    needs: release-please
+    if: needs.release-please.outputs.pr_branch != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BRANCH: ${{ needs.release-please.outputs.pr_branch }}
+    steps:
+      - run: |
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
+          gh workflow run commit-message.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
 
   # Everything that runs third-party code lives here, in a job with no publish
   # identity. A release created by GITHUB_TOKEN starts no new workflow runs, so
