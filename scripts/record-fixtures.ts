@@ -118,6 +118,44 @@ function assertOriginRefusal(err: DevToApiError, label: string): void {
   );
 }
 
+/** A read whose response was generated for some other request (R10). */
+class ContradictedRead extends Error {}
+
+/** The reads keyed on one sample article. */
+export function articleReads(article: { id: number; path: string }): ReadSpec[] {
+  const [username = "", slug = ""] = article.path.replace(/^\//, "").split("/");
+  return [
+    { template: "/api/articles/{id}", path: `/api/articles/${article.id}` },
+    { template: "/api/articles/{username}/{slug}", path: `/api/articles/${username}/${slug}` },
+    { template: "/api/comments", path: "/api/comments", query: { a_id: article.id } },
+  ];
+}
+
+/**
+ * Records the per-article reads, moving to the next sample article when dev.to's
+ * edge replays a contradicted response for one. An entry can stay poisoned for its
+ * whole 48h TTL, and any other article answers the same question.
+ */
+export async function recordArticleReads(
+  rf: Rf,
+  candidates: { id: number; path: string }[],
+  pick: (specs: ReadSpec[]) => ReadSpec[],
+  outDir: string,
+  pauseMs?: number,
+  latest?: LatestResponse,
+): ReturnType<typeof recordReads> {
+  for (const [i, article] of candidates.entries()) {
+    try {
+      return await recordReads(rf, pick(articleReads(article)), outDir, pauseMs, latest);
+    } catch (err) {
+      const next = candidates[i + 1];
+      if (!(err instanceof ContradictedRead) || next === undefined) throw err;
+      console.warn(`${err.message}; trying article ${next.id}`);
+    }
+  }
+  return { recorded: [], skipped: [], files: [] };
+}
+
 export async function recordReads(
   rf: Rf,
   specs: ReadSpec[],
@@ -144,7 +182,7 @@ export async function recordReads(
         );
       }
       if (meta?.contradiction !== undefined) {
-        throw new Error(
+        throw new ContradictedRead(
           `refusing to record ${method} ${spec.template} from ${spec.path}: ${meta.contradiction}, so the response was not generated for this request. Re-run once the edge entry expires`,
         );
       }
@@ -441,10 +479,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       organization?: { username: string };
     }[]
   >("GET", "/api/articles", { query: { per_page: 10 } });
-  // prefer a user-owned article so path-derived {username} is a user, not an org
-  const first = articles.find((a) => !a.organization) ?? articles[0];
+  // prefer user-owned articles so path-derived {username} is a user, not an org
+  const userOwned = articles.filter((a) => !a.organization);
+  const candidates = userOwned.length > 0 ? userOwned : articles.slice(0, 1);
+  const first = candidates[0];
   if (!first) throw new Error("no articles returned: cannot derive sample ids");
-  const [username = "", slug = ""] = first.path.replace(/^\//, "").split("/");
   // a numeric org username would make deriveTemplate pick {id} over {username} and
   // crash assertLabel: prefer a non-numeric one, else skip the org reads this run
   const org = articles.find((a) => a.organization && !/^\d+$/.test(a.organization.username))
@@ -454,9 +493,6 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     { template: "/api/articles", path: "/api/articles" },
     { template: "/api/articles/latest", path: "/api/articles/latest" },
     { template: "/api/articles/search", path: "/api/articles/search", query: { q: "javascript" } },
-    { template: "/api/articles/{id}", path: `/api/articles/${first.id}` },
-    { template: "/api/articles/{username}/{slug}", path: `/api/articles/${username}/${slug}` },
-    { template: "/api/comments", path: "/api/comments", query: { a_id: first.id } },
     { template: "/api/tags", path: "/api/tags" },
     { template: "/api/pages", path: "/api/pages", trim: 3 },
     { template: "/api/podcast_episodes", path: "/api/podcast_episodes" },
@@ -507,9 +543,25 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     : [];
 
   const allReads = [...publicReads, ...userReads];
-  const selectedReads = runAll ? allReads : selectReads(allReads, readSelectors);
+  // the per-article reads are selectable like any other, but record through the rotation
+  const perArticle = articleReads(first);
+  const selectedReads = runAll
+    ? allReads
+    : selectReads([...allReads, ...perArticle], readSelectors).filter(
+        (s) => !perArticle.includes(s),
+      );
+  const pick = (specs: ReadSpec[]): ReadSpec[] =>
+    runAll ? specs : specs.filter((s) => readSelectors.includes(s.template));
   // recordReads persists each fixture as it lands (KTD4): no separate batch write
   const reads = await recordReads(rf, selectedReads, outDir, target.pauseMs, latest);
+  const articleSide = await recordArticleReads(
+    rf,
+    candidates,
+    pick,
+    outDir,
+    target.pauseMs,
+    latest,
+  );
   if (apiKey !== undefined) {
     const userTemplates = new Set(userReads.map((u) => u.template));
     assertUserTierRecorded(
@@ -523,7 +575,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     throw new Error("--only write-cycle needs an API key (FOREM_API_KEY or DEVTO_API_KEY)");
   }
   const writes = doWriteCycle ? await recordWriteCycle(rf, first.id, outDir) : [];
-  const files = [...reads.files, ...writes.map(fixtureFileName)];
+  const files = [...reads.files, ...articleSide.files, ...writes.map(fixtureFileName)];
 
   // KTD13: do public endpoints answer cross-origin? Probe with an Origin header.
   // Only on a full run: a targeted re-record must not clobber the CORS snapshot.
@@ -541,5 +593,5 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   }
 
   console.log(`recorded ${files.length} fixtures to ${outDir}`);
-  for (const s of reads.skipped) console.log(`skipped: ${s}`);
+  for (const s of [...reads.skipped, ...articleSide.skipped]) console.log(`skipped: ${s}`);
 }

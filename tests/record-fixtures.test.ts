@@ -12,6 +12,7 @@ import {
   type ReadSpec,
   type Recorded,
   type Rf,
+  recordArticleReads,
   recordReads,
   recordWriteCycle,
   resolveTarget,
@@ -354,6 +355,63 @@ describe("recordReads provenance gate (U4)", () => {
     const rf = vi.fn(async () => [{ id: 1 }]) as unknown as Rf;
     const { recorded } = await recordReads(rf, [read("/api/tags")], tmp(), 0);
     expect(recorded).toHaveLength(1);
+  });
+
+  describe("recordArticleReads", () => {
+    const all = (specs: ReadSpec[]): ReadSpec[] => specs;
+    const poisoned = { "/api/articles/1": meta({ fromCache: true, contradiction: "v0-under-v1" }) };
+    const candidates = [
+      { id: 1, path: "/alice/first-post" },
+      { id: 2, path: "/bob/second-post" },
+    ];
+
+    it("moves to the next sample article when one comes back contradicted", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const latest: LatestResponse = { meta: undefined };
+      const rf = answering(latest, poisoned);
+      const { recorded } = await recordArticleReads(rf, candidates, all, tmp(), 0, latest);
+      expect(recorded.map((r) => r.path)).toEqual([
+        "/api/articles/2",
+        "/api/articles/bob/second-post",
+        "/api/comments",
+      ]);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("article 2"));
+      warn.mockRestore();
+    });
+
+    it("records only the selected per-article reads", async () => {
+      const latest: LatestResponse = { meta: undefined };
+      const pick = (specs: ReadSpec[]) => specs.filter((s) => s.template === "/api/comments");
+      const { recorded } = await recordArticleReads(
+        answering(latest, {}),
+        candidates,
+        pick,
+        tmp(),
+        0,
+        latest,
+      );
+      expect(recorded.map((r) => r.template)).toEqual(["/api/comments"]);
+    });
+
+    it("gives up with the refusal once every candidate is contradicted", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const latest: LatestResponse = { meta: undefined };
+      const rf = answering(latest, poisoned);
+      await expect(
+        recordArticleReads(rf, candidates.slice(0, 1), all, tmp(), 0, latest),
+      ).rejects.toThrow(/refusing to record GET \/api\/articles\/\{id\}/);
+      warn.mockRestore();
+    });
+
+    it("does not rotate past an error that is not a contradiction", async () => {
+      const rf = vi.fn(async () => {
+        throw new Error("network down");
+      }) as unknown as Rf;
+      await expect(recordArticleReads(rf, candidates, all, tmp(), 0)).rejects.toThrow(
+        "network down",
+      );
+      expect(rf).toHaveBeenCalledTimes(1);
+    });
   });
 });
 
