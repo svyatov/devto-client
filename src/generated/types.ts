@@ -5282,13 +5282,6 @@ export interface components {
       id_code?: string;
       /** Format: date-time */
       created_at?: string;
-      /**
-       * @description Level of AI tooling usage disclosure
-       * @enum {string}
-       */
-      ai_disclosure_level?: "not_disclosed" | "no_ai" | "some_ai" | "fully_autonomous";
-      /** @description Human-readable label of AI disclosure */
-      ai_disclosure_label?: string;
       body_html?: string;
       user?: {
         name?: string;

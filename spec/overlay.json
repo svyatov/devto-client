@@ -1110,6 +1110,30 @@
     }
   },
   {
+    "target": "/components/schemas/Comment/properties/ai_disclosure_level",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: only the v0 _comment.json.jbuilder renders ai_disclosure_level; the v1 partial never has, and a fresh v1 recording confirms no comment carries it",
+    "patch": null,
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
+    }
+  },
+  {
+    "target": "/components/schemas/Comment/properties/ai_disclosure_label",
+    "expect": {
+      "type": "string"
+    },
+    "reason": "reality correction: only the v0 _comment.json.jbuilder renders ai_disclosure_label; the v1 partial never has, and a fresh v1 recording confirms no comment carries it",
+    "patch": null,
+    "provenance": {
+      "instrument": "devto-fixture",
+      "corroborated": true
+    }
+  },
+  {
     "target": "/components/schemas/Comment/properties/body_html",
     "expect": null,
     "reason": "missing schema: emitted by _comment.json.jbuilder for visible comments, absent from the upstream Comment schema",

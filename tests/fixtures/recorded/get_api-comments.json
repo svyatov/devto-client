@@ -1,57 +1,1597 @@
 {
   "template": "/api/comments",
   "method": "GET",
-  "recordedAt": "2026-07-17T13:11:16.383Z",
+  "recordedAt": "2026-09-24T15:04:20.190Z",
   "path": "/api/comments",
   "payload": [
     {
       "type_of": "comment",
-      "id_code": "3bba8",
-      "created_at": "2026-07-16T19:20:56Z",
-      "body_html": "<p>Hello Everyone, I'm Sam a developer talent connector. I'm currently connecting with experienced developers from South Africa, Europe, U.S and arround the world for remote international project opportunities. There's also a separate remote customer communication opportunity for U.S. residents, and technical experience isn't required for that role. Happy to explain more to anyone interested.</p>\n\n",
+      "id_code": "3ffkl",
+      "created_at": "2026-09-23T13:47:07Z",
+      "body_html": "<p>Hi everyone 😀 A big welcome to all the new members, and welcome back to everyone who’s been here before!</p>\n\n<p>Really happy to have you all here. I hope you get to meet some great people, learn new things, share your experiences, and have a good time along the way. </p>\n\n<p>Looking forward to seeing you around and chatting with you in the comments. Hope you enjoy being part of the community 💙</p>\n\n",
       "user": {
-        "name": "Sam Tech",
-        "username": "sam_tech_e3c30d03221da839",
+        "name": "Hemapriya Kanagala",
+        "username": "hemapriya_kanagala",
+        "twitter_username": "KanagalaHema",
+        "github_username": "hemapriya-kanagala",
+        "user_id": 3307586,
+        "website_url": "https://www.linkedin.com/in/hemapriya-kanagala/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F3307586%2F2dffaf97-946d-44a6-8a39-07d94a72e07d.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F3307586%2F2dffaf97-946d-44a6-8a39-07d94a72e07d.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3ffmp",
+      "created_at": "2026-09-23T14:31:03Z",
+      "body_html": "<p>hi</p>\n\n",
+      "user": {
+        "name": "Developer Open",
+        "username": "developer_open",
         "twitter_username": null,
         "github_username": null,
-        "user_id": 4008303,
+        "user_id": 4139653,
         "website_url": null,
-        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4008303%2F1ae9c435-4bee-4626-88bb-f7152aa1742c.jpg",
-        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4008303%2F1ae9c435-4bee-4626-88bb-f7152aa1742c.jpg"
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139653%2F76bc5a1d-8cbf-4b34-8f71-608a9a8a1e7c.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139653%2F76bc5a1d-8cbf-4b34-8f71-608a9a8a1e7c.png"
       },
       "children": []
     },
     {
       "type_of": "comment",
-      "id_code": "3bbkn",
-      "created_at": "2026-07-17T05:21:21Z",
-      "body_html": "<p>I can be wrong but <code>jobs -p</code> returning nothing in a non-interactive shell is such a quiet way to lose, because the cleanup line is right there in the script and reads like it works. The trap is the real fix, and I'd argue it's the fix even when you collect <code>$!</code> correctly, since the parent dying is the more common failure of the two. Worth noting the trap won't save you from a <code>kill -9</code> on the parent either, so for anything that pegs every core I'd have the loop time-limit itself as a backstop. Two days of <code>while :; do :; done</code> is a great argument that the spinner should never outlive its purpose regardless of who's supposed to clean it up.</p>\n\n",
+      "id_code": "3ffoh",
+      "created_at": "2026-09-23T14:58:57Z",
+      "body_html": "<p>Hello everyone !!!</p>\n\n",
       "user": {
-        "name": "Nazar Boyko",
-        "username": "nazar-boyko",
+        "name": "Dhruv Ghosal",
+        "username": "dhruv_ghosal_019265a175ed",
         "twitter_username": null,
         "github_username": null,
-        "user_id": 1875383,
-        "website_url": "http://nazarboyko.com/",
-        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1875383%2Fbaa58f3a-24b4-4cd1-bea6-034acfb76210.jpg",
-        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1875383%2Fbaa58f3a-24b4-4cd1-bea6-034acfb76210.jpg"
+        "user_id": 4139688,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139688%2Fdf51189b-4f8c-4529-871f-52fb934583e2.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139688%2Fdf51189b-4f8c-4529-871f-52fb934583e2.png"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fgjo",
+          "created_at": "2026-09-24T01:07:36Z",
+          "body_html": "<p>hello!</p>\n\n",
+          "user": {
+            "name": "David Au Yeung",
+            "username": "auyeungdavid_2847435260",
+            "twitter_username": null,
+            "github_username": null,
+            "user_id": 2351622,
+            "website_url": "https://dev.to/auyeungdavid_2847435260",
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F2351622%2Fcb769046-bc63-446f-8640-4da513dd98c9.png",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F2351622%2Fcb769046-bc63-446f-8640-4da513dd98c9.png"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3ffoo",
+      "created_at": "2026-09-23T15:04:35Z",
+      "body_html": "<p>hay yawl. I am new here, this is one of the only forms that my boss lets me use so pleas keep it funny I could use it! </p>\n\n",
+      "user": {
+        "name": "S.",
+        "username": "nuralwhale0110",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4138405,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138405%2F0444b452-92e3-412d-b7c3-c7c1b7ffb393.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138405%2F0444b452-92e3-412d-b7c3-c7c1b7ffb393.jpg"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fgi4",
+          "created_at": "2026-09-24T00:03:05Z",
+          "body_html": "<p>Be sure to check out <a class=\"mentioned-user\" href=\"https://dev.to/ben\">@ben</a> for meme Mondays! Plenty of content to sift through,  - past meme Mondays. Feel free to contribute to the nonsense!</p>\n\n",
+          "user": {
+            "name": "Anna Villarreal",
+            "username": "annavi11arrea1",
+            "twitter_username": null,
+            "github_username": "AnnaVi11arrea1",
+            "user_id": 1467610,
+            "website_url": "https://annavillarreal.com",
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3ffp9",
+      "created_at": "2026-09-23T15:11:44Z",
+      "body_html": "<p>Hey everyone. Nice to be part of this amazing community</p>\n\n",
+      "user": {
+        "name": "Rinoy RK",
+        "username": "rinoy_rk",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4138812,
+        "website_url": "https://rinoyrk.github.io",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138812%2F52d3c1d4-538f-4e7f-a5fa-f83d4e5b6120.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138812%2F52d3c1d4-538f-4e7f-a5fa-f83d4e5b6120.png"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fgi5",
+          "created_at": "2026-09-24T00:03:52Z",
+          "body_html": "<p>Welcome <a class=\"mentioned-user\" href=\"https://dev.to/rinoy_rk\">@rinoy_rk</a> !</p>\n\n",
+          "user": {
+            "name": "Anna Villarreal",
+            "username": "annavi11arrea1",
+            "twitter_username": null,
+            "github_username": "AnnaVi11arrea1",
+            "user_id": 1467610,
+            "website_url": "https://annavillarreal.com",
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fg16",
+      "created_at": "2026-09-23T15:54:35Z",
+      "body_html": "<p>hello everyone</p>\n\n",
+      "user": {
+        "name": "dino david",
+        "username": "dino_david_c5d8f55f119b7f",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4128735,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4128735%2F1e87cc10-230b-4353-986c-19b0e9bff94a.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4128735%2F1e87cc10-230b-4353-986c-19b0e9bff94a.png"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fhp9",
+          "created_at": "2026-09-24T13:27:40Z",
+          "body_html": "<p>Hello</p>\n\n",
+          "user": {
+            "name": "Waniyah Khan",
+            "username": "waniyah_khan_764b34d0ab9c",
+            "twitter_username": null,
+            "github_username": null,
+            "user_id": 4140523,
+            "website_url": "https://luopan.whop.site/",
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140523%2F28c52c6f-7f4c-4ccc-b074-7150c1c34a77.jpg",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140523%2F28c52c6f-7f4c-4ccc-b074-7150c1c34a77.jpg"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fg1k",
+      "created_at": "2026-09-23T16:13:35Z",
+      "body_html": "<p>hello</p>\n\n",
+      "user": {
+        "name": "Gabriel Dressler",
+        "username": "dresslert",
+        "twitter_username": null,
+        "github_username": "dresslert",
+        "user_id": 4138244,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138244%2F33dfa013-466d-466a-b6ff-6f057aeea838.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138244%2F33dfa013-466d-466a-b6ff-6f057aeea838.jpg"
       },
       "children": []
     },
     {
       "type_of": "comment",
-      "id_code": "3bc6f",
-      "created_at": "2026-07-17T11:46:16Z",
-      "body_html": "<p>This is a good example of why agent reliability extends beyond prompt quality. Once an agent can spawn subprocesses, you've crossed into systems engineering territory. Every background task should have a lifecycle: ownership, timeout, heartbeat, and guaranteed cleanup even if the parent crashes or the session is interrupted. We've seen similar issues when agents launch long-running builds, local inference servers, or stress tests. A trap helps, but process groups, watchdogs, and explicit resource budgets make these failures much harder to trigger. AI agents don't just generate code anymore they're operating systems clients, and they need to be treated with the same discipline as any other automation.</p>\n\n",
+      "id_code": "3fg2o",
+      "created_at": "2026-09-23T16:36:24Z",
+      "body_html": "<p>Hi</p>\n\n",
       "user": {
-        "name": "Mateo Ruiz",
-        "username": "mateo_ruiz_6992b1fce47843",
+        "name": "かる",
+        "username": "kalppi1111",
+        "twitter_username": "kalppi1111",
+        "github_username": null,
+        "user_id": 4139780,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139780%2F0b2e4082-d14e-4828-bb43-b52def28837e.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139780%2F0b2e4082-d14e-4828-bb43-b52def28837e.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fg3k",
+      "created_at": "2026-09-23T16:50:34Z",
+      "body_html": "<p><strong>Hey everyone</strong> 👋 </p>\n\n",
+      "user": {
+        "name": "Ahsan Luqman",
+        "username": "ahsanluqman",
         "twitter_username": null,
         "github_username": null,
-        "user_id": 3954372,
-        "website_url": "https://www.itpathsolutions.com/",
-        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F3954372%2Fd5544456-41d1-4a3c-bca3-aab867c15c59.png",
-        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F3954372%2Fd5544456-41d1-4a3c-bca3-aab867c15c59.png"
+        "user_id": 4139469,
+        "website_url": "https://www.aliasfleet.com/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139469%2Fd73cf345-c787-42f7-94fa-e80342f650f1.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139469%2Fd73cf345-c787-42f7-94fa-e80342f650f1.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fg3n",
+      "created_at": "2026-09-23T16:52:44Z",
+      "body_html": "<p>I'm into cybersecurity </p>\n\n",
+      "user": {
+        "name": "Hazel Njanje",
+        "username": "hazel_njanje_7716e3526c5a",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4139855,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139855%2F52d582b6-882f-4c0c-b6e4-be5f1fab1072.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139855%2F52d582b6-882f-4c0c-b6e4-be5f1fab1072.jpg"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fgi8",
+          "created_at": "2026-09-24T00:05:24Z",
+          "body_html": "<p>What cool cybersecurity stuff are you into? What is your favorite tool?</p>\n\n",
+          "user": {
+            "name": "Anna Villarreal",
+            "username": "annavi11arrea1",
+            "twitter_username": null,
+            "github_username": "AnnaVi11arrea1",
+            "user_id": 1467610,
+            "website_url": "https://annavillarreal.com",
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fg72",
+      "created_at": "2026-09-23T18:06:58Z",
+      "body_html": "<p>Hello Everyone from My Side...</p>\n\n",
+      "user": {
+        "name": "Henry Jack",
+        "username": "henry_jack_8edbebf309ddaf",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4139193,
+        "website_url": "https://aethersx2.online/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139193%2F92581c6b-adcf-4367-94d4-117884e415e4.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139193%2F92581c6b-adcf-4367-94d4-117884e415e4.jpg"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fgib",
+          "created_at": "2026-09-24T00:06:44Z",
+          "body_html": "<p>Noted, <a class=\"mentioned-user\" href=\"https://dev.to/henry_jack_8edbebf309ddaf\">@henry_jack_8edbebf309ddaf</a> has sides and is therefore not a circle. Jk 😜 welcome!!!</p>\n\n",
+          "user": {
+            "name": "Anna Villarreal",
+            "username": "annavi11arrea1",
+            "twitter_username": null,
+            "github_username": "AnnaVi11arrea1",
+            "user_id": 1467610,
+            "website_url": "https://annavillarreal.com",
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fg74",
+      "created_at": "2026-09-23T18:07:13Z",
+      "body_html": "<p>Hey everyone. Nice to be part of this amazing community.!!</p>\n\n",
+      "user": {
+        "name": "O Botão do Fim",
+        "username": "obotaodofim",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4139924,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139924%2Fad0cbd5c-bef7-4edf-94b5-26fac288bfda.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139924%2Fad0cbd5c-bef7-4edf-94b5-26fac288bfda.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fg76",
+      "created_at": "2026-09-23T18:07:39Z",
+      "body_html": "<p>Hey everyone. Nice to be part of this amazing community</p>\n\n",
+      "user": {
+        "name": "O Botão do Fim",
+        "username": "obotaodofim",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4139924,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139924%2Fad0cbd5c-bef7-4edf-94b5-26fac288bfda.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139924%2Fad0cbd5c-bef7-4edf-94b5-26fac288bfda.jpg"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fgie",
+          "created_at": "2026-09-24T00:08:24Z",
+          "body_html": "<p>Welcome to DEV! There is alot to keep you busy here. ✨️ And alot of good people!</p>\n\n",
+          "user": {
+            "name": "Anna Villarreal",
+            "username": "annavi11arrea1",
+            "twitter_username": null,
+            "github_username": "AnnaVi11arrea1",
+            "user_id": 1467610,
+            "website_url": "https://annavillarreal.com",
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fg79",
+      "created_at": "2026-09-23T18:09:50Z",
+      "body_html": "<p>Hi everyone!</p>\n\n",
+      "user": {
+        "name": "robzepdev",
+        "username": "robzepdev",
+        "twitter_username": null,
+        "github_username": "RobertoZeppilli",
+        "user_id": 4137777,
+        "website_url": "https://robertoz.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4137777%2Fd4609af9-c427-4a92-9922-3f6385672552.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4137777%2Fd4609af9-c427-4a92-9922-3f6385672552.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fg7g",
+      "created_at": "2026-09-23T18:13:56Z",
+      "body_html": "<p>Hi everyone,</p>\n\n<p>We're building Solstack (solstack.xyz), a set of browser-based tools for Solana. It's for developers who create and manage tokens, and for traders who want to check a token before they buy it.</p>\n\n<p>For token creators: mint SPL and Token-2022 tokens, launch on pump.fun, letsbonk and Meteora, send tokens to a list of wallets with a single signature, airdrop to every holder of a token, and lock or vest supply.</p>\n\n<p>For traders: a 0–100 safety score for any token, a check on whether its liquidity is actually locked, and a way to get back the SOL tied up in empty token accounts.</p>\n\n<p>In this series we'll share what we learned building it, including the parts of Solana that surprised us.</p>\n\n",
+      "user": {
+        "name": "Solstack",
+        "username": "solstack",
+        "twitter_username": "solstack_xyz",
+        "github_username": null,
+        "user_id": 4139927,
+        "website_url": "https://solstack.xyz",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139927%2Ffc884a06-4bea-4725-a1e5-f4ac9c2814bc.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139927%2Ffc884a06-4bea-4725-a1e5-f4ac9c2814bc.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgcc",
+      "created_at": "2026-09-23T20:34:07Z",
+      "body_html": "<p>hello!!</p>\n\n",
+      "user": {
+        "name": "jamie peacock",
+        "username": "jamie_peacock_00e4e5a737b",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140032,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140032%2F00672d74-e282-48b3-8b4e-6194593d54b5.gif",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140032%2F00672d74-e282-48b3-8b4e-6194593d54b5.gif"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgcj",
+      "created_at": "2026-09-23T20:54:59Z",
+      "body_html": "<p>I say it in javascript:<br>\n</p>\n\n<div class=\"highlight js-code-highlight\">\n<pre class=\"highlight javascript\"><code><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]][([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]((</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+!+</span><span class=\"p\">[]]))[(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([]</span><span class=\"o\">+</span><span class=\"p\">[])[([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]][([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">((</span><span class=\"o\">+</span><span class=\"p\">[])[([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]](</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]])</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]])()([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]][([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]((</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([]</span><span class=\"o\">+</span><span class=\"p\">[])[(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]][([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]((</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]])[([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]])[([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]])()[([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]((</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]])[([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]])</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]][([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]((</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]])[([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]])[([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]])()[([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]((</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]])[([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]])</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]][([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]((</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]])[([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]])[([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]])()[([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]((</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]])[([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([</span><span class=\"o\">!</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[][[]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]])</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([]</span><span class=\"o\">+</span><span class=\"p\">[])[(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">([][[]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">([][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[][(</span><span class=\"o\">!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+</span><span class=\"p\">[]]])[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">+</span><span class=\"p\">[]]]</span><span class=\"o\">+</span><span class=\"p\">(</span><span class=\"o\">!!</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[])[</span><span class=\"o\">+!+</span><span class=\"p\">[]]]()[</span><span class=\"o\">+!+</span><span class=\"p\">[]</span><span class=\"o\">+</span><span class=\"p\">[</span><span class=\"o\">!+</span><span class=\"p\">[]</span><span class=\"o\">+!+</span><span class=\"p\">[]]])())</span>\n</code></pre>\n<div class=\"highlight__panel js-actions-panel\">\n<div class=\"highlight__panel-action js-fullscreen-code-action\">\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20px\" height=\"20px\" viewbox=\"0 0 24 24\" class=\"highlight-action crayons-icon highlight-action--fullscreen-on\"><title>Enter fullscreen mode</title>\n    <path d=\"M16 3h6v6h-2V5h-4V3zM2 3h6v2H4v4H2V3zm18 16v-4h2v6h-6v-2h4zM4 19h4v2H2v-6h2v4z\"></path>\n</svg>\n\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20px\" height=\"20px\" viewbox=\"0 0 24 24\" class=\"highlight-action crayons-icon highlight-action--fullscreen-off\"><title>Exit fullscreen mode</title>\n    <path d=\"M18 7h4v2h-6V3h2v4zM8 9H2V7h4V3h2v6zm10 8v4h-2v-6h6v2h-4zM8 15v6H6v-4H2v-2h6z\"></path>\n</svg>\n\n</div>\n</div>\n</div>\n\n\n\n",
+      "user": {
+        "name": "King Sia ",
+        "username": "io64bit",
+        "twitter_username": "io64bit",
+        "github_username": "code-by-sia",
+        "user_id": 4140043,
+        "website_url": "https://samalstudios.com/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140043%2F9c546c89-dc5d-4603-a04b-5d1f16f35cb0.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140043%2F9c546c89-dc5d-4603-a04b-5d1f16f35cb0.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgd4",
+      "created_at": "2026-09-23T21:06:21Z",
+      "body_html": "<p>Hi All!</p>\n\n",
+      "user": {
+        "name": "CodeMonkeyG",
+        "username": "codemonkeyg",
+        "twitter_username": null,
+        "github_username": "CodeMonkeyG",
+        "user_id": 4138363,
+        "website_url": "https://codemonkeyg.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138363%2Fb902969e-a9f4-446f-9b6c-8c237bf4b3eb.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138363%2Fb902969e-a9f4-446f-9b6c-8c237bf4b3eb.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fge2",
+      "created_at": "2026-09-23T21:49:25Z",
+      "body_html": "<p>Hello from Houston. 👋</p>\n\n<p>Naveen. Software architect, about seventeen years in, most of it building .NET and Python systems for government agencies. That work means a lot of forms, workflows and business rules that arrive from statute rather than from anyone's product roadmap, which has shaped how I think about software more than I expected it to.</p>\n\n<p>Lately it has been Azure, RAG and ML.NET. The recurring lesson is that the model is never the hard part. Deciding what the system should refuse to do is the hard part.</p>\n\n<p>Read here for a long time, finally made an account. Working on a first post about form builders and validation rules that are themselves invalid, which turns out to be more interesting than it sounds.</p>\n\n<p><a class=\"mentioned-user\" href=\"https://dev.to/io64bit\">@io64bit</a> opening the thread with a hello world is a choice, and I respect it.</p>\n\n",
+      "user": {
+        "name": "Naveen Alavilli",
+        "username": "naveen_alavilli",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140078,
+        "website_url": "https://naveenalavilli.dev/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140078%2Fd351ad91-80c5-45b8-8946-0e59f869e352.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140078%2Fd351ad91-80c5-45b8-8946-0e59f869e352.png"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fgi3",
+          "created_at": "2026-09-24T00:01:39Z",
+          "body_html": "<p>Welcome to the party <a class=\"mentioned-user\" href=\"https://dev.to/naveen_alavilli\">@naveen_alavilli</a> !</p>\n\n",
+          "user": {
+            "name": "Anna Villarreal",
+            "username": "annavi11arrea1",
+            "twitter_username": null,
+            "github_username": "AnnaVi11arrea1",
+            "user_id": 1467610,
+            "website_url": "https://annavillarreal.com",
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgeg",
+      "created_at": "2026-09-23T22:11:51Z",
+      "body_html": "<p>Hi</p>\n\n",
+      "user": {
+        "name": "Md Maksudul H Rishad",
+        "username": "rishadrenegade",
+        "twitter_username": null,
+        "github_username": "rishadrenegade",
+        "user_id": 4140114,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140114%2F5401848d-2a24-4d76-bbd6-cc77a6c26dc4.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140114%2F5401848d-2a24-4d76-bbd6-cc77a6c26dc4.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgej",
+      "created_at": "2026-09-23T22:29:22Z",
+      "body_html": "<p>hello everyone</p>\n\n",
+      "user": {
+        "name": "Yash",
+        "username": "yashhhs_",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140128,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140128%2Fde9aebb6-1f29-4183-b8db-9b3d0e0f0e6f.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140128%2Fde9aebb6-1f29-4183-b8db-9b3d0e0f0e6f.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fggd",
+      "created_at": "2026-09-23T23:40:48Z",
+      "body_html": "<p>Decided not to continuously copy/pasting the same message over and over again and decide to be genuine again.</p>\n\n<p>With that said, Welcome everyone! What brings you here?</p>\n\n",
+      "user": {
+        "name": "FrancisTRᴅᴇᴠ",
+        "username": "francistrdev",
+        "twitter_username": null,
+        "github_username": "FrancisTRdev",
+        "user_id": 3711376,
+        "website_url": "https://francistrdev.github.io/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F3711376%2Fe88f6fdf-33af-4dde-bb60-fbe662e87d02.gif",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F3711376%2Fe88f6fdf-33af-4dde-bb60-fbe662e87d02.gif"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fhl0",
+          "created_at": "2026-09-24T12:18:39Z",
+          "body_html": "<p>Hey Francis! Brought here by a failed backtest, honestly. I've been running quant experiments on crypto and prediction markets, and realized the only way to make it useful is to write it up publicly. Just posted my first article — Sharpe 13.4 before trading costs, -40.1 after. Clean failure, but worth documenting.</p>\n\n",
+          "user": {
+            "name": "Pavel Kazantsev",
+            "username": "pavel_kkkkazantsev",
+            "twitter_username": null,
+            "github_username": null,
+            "user_id": 4134503,
+            "website_url": null,
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4134503%2Ff205ee49-57b0-4bad-9418-b47e90ef04a5.png",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4134503%2Ff205ee49-57b0-4bad-9418-b47e90ef04a5.png"
+          },
+          "children": []
+        },
+        {
+          "type_of": "comment",
+          "id_code": "3fhp6",
+          "created_at": "2026-09-24T13:27:15Z",
+          "body_html": "<p>Hi!</p>\n\n",
+          "user": {
+            "name": "Waniyah Khan",
+            "username": "waniyah_khan_764b34d0ab9c",
+            "twitter_username": null,
+            "github_username": null,
+            "user_id": 4140523,
+            "website_url": "https://luopan.whop.site/",
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140523%2F28c52c6f-7f4c-4ccc-b074-7150c1c34a77.jpg",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140523%2F28c52c6f-7f4c-4ccc-b074-7150c1c34a77.jpg"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fggf",
+      "created_at": "2026-09-23T23:44:43Z",
+      "body_html": "<p>Hello d3v</p>\n\n",
+      "user": {
+        "name": "Pradip poudel",
+        "username": "chill_zone_3f68f9801bf635",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140159,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140159%2F7e16b750-2790-4882-88a8-854ec2ccdf61.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140159%2F7e16b750-2790-4882-88a8-854ec2ccdf61.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgho",
+      "created_at": "2026-09-24T00:00:17Z",
+      "body_html": "<p>I dont post in the welcome thread very often, but I wanted to encourage new members to participate in DEV challenges. They are a fun way to learn new tools and expand your skill set. That is one highly valuable thing I have learned during my time here. Welcome everyone! Can't wait to see what everyone is building. </p>\n\n",
+      "user": {
+        "name": "Anna Villarreal",
+        "username": "annavi11arrea1",
+        "twitter_username": null,
+        "github_username": "AnnaVi11arrea1",
+        "user_id": 1467610,
+        "website_url": "https://annavillarreal.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F1467610%2F3e4ce925-fffd-4643-9aae-8ee77cf01828.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgii",
+      "created_at": "2026-09-24T00:09:15Z",
+      "body_html": "<p>Hello everyone! Hope you have a great day :)</p>\n\n",
+      "user": {
+        "name": "Karloos",
+        "username": "karloos",
+        "twitter_username": null,
+        "github_username": "karloows",
+        "user_id": 4139014,
+        "website_url": "https://karloos.dev",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139014%2Fec23a00c-5fe3-4411-a9fb-1e08233e2cac.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139014%2Fec23a00c-5fe3-4411-a9fb-1e08233e2cac.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgij",
+      "created_at": "2026-09-24T00:11:53Z",
+      "body_html": "<p>Hello everyone</p>\n\n",
+      "user": {
+        "name": "Peter Brau",
+        "username": "psbrau-tech",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140175,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140175%2F07276bdd-28a7-411a-a62b-e06f72fb1e21.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140175%2F07276bdd-28a7-411a-a62b-e06f72fb1e21.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgjm",
+      "created_at": "2026-09-24T01:07:10Z",
+      "body_html": "<p>hello</p>\n\n",
+      "user": {
+        "name": "David Au Yeung",
+        "username": "auyeungdavid_2847435260",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 2351622,
+        "website_url": "https://dev.to/auyeungdavid_2847435260",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F2351622%2Fcb769046-bc63-446f-8640-4da513dd98c9.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F2351622%2Fcb769046-bc63-446f-8640-4da513dd98c9.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgk6",
+      "created_at": "2026-09-24T01:25:53Z",
+      "body_html": "<p>Hi everyone!<br>\nNice to be part of this amazing community..</p>\n\n",
+      "user": {
+        "name": "Krypton",
+        "username": "krypt_a46eccca1b8488",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140224,
+        "website_url": "https://www.linkedin.com/in/kapila-pgg-a6456830/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140224%2F2edb32b2-ee86-4011-b07f-67ef514a0c2d.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140224%2F2edb32b2-ee86-4011-b07f-67ef514a0c2d.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgl7",
+      "created_at": "2026-09-24T02:18:21Z",
+      "body_html": "<p>howdy</p>\n\n",
+      "user": {
+        "name": "Zach Winchester",
+        "username": "zachisparanoid",
+        "twitter_username": null,
+        "github_username": "zachisparanoid",
+        "user_id": 4140262,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140262%2F86e56871-a4bf-42d0-8b4a-e64b247caa4f.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140262%2F86e56871-a4bf-42d0-8b4a-e64b247caa4f.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fglp",
+      "created_at": "2026-09-24T02:51:29Z",
+      "body_html": "<p>Welcome to DEV!</p>\n\n<p>  <iframe src=\"https://www.youtube.com/embed/T79XdHckbtQ\" width=\"710\" height=\"399\" style=\"width: 100%; height: auto; aspect-ratio: 16 / 9;\" allowfullscreen loading=\"lazy\">\n  </iframe>\n</p>\n\n<p>P.S. I asked Gemini to make a .gif, but it made me a video instead 😂</p>\n\n",
+      "user": {
+        "name": "Fayaz",
+        "username": "fm",
+        "twitter_username": "SweaDev",
+        "github_username": "SweaDev",
+        "user_id": 40939,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F40939%2F6efd7aef-f7ee-41ef-9df7-25bc381ea657.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F40939%2F6efd7aef-f7ee-41ef-9df7-25bc381ea657.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgm7",
+      "created_at": "2026-09-24T03:08:25Z",
+      "body_html": "<p>Jimmy. Writing about code quality for 8 years at pathsensitive.com . Have trained 500 engineers at the senior level and higher. Finally decided to check out this community.</p>\n\n",
+      "user": {
+        "name": "James Koppel",
+        "username": "james_koppel_3aa6e45753b4",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140296,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140296%2F0cc12667-8a35-472d-a539-cb54025d8411.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140296%2F0cc12667-8a35-472d-a539-cb54025d8411.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgnd",
+      "created_at": "2026-09-24T03:38:59Z",
+      "body_html": "<p>Hello Everyone!!! 👋</p>\n\n",
+      "user": {
+        "name": "Plastik Electrik",
+        "username": "plastikelectrik",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140326,
+        "website_url": "https://plastikelectrik.xyz",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140326%2Fe8437b33-eb89-4587-91f7-961e918a4cd9.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140326%2Fe8437b33-eb89-4587-91f7-961e918a4cd9.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgne",
+      "created_at": "2026-09-24T03:41:22Z",
+      "body_html": "<p>hiii</p>\n\n",
+      "user": {
+        "name": "TechBoss",
+        "username": "techboss",
+        "twitter_username": "imtechboss",
+        "github_username": null,
+        "user_id": 4140335,
+        "website_url": "https://imtechboss.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140335%2F57de8a3a-bd90-4fc8-8a23-30e6e2811cc1.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140335%2F57de8a3a-bd90-4fc8-8a23-30e6e2811cc1.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgng",
+      "created_at": "2026-09-24T03:48:11Z",
+      "body_html": "<p>Yo</p>\n\n",
+      "user": {
+        "name": "atif-1402",
+        "username": "atif1402",
+        "twitter_username": null,
+        "github_username": "atif-1402",
+        "user_id": 4140339,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140339%2F6595579e-ffdd-412e-858f-67a613aca15f.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140339%2F6595579e-ffdd-412e-858f-67a613aca15f.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgo1",
+      "created_at": "2026-09-24T04:13:08Z",
+      "body_html": "<p>Hello everyone. Nice to be part of this amazing dev community.</p>\n\n",
+      "user": {
+        "name": "Abhishek Kumar Sah",
+        "username": "abhi5heksah",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4138664,
+        "website_url": "https://abhi5heksah.in",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138664%2F2836940e-9d3e-4b52-9768-7562f8b2920e.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138664%2F2836940e-9d3e-4b52-9768-7562f8b2920e.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgol",
+      "created_at": "2026-09-24T04:43:13Z",
+      "body_html": "<p>Hey everyone! Happy to be here and excited to start contributing!</p>\n\n",
+      "user": {
+        "name": "Parvesh Rawal",
+        "username": "parveshiiii",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140385,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140385%2Fd2e98754-fb65-46b9-8572-13571a2cc6e6.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140385%2Fd2e98754-fb65-46b9-8572-13571a2cc6e6.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fgph",
+      "created_at": "2026-09-24T04:56:10Z",
+      "body_html": "<p>Hy</p>\n\n",
+      "user": {
+        "name": "Hiren Kukadiya",
+        "username": "hiren_kukadiya",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140392,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140392%2F0255b02c-1b5a-46b5-bdce-ee0a664aeccf.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140392%2F0255b02c-1b5a-46b5-bdce-ee0a664aeccf.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh1g",
+      "created_at": "2026-09-24T05:48:48Z",
+      "body_html": "<p>HI, I come here to take some rest from the chaos of AI, find myself a place to being an engineer again. </p>\n\n",
+      "user": {
+        "name": "Milky Way",
+        "username": "milkyway66",
+        "twitter_username": null,
+        "github_username": "milky-way-66",
+        "user_id": 4140455,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140455%2F0c30b2e2-51b0-4f2f-af68-409f0a06950f.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140455%2F0c30b2e2-51b0-4f2f-af68-409f0a06950f.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh27",
+      "created_at": "2026-09-24T06:04:44Z",
+      "body_html": "<p>hi, new here</p>\n\n",
+      "user": {
+        "name": "huichang",
+        "username": "zhang_zehui_ad87110ce3297",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140492,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140492%2F498ebc8d-173d-4fee-aece-f85ead77f298.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140492%2F498ebc8d-173d-4fee-aece-f85ead77f298.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh36",
+      "created_at": "2026-09-24T06:28:20Z",
+      "body_html": "<p>hi</p>\n\n",
+      "user": {
+        "name": "Daniil Lutsiuk",
+        "username": "lutsiukdaniildesign",
+        "twitter_username": null,
+        "github_username": "lutsiukdaniil-design",
+        "user_id": 4134424,
+        "website_url": "https://prime-seo-plugin.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4134424%2Fae32986c-d3d5-4bc9-b48a-659fe9f64a41.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4134424%2Fae32986c-d3d5-4bc9-b48a-659fe9f64a41.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh3d",
+      "created_at": "2026-09-24T06:38:03Z",
+      "body_html": "<p>Hii from Webdesign Manchester</p>\n\n",
+      "user": {
+        "name": "Webdesign Manchester",
+        "username": "webdesign_manchester",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140516,
+        "website_url": "https://webdesignmanchester.io/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140516%2Fcbe47a6b-4dc6-419d-8d42-358832504a30.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140516%2Fcbe47a6b-4dc6-419d-8d42-358832504a30.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh41",
+      "created_at": "2026-09-24T06:56:57Z",
+      "body_html": "<p>hi and enjoy</p>\n\n",
+      "user": {
+        "name": "Alice",
+        "username": "alice_kontylix",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140461,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140461%2F8d316a22-5eb9-4454-b362-8cb9f1173c68.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140461%2F8d316a22-5eb9-4454-b362-8cb9f1173c68.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh51",
+      "created_at": "2026-09-24T07:22:46Z",
+      "body_html": "<p>Welcome, glad to join. Lets see what is ongoing on this platform. </p>\n\n",
+      "user": {
+        "name": "Hans Kuepper",
+        "username": "hans_kuepper_",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140632,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140632%2Fe64caa71-d382-4eec-a32b-fe6bb9714e91.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140632%2Fe64caa71-d382-4eec-a32b-fe6bb9714e91.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh55",
+      "created_at": "2026-09-24T07:24:55Z",
+      "body_html": "<p>hi</p>\n\n",
+      "user": {
+        "name": "laonongapi",
+        "username": "laonongapi",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140589,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140589%2F4bc0efde-5574-4707-a59b-eae29795cc1a.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140589%2F4bc0efde-5574-4707-a59b-eae29795cc1a.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh57",
+      "created_at": "2026-09-24T07:26:32Z",
+      "body_html": "<p>hi</p>\n\n",
+      "user": {
+        "name": "hellen hu",
+        "username": "hellen",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140617,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140617%2F89cc5a98-f6f8-470c-92ca-2c18850730b8.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140617%2F89cc5a98-f6f8-470c-92ca-2c18850730b8.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh5d",
+      "created_at": "2026-09-24T07:31:20Z",
+      "body_html": "<p>Hello there !!</p>\n\n",
+      "user": {
+        "name": "Taha Vora",
+        "username": "euclidator",
+        "twitter_username": null,
+        "github_username": "Euclidator",
+        "user_id": 4140648,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140648%2F38dc69d1-98a9-4276-991c-030d4c498223.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140648%2F38dc69d1-98a9-4276-991c-030d4c498223.jpg"
+      },
+      "children": [
+        {
+          "type_of": "comment",
+          "id_code": "3fh5e",
+          "created_at": "2026-09-24T07:32:20Z",
+          "body_html": "<p>hello </p>\n\n",
+          "user": {
+            "name": "laonongapi",
+            "username": "laonongapi",
+            "twitter_username": null,
+            "github_username": null,
+            "user_id": 4140589,
+            "website_url": null,
+            "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140589%2F4bc0efde-5574-4707-a59b-eae29795cc1a.png",
+            "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140589%2F4bc0efde-5574-4707-a59b-eae29795cc1a.png"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh6l",
+      "created_at": "2026-09-24T08:01:24Z",
+      "body_html": "<p>Hey ya'll. I'm Neve, saying hi from Barcelona! I'm here to connect, learn about good programming principles, shipping products, continuous integration. The fully nine-yards! I'm not a professional programmer but a veteran of the vfx and film, animation spending an inordinate time coding... so here I am :)<br>\n🎉</p>\n\n",
+      "user": {
+        "name": "Neve",
+        "username": "nevenincs",
+        "twitter_username": "neve_studio",
+        "github_username": "nevenincs",
+        "user_id": 4140704,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140704%2F918cb3fc-3894-406c-ae18-94e511ba759d.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140704%2F918cb3fc-3894-406c-ae18-94e511ba759d.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh72",
+      "created_at": "2026-09-24T08:05:40Z",
+      "body_html": "<p>Hey everyone. Nice to be here~I'm building generative video pipelines and exploring prompt engineering consistency.</p>\n\n",
+      "user": {
+        "name": "Tttttest",
+        "username": "tttttest",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140723,
+        "website_url": "https://hevzo.com/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140723%2Fa4a8be89-bc93-421b-a4da-684c77f48118.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140723%2Fa4a8be89-bc93-421b-a4da-684c77f48118.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh89",
+      "created_at": "2026-09-24T08:42:32Z",
+      "body_html": "<p>Hi all,<br>\nI'm building blogwriter, a Mac app that reads your site once to learn what you sell and how you sound, then writes researched, interlinked blog posts from a topic and keyword. It runs on your own Claude subscription. Happy to be here and to read what everyone is working on.</p>\n\n",
+      "user": {
+        "name": "Srikanth Merugu",
+        "username": "buffetmusk",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4126522,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4126522%2F3cc63b16-573f-4985-b96b-38e0f6dbd504.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4126522%2F3cc63b16-573f-4985-b96b-38e0f6dbd504.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh8k",
+      "created_at": "2026-09-24T08:47:50Z",
+      "body_html": "<p>Hi all,</p>\n\n<p>I've open-sourced my <a href=\"https://marketplace.visualstudio.com/items?itemName=MarcusApreliusAntoninus.sato-vscode-ext\" rel=\"nofollow noopener noreferrer\" target=\"_blank\">VS Code extension</a> for working with crypto files and vaults. Feedback, ideas, and testing are welcome.</p>\n\n<p><a href=\"https://dev.to/marcusaprelius/vscode-extension-for-browsing-crypto-filesvaults-1h38\" rel=\"nofollow\">dev.to/marcusaprelius/vscode-exten...</a></p>\n\n",
+      "user": {
+        "name": "Marcus-Aprelius",
+        "username": "marcusaprelius",
+        "twitter_username": null,
+        "github_username": "Marcus-Aprelius",
+        "user_id": 4115696,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4115696%2F8931d695-8267-47a7-b5a4-82c77f6b3e17.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4115696%2F8931d695-8267-47a7-b5a4-82c77f6b3e17.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh93",
+      "created_at": "2026-09-24T08:50:15Z",
+      "body_html": "<p>Hi everyone! We’re the team behind Webhooker, a small EU-hosted tool for receiving, inspecting, and replaying webhooks.</p>\n\n<p>We’ll be sharing posts about webhook debugging, signature verification, retries, idempotency, and the edge cases that tend to break in production.</p>\n\n<p>Happy to exchange war stories about failed webhook deliveries 👋</p>\n\n",
+      "user": {
+        "name": "Webhooker",
+        "username": "webhooker-eu",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4132023,
+        "website_url": "https://webhooker.eu/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4132023%2F77333e76-9705-42fe-b6a5-4864763ca2c8.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4132023%2F77333e76-9705-42fe-b6a5-4864763ca2c8.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fh9i",
+      "created_at": "2026-09-24T09:00:56Z",
+      "body_html": "<p>Hello everyone!</p>\n\n",
+      "user": {
+        "name": "Maksim (JSON All-in-One)",
+        "username": "maksim_json_aio",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140813,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140813%2F20867cf9-4199-46a9-82b3-78852383e5ad.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140813%2F20867cf9-4199-46a9-82b3-78852383e5ad.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fha6",
+      "created_at": "2026-09-24T09:12:00Z",
+      "body_html": "<p>HI</p>\n\n",
+      "user": {
+        "name": "Saravana Manickam",
+        "username": "saravana_manickam_4cb3b71",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140814,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140814%2F60107563-3b21-4ba7-91f5-f3fd84523a68.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140814%2F60107563-3b21-4ba7-91f5-f3fd84523a68.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhai",
+      "created_at": "2026-09-24T09:19:57Z",
+      "body_html": "<p>hi all🖐️</p>\n\n",
+      "user": {
+        "name": "Jeyaprabakaran",
+        "username": "jeyaprabakaran",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140877,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140877%2Fed19add2-23a5-4191-9ad8-c54ff30ad2c9.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140877%2Fed19add2-23a5-4191-9ad8-c54ff30ad2c9.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhbg",
+      "created_at": "2026-09-24T09:29:26Z",
+      "body_html": "<p>Hi DEV. We're Peculiar Systems, a young software studio. Right now most of our work is testing ideas for small products and dropping the ones that don't hold up. First post is about three we dropped last month: <a href=\"https://dev.to/peculiar-systems/as-of-when-three-product-bets-killed-by-year-old-ai-research-1c85\" rel=\"nofollow\">dev.to/peculiar-systems/as-of-when...</a></p>\n\n",
+      "user": {
+        "name": "Peculiar Systems",
+        "username": "peculiar-systems",
+        "twitter_username": null,
+        "github_username": "peculiar-systems",
+        "user_id": 4138211,
+        "website_url": "https://peculiar.systems/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138211%2F56944269-7543-46d3-814a-0b266ec30e57.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138211%2F56944269-7543-46d3-814a-0b266ec30e57.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhd4",
+      "created_at": "2026-09-24T09:45:42Z",
+      "body_html": "<p>Hey Everyone!</p>\n\n",
+      "user": {
+        "name": "Prabhash",
+        "username": "prabhash_me",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4139255,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139255%2Fb60888a9-49b3-48d2-b954-cc63fa960405.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4139255%2Fb60888a9-49b3-48d2-b954-cc63fa960405.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhdk",
+      "created_at": "2026-09-24T09:56:47Z",
+      "body_html": "<p>hello, everyone~</p>\n\n",
+      "user": {
+        "name": "liang Xu",
+        "username": "liang_xu_101219aedb481eb9",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140903,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140903%2F968b4a07-07e2-496f-b3d3-46220c2888b6.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140903%2F968b4a07-07e2-496f-b3d3-46220c2888b6.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhfe",
+      "created_at": "2026-09-24T10:33:39Z",
+      "body_html": "<p>Looking forward to learning from everyone here and seeing what I can build!</p>\n\n",
+      "user": {
+        "name": "Tony",
+        "username": "tony123s",
+        "twitter_username": null,
+        "github_username": "tony123S",
+        "user_id": 352875,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F352875%2F9a7fa8ab-7df3-46ea-a74f-3fa15a1cb3cc.jpeg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F352875%2F9a7fa8ab-7df3-46ea-a74f-3fa15a1cb3cc.jpeg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhi6",
+      "created_at": "2026-09-24T11:19:33Z",
+      "body_html": "<p>Hi, I built <a href=\"https://omnitwine.com\" rel=\"nofollow noopener noreferrer\" target=\"_blank\">omnitwine</a> its an AI powered professional networking platform where you use the AI chat like your day to day AI and we use insights collected from those chats to suggest connections</p>\n\n",
+      "user": {
+        "name": "Omnitwine",
+        "username": "omnitwine",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141110,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141110%2Fd2017e8e-cc03-4116-9a67-8f9e2b3dba1f.jpeg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141110%2Fd2017e8e-cc03-4116-9a67-8f9e2b3dba1f.jpeg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhi8",
+      "created_at": "2026-09-24T11:20:28Z",
+      "body_html": "<p>Hey Paul Thommithazhe from India , Bangalore . </p>\n\n",
+      "user": {
+        "name": "Paul Thommithazhe",
+        "username": "paulthommithazhe",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4140628,
+        "website_url": "https://in.linkedin.com/in/paulthommithazhe",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140628%2F3ac45dc2-4abd-4ce8-bd6e-b6f3d2670f6d.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140628%2F3ac45dc2-4abd-4ce8-bd6e-b6f3d2670f6d.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhib",
+      "created_at": "2026-09-24T11:23:09Z",
+      "body_html": "<p>Hey everyone 👋<br><br>\nI'm the independent maker behind IAmYourStickyNote.<br>\nI joined DEV to connect with other builders, share what I'm learning while building in public, and learn from people creating their own products.<br>\nI'm especially interested in productivity, SaaS, web development, and simple products that solve small everyday problems.<br>\nLooking forward to being part of the community. What are you building right now?</p>\n\n",
+      "user": {
+        "name": "I Am Your Sticky Note",
+        "username": "iamyourstickynote",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4126469,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4126469%2F68917493-f82b-4aba-a163-898eede4b705.jpeg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4126469%2F68917493-f82b-4aba-a163-898eede4b705.jpeg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhif",
+      "created_at": "2026-09-24T11:29:03Z",
+      "body_html": "<p>I want to know about AI and ML and im invested</p>\n\n",
+      "user": {
+        "name": "Sir Deen",
+        "username": "sir_deen",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141125,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141125%2F6c251b91-09c2-42d9-90d0-4e9c67866102.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141125%2F6c251b91-09c2-42d9-90d0-4e9c67866102.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhj2",
+      "created_at": "2026-09-24T11:47:09Z",
+      "body_html": "<p>Hey beautiful people I’m Mika 👋</p>\n\n<p>I’m a software developer who’s been learning mostly by building things and documenting what goes wrong along the way 😅 Hmm, lately I’ve been working on little projects,  Three.js experiments, and whatever else my brain decides to focus on. I’ve also started writing more about the actual process behind my projects</p>\n\n<p>I’ve really enjoyed meeting people here and seeing how differently everyone approaches development. Everyone has been so awesome.<br>\nIf you’re new too, tell me what you’re building or learning right now. I’d love to check it out 💚</p>\n\n",
+      "user": {
+        "name": "Mika Flowers",
+        "username": "mikachu",
+        "twitter_username": null,
+        "github_username": "miflow13",
+        "user_id": 4120886,
+        "website_url": "https://miflow13.github.io/my-blog/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4120886%2F5cdc0452-1fae-4294-912b-dfdcc3210892.jpeg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4120886%2F5cdc0452-1fae-4294-912b-dfdcc3210892.jpeg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhjb",
+      "created_at": "2026-09-24T11:50:31Z",
+      "body_html": "<p>Hey everyone 👋 I'm Sebastian: full-stack developer, AI engineer and founder.</p>\n\n<p>This week I went down the Jev rabbit hole (TypeSafe's new model that makes decisions instead of writing text), and it turned into my first DEV post: a free guide that helps Claude Code and Codex build with it properly.</p>\n\n<p>What I care about most right now is the gap between \"the AI wrote it\" and \"it actually works\". Getting coding assistants to do it right the first time, instead of me cleaning up after them.</p>\n\n<p>Happy to be here. What's everyone building this week? 🙂</p>\n\n",
+      "user": {
+        "name": "Sebastian Bennis",
+        "username": "sebastianbennis",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141148,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141148%2F14c48b76-a7f5-4293-a543-116f3542241c.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141148%2F14c48b76-a7f5-4293-a543-116f3542241c.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhjk",
+      "created_at": "2026-09-24T11:55:37Z",
+      "body_html": "<p>Hi DEV community! 👋</p>\n\n<p>I've been reading articles here for a while and finally decided to create an account and jump into the discussions!</p>\n\n<p>I'm a full-stack dev (building stuff with .NET, React, and Python). Lately, I've been obsessed with building developer tools that don't require heavy cloud/database setups, which led me to create ProFolio!</p>\n\n<p>Really pumped to be here, share what I'm building, and learn from all of you. Feel free to say hi or connect! 😊🙌</p>\n\n",
+      "user": {
+        "name": "Mina Makram",
+        "username": "mina_makram_51da33ccd18fb",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141168,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141168%2F3227dc4e-82c0-437c-8137-171c26883d89.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141168%2F3227dc4e-82c0-437c-8137-171c26883d89.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhka",
+      "created_at": "2026-09-24T12:05:30Z",
+      "body_html": "<p>Hey everyone 👋</p>\n\n<p>I'm building proxy infrastructure for developers — the plumbing between a scraper or an AI agent and the site it's trying to reach. We launch in October, so right now most of my time goes to reading error messages and working out which ones are actually the proxy's fault. (Fewer than you'd think.)</p>\n\n<p>I'll be writing here about the unglamorous side of web data: proxy errors, why requests pass locally and fail in CI, and what bot detection actually looks at.</p>\n\n<p>If you're stuck on a proxy or blocking issue, feel free to ping me — happy to help debug.</p>\n\n",
+      "user": {
+        "name": "Lucas",
+        "username": "ipvolt",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141024,
+        "website_url": "https://ipvolt.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141024%2F8e3c92f5-a73e-405c-be65-550c8785ad87.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141024%2F8e3c92f5-a73e-405c-be65-550c8785ad87.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhmh",
+      "created_at": "2026-09-24T12:54:05Z",
+      "body_html": "<p>Hi everyone, I'm Denny from Berlin. I build Routebase, an API platform where docs, mocks and tests come from one OpenAPI spec. I'm here to write about API design and versioning, and to learn from how others keep their contracts from drifting.</p>\n\n",
+      "user": {
+        "name": "Denny",
+        "username": "dennyriedl",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141262,
+        "website_url": "https://routebase.dev",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141262%2F0ae78650-aaef-442e-9f14-43a462362fa1.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141262%2F0ae78650-aaef-442e-9f14-43a462362fa1.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhmj",
+      "created_at": "2026-09-24T12:57:46Z",
+      "body_html": "<p>Hi, hope you all good!</p>\n\n",
+      "user": {
+        "name": "Deming Sung",
+        "username": "deming_sung",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141258,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141258%2F013cd75e-8534-4c44-ab44-f0c10d349524.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141258%2F013cd75e-8534-4c44-ab44-f0c10d349524.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhn4",
+      "created_at": "2026-09-24T13:02:55Z",
+      "body_html": "<p>Hi all, maintainer of a new open source project: <a href=\"https://github.com/cynative/cynative\" rel=\"nofollow noopener noreferrer\" target=\"_blank\">github.com/cynative/cynative</a><br>\nJust published my first post here: <a href=\"https://dev.to/szin/building-security-agents-that-cannot-escape-their-trust-boundary-7bf\" rel=\"nofollow\">dev.to/szin/building-security-agen...</a> </p>\n\n",
+      "user": {
+        "name": "Shaked Zin",
+        "username": "szin",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141208,
+        "website_url": "https://cynative.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141208%2Ff8e17f02-e219-4564-b7cd-cbf5d9fc70e1.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141208%2Ff8e17f02-e219-4564-b7cd-cbf5d9fc70e1.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhnk",
+      "created_at": "2026-09-24T13:09:52Z",
+      "body_html": "<p>Hi all, i'm here to learn and meet </p>\n\n",
+      "user": {
+        "name": "Babatunde Abidemi",
+        "username": "tundeakinbamidev",
+        "twitter_username": null,
+        "github_username": "Tundeakinbami-dev",
+        "user_id": 4141290,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141290%2Fb13607d8-a61b-4f3b-b323-f8d44301d4cd.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141290%2Fb13607d8-a61b-4f3b-b323-f8d44301d4cd.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fho6",
+      "created_at": "2026-09-24T13:14:03Z",
+      "body_html": "<p>Hi everyone, I'm Adrian. I'm building SovRoute and writing about AI agents, Lightning payments, and micro-payments. Glad to be here.</p>\n\n",
+      "user": {
+        "name": "Adrian Cole",
+        "username": "sovroute",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141263,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141263%2Fd67c4f1c-2a86-48c8-af59-c2c6608b2594.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141263%2Fd67c4f1c-2a86-48c8-af59-c2c6608b2594.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhoj",
+      "created_at": "2026-09-24T13:21:55Z",
+      "body_html": "<p>Hey everyone! I do marketing for custom packaging over at The Printing World. Joined DEV to get a better handle on how our devs manage site code and tech workflows. excited to learn from you all!</p>\n\n",
+      "user": {
+        "name": "Henry ",
+        "username": "henry786",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141228,
+        "website_url": "https://www.theprintingworld.com/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141228%2Fc65c3b7e-8877-45fc-84ea-96246fd95632.jpeg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141228%2Fc65c3b7e-8877-45fc-84ea-96246fd95632.jpeg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhok",
+      "created_at": "2026-09-24T13:22:05Z",
+      "body_html": "<p>Hello DEV, I'm Erik, developer, designer and all-round tinkerer. I've been building software for over 20 years now, everything from games to audio to mobile apps and websites. When I'm not freelancing, I'm working on my own baby called Fileside, which is a different take on a desktop file manager.</p>\n\n",
+      "user": {
+        "name": "Erik Jälevik",
+        "username": "erikj",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141307,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141307%2Fa839dd23-550b-4448-8bca-062f7a60fdbc.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141307%2Fa839dd23-550b-4448-8bca-062f7a60fdbc.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhpf",
+      "created_at": "2026-09-24T13:31:44Z",
+      "body_html": "<p>Hello everyone!❤️</p>\n\n",
+      "user": {
+        "name": "Pavel Kazantsev",
+        "username": "pavel_kkkkazantsev",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4134503,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4134503%2Ff205ee49-57b0-4bad-9418-b47e90ef04a5.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4134503%2Ff205ee49-57b0-4bad-9418-b47e90ef04a5.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fhpk",
+      "created_at": "2026-09-24T13:37:27Z",
+      "body_html": "<p>GM Folks!</p>\n\n",
+      "user": {
+        "name": "Arpit Tembhekar",
+        "username": "0xat8",
+        "twitter_username": "Arpit_Tembhekar",
+        "github_username": "Fretzzz",
+        "user_id": 4141329,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141329%2Fb2ffb553-b042-4edb-91f3-473ae20d00b7.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141329%2Fb2ffb553-b042-4edb-91f3-473ae20d00b7.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fi06",
+      "created_at": "2026-09-24T13:47:39Z",
+      "body_html": "<p>welcome thread, im from earth 616</p>\n\n",
+      "user": {
+        "name": "thisran",
+        "username": "khaithisran",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141373,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141373%2F78fb263b-c004-4a8f-9379-85da668946bc.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141373%2F78fb263b-c004-4a8f-9379-85da668946bc.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fi0a",
+      "created_at": "2026-09-24T13:51:20Z",
+      "body_html": "<p>HI dev.to, I love you 🥰</p>\n\n",
+      "user": {
+        "name": "David Williams",
+        "username": "davidwilliams86",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4138653,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138653%2F08446649-85cf-4312-87bf-d2ddff938567.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4138653%2F08446649-85cf-4312-87bf-d2ddff938567.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fi1k",
+      "created_at": "2026-09-24T14:10:18Z",
+      "body_html": "<p>Hi everyone! 👋</p>\n\n<p>I’ve recently fulfilled a small developer dream of mine — I released my own <strong>open-source framework for building plugins on Microsoft Power Platform / Dataverse</strong>.</p>\n\n<p>I’ve been working with .NET, Power Platform and Dataverse for years, and I wanted to turn some of the patterns and practices I use in real projects into something reusable for other developers.</p>\n\n<p>Now I’d love to get it in front of the community.</p>\n\n<p>I’ll be happy for any <strong>feedback, ideas, contributions, or real-world experience</strong> with the framework. My goal is not just to publish another GitHub repository, but to build a community around it and improve it together.</p>\n\n<p>Looking forward to meeting other Power Platform and .NET developers here! 🚀</p>\n\n",
+      "user": {
+        "name": "Ján",
+        "username": "honza",
+        "twitter_username": null,
+        "github_username": "Honza-Pillaro",
+        "user_id": 4119392,
+        "website_url": "https://pillaro.cz/",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4119392%2F43837995-4a4d-4472-a296-52f522d1fde2.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4119392%2F43837995-4a4d-4472-a296-52f522d1fde2.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fi1l",
+      "created_at": "2026-09-24T14:11:06Z",
+      "body_html": "<p>Hi everyone 👋 I'm Rudra. I work on AI agent security: what stops an agent from<br>\nfollowing instructions hidden in an email or web page it reads?</p>\n\n<p>I just published a benchmark testing 10 open-source prompt-injection detectors<br>\non 629 realistic attacks: <a href=\"//github.com/rudratoshs/buried-injections\" rel=\"nofollow\">github.com/rudratoshs/buried-injections<br>\n</a><br>\nHere to learn from people building agents. What are you working on?</p>\n\n",
+      "user": {
+        "name": "Rudratosh Shastri",
+        "username": "rudratosh",
+        "twitter_username": null,
+        "github_username": "exportbankstatement",
+        "user_id": 4140494,
+        "website_url": "https://exportbankstatement.com",
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140494%2Fc72f2abd-6030-4eac-a11b-df299b2b87e3.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4140494%2Fc72f2abd-6030-4eac-a11b-df299b2b87e3.png"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fi24",
+      "created_at": "2026-09-24T14:22:30Z",
+      "body_html": "<p>I人，独立开发中，目前主要做的的项目是图像处理方向</p>\n\n",
+      "user": {
+        "name": "xbhog",
+        "username": "xbhog",
+        "twitter_username": null,
+        "github_username": "xbhog",
+        "user_id": 4141438,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141438%2Fd882707b-bef1-4c01-9edc-030d1789d619.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141438%2Fd882707b-bef1-4c01-9edc-030d1789d619.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fi42",
+      "created_at": "2026-09-24T14:54:40Z",
+      "body_html": "<p>Hi everyone! I'm really happy to be a part of this community! 👋</p>\n\n<p>I'm excited to connect with developers from different backgrounds, learn from your experiences, and discover new ways of thinking and building.</p>\n\n<p>I hope to gain a lot of knowledge from people who are more experienced than me, while also sharing what I learn along the way. I'm always open to advice, discussions, collaboration, and new perspectives.</p>\n\n<p>Looking forward to meeting you all, learning together, and growing as a developer! </p>\n\n",
+      "user": {
+        "name": "Aissatou Lamarana Diallo",
+        "username": "aissatou_lamaranadiallo_",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4136041,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4136041%2F8fb57175-5047-406e-b19a-c4221284e580.jpg",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4136041%2F8fb57175-5047-406e-b19a-c4221284e580.jpg"
+      },
+      "children": []
+    },
+    {
+      "type_of": "comment",
+      "id_code": "3fi4e",
+      "created_at": "2026-09-24T15:02:05Z",
+      "body_html": "<p>Hello everyone</p>\n\n",
+      "user": {
+        "name": "Alex",
+        "username": "alexiaxaxa",
+        "twitter_username": null,
+        "github_username": null,
+        "user_id": 4141365,
+        "website_url": null,
+        "profile_image": "https://media2.dev.to/dynamic/image/width=640,height=640,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141365%2Fcf2e14be-eadd-47bc-b1a1-7476fc2393e5.png",
+        "profile_image_90": "https://media2.dev.to/dynamic/image/width=90,height=90,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F4141365%2Fcf2e14be-eadd-47bc-b1a1-7476fc2393e5.png"
       },
       "children": []
     }
