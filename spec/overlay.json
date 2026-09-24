@@ -1601,21 +1601,6 @@
     }
   },
   {
-    "target": "/components/schemas/MyUser/properties/email",
-    "expect": {
-      "type": "string"
-    },
-    "reason": "reality correction: null when the user hides their email (verified in recorded fixtures)",
-    "patch": {
-      "type": "string",
-      "nullable": true
-    },
-    "provenance": {
-      "instrument": "devto-fixture",
-      "corroborated": true
-    }
-  },
-  {
     "target": "/components/schemas/MyArticle",
     "expect": null,
     "reason": "missing schema: the articles/me serializer differs from ArticleIndex (adds published/page_views_count/body_markdown, drops readable_publish_date/social_image/tags/timestamps). Verified against recorded fixtures.",

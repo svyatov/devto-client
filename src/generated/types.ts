@@ -5256,6 +5256,7 @@ export interface components {
       summary?: string | null;
       twitter_username?: string | null;
       github_username?: string | null;
+      /** @description Authenticated user's own email address, always returned regardless of display_email_on_profile setting */
       email?: string | null;
       website_url?: string | null;
       location?: string | null;

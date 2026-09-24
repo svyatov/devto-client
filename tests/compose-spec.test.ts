@@ -401,7 +401,7 @@ describe("composed real spec", () => {
       mix[key] = (mix[key] ?? 0) + 1;
     }
     expect(mix).toEqual({
-      "devto-fixture/true": 37,
+      "devto-fixture/true": 36,
       "devto-fixture/false": 4,
       // most of the Overlay is read off Forem's own controllers, serializers and
       // jbuilder views; six of those shapes also have a dev.to fixture that agrees
