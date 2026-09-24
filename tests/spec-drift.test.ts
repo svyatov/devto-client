@@ -34,6 +34,23 @@ describe("diffSpecs", () => {
     expect(d.changed).toEqual(["/api/a"]);
   });
 
+  it("lists templates in sorted order whatever the upstream key order", () => {
+    const d = diffSpecs(
+      spec({ "/api/z": { get: op("#/Z2") }, "/api/b": {}, "/api/a": { get: op("#/A2") } }),
+      spec({
+        "/api/a": { get: op("#/A") },
+        "/api/y": {},
+        "/api/x": {},
+        "/api/z": { get: op("#/Z") },
+      }),
+    );
+    expect(d).toEqual({
+      added: ["/api/b"],
+      removed: ["/api/x", "/api/y"],
+      changed: ["/api/a", "/api/z"],
+    });
+  });
+
   it("is quiet when specs are identical", () => {
     const s = spec({ "/api/a": { get: op("#/A") } });
     expect(diffSpecs(s, s)).toEqual({ added: [], removed: [], changed: [] });
@@ -102,6 +119,16 @@ describe("buildShotList", () => {
     );
     expect(count(out, "bun run record -- --only write-cycle")).toBe(1);
     expect(out).not.toContain("--only /api/articles\n");
+  });
+
+  it("renders the same commands whatever order the fixtures were read in", () => {
+    const fixtures = [
+      { template: "/api/articles", method: "POST" },
+      { template: "/api/articles", method: "GET" },
+    ];
+    const diff = { added: [], removed: [], changed: ["/api/articles"] };
+    const out = buildShotList(diff, fixtures, []);
+    expect(buildShotList(diff, [...fixtures].reverse(), [])).toBe(out);
   });
 
   it("returns empty output when there are no findings", () => {

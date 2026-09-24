@@ -32,9 +32,13 @@ export interface StaleFixture extends FixtureMeta {
 export function diffSpecs(upstream: Spec, pinned: Spec): SpecDiff {
   const up = upstream.paths;
   const pin = pinned.paths;
-  const added = Object.keys(up).filter((k) => !(k in pin));
-  const removed = Object.keys(pin).filter((k) => !(k in up));
-  const changed = Object.keys(up)
+  // sorted so the issue body only changes when the findings do (KTD7 heartbeat)
+  const upKeys = Object.keys(up).sort();
+  const added = upKeys.filter((k) => !(k in pin));
+  const removed = Object.keys(pin)
+    .sort()
+    .filter((k) => !(k in up));
+  const changed = upKeys
     .filter((k) => k in pin)
     .filter((k) => {
       const upOps = (up[k] ?? {}) as Record<string, unknown>;
@@ -48,7 +52,9 @@ export function diffSpecs(upstream: Spec, pinned: Spec): SpecDiff {
 /** Recorded fixtures whose `recordedAt` is older than `maxAgeDays` (KTD6). */
 export function staleFixtures(dir: string, nowMs: number, maxAgeDays: number): StaleFixture[] {
   const stale: StaleFixture[] = [];
-  for (const file of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
+  for (const file of readdirSync(dir)
+    .filter((f) => f.endsWith(".json"))
+    .sort()) {
     const rec = JSON.parse(readFileSync(join(dir, file), "utf8")) as {
       template: string;
       method: string;
@@ -96,7 +102,7 @@ export function buildShotList(
 
   if (lines.length === 0) return "";
 
-  const cmds = [...commands];
+  const cmds = [...commands].sort();
   return [
     "## Fixture shot list",
     "",
